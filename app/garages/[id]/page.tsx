@@ -1,4 +1,5 @@
 import Navbar from "@/app/components/Navbar"
+import BookingForm from "@/app/components/BookingForm"
 
 type Params = {
   params: Promise<{
@@ -39,9 +40,7 @@ export default async function GarageDetail({ params }: Params) {
             <h2 className="text-xl font-bold mb-2">About</h2>
             <p className="text-gray-600">A trusted local garage offering a wide range of vehicle services. Fully qualified technicians with years of experience.</p>
           </div>
-          <button className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition w-full text-lg font-bold">
-            Book an Appointment
-          </button>
+          <BookingForm garageId={id} />
         </div>
       </main>
     </>
