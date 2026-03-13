@@ -8,16 +8,24 @@ export default async function Home() {
   return (
     <>
       <Navbar />
-      <section className="bg-gray-900 text-white py-24 px-8">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl font-extrabold mb-4 leading-tight">
+      <section style={{padding: "120px 32px", background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)"}} className="text-white overflow-hidden">
+        <div className="max-w-5xl mx-auto">
+          <p style={{color: "#f59e0b", fontWeight: 600, fontSize: "0.875rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem"}}>The smarter way to book</p>
+          <h1 style={{fontSize: "3.5rem", fontWeight: 800, lineHeight: 1.1, marginBottom: "1.5rem"}}>
             Find and book a garage <br />
-            <span className="text-amber-400">near you</span>
+            <span style={{color: "#f59e0b"}}>near you</span>
           </h1>
-          <p className="text-gray-400 text-xl mb-8">Skip the phone calls. Book your vehicle service online in minutes.</p>
-          <a href="/garages" className="bg-amber-400 text-gray-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-amber-300 transition inline-block">
-            Find a Garage
-          </a>
+          <p style={{color: "#94a3b8", fontSize: "1.25rem", marginBottom: "2.5rem", maxWidth: "32rem"}}>
+            Skip the phone calls. Book your vehicle service online in minutes.
+          </p>
+          <div style={{display: "flex", gap: "1rem"}}>
+            <a href="/garages" style={{background: "#f59e0b", color: "#0f172a", padding: "16px 32px", borderRadius: "12px", fontWeight: 700, fontSize: "1.1rem", textDecoration: "none"}}>
+              Find a Garage
+            </a>
+            <a href="/garages" style={{border: "2px solid #475569", color: "white", padding: "16px 32px", borderRadius: "12px", fontWeight: 700, fontSize: "1.1rem", textDecoration: "none"}}>
+              How it works
+            </a>
+          </div>
         </div>
       </section>
       <main className="max-w-5xl mx-auto px-8 py-16">
