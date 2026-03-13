@@ -10,6 +10,13 @@ export default async function Bookings() {
     orderBy: { createdAt: "desc" }
   })
 
+  const garageIds = bookings.map((b) => b.garageId)
+  const garages = await prisma.garage.findMany({
+    where: { id: { in: garageIds } }
+  })
+
+  const garageMap = Object.fromEntries(garages.map((g) => [g.id, g.name]))
+
   return (
     <>
       <Navbar />
@@ -22,9 +29,9 @@ export default async function Bookings() {
           <div className="flex flex-col gap-4">
             {bookings.map((booking) => (
               <div key={booking.id} className="border rounded-lg p-4 shadow-md">
-                <p className="font-bold text-lg">{booking.service}</p>
+                <p className="font-bold text-lg">{garageMap[booking.garageId] || "Unknown Garage"}</p>
+                <p className="text-gray-600">{booking.service}</p>
                 <p className="text-gray-500">📅 {new Date(booking.date).toLocaleDateString()}</p>
-                <p className="text-gray-500">Garage ID: {booking.garageId}</p>
                 <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm">
                   {booking.status}
                 </span>
