@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     const body = await req.json()
     console.log("body:", body)
 
-    const { garageId, service, date } = body
+    const { garageId, service, date, time, registration } = body
 
     const booking = await prisma.booking.create({
       data: {
@@ -22,6 +22,8 @@ export async function POST(req: Request) {
         garageId,
         service,
         date: new Date(date),
+        time,
+        registration,
         status: "pending"
       }
     })
