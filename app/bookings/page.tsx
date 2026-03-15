@@ -15,31 +15,53 @@ export default async function Bookings() {
     where: { id: { in: garageIds } }
   })
 
-  const garageMap = Object.fromEntries(garages.map((g) => [g.id, g.name]))
+  const garageMap = Object.fromEntries(garages.map((g) => [g.id, g]))
 
   return (
     <>
       <Navbar />
-      <main className="max-w-4xl mx-auto p-8">
-        <h1 className="text-4xl font-bold mb-2">My Bookings</h1>
-        <p className="text-gray-500 mb-8">View and manage your garage bookings</p>
-        {bookings.length === 0 ? (
-          <p className="text-gray-500">No bookings yet — find a garage to get started!</p>
-        ) : (
-          <div className="flex flex-col gap-4">
-            {bookings.map((booking) => (
-              <div key={booking.id} className="border rounded-lg p-4 shadow-md">
-                <p className="font-bold text-lg">{garageMap[booking.garageId] || "Unknown Garage"}</p>
-                <p className="text-gray-600">{booking.service}</p>
-                <p className="text-gray-500">📅 {new Date(booking.date).toLocaleDateString()}</p>
-                <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm">
-                  {booking.status}
-                </span>
-              </div>
-            ))}
+      <div style={{background: "#f8f9fb", minHeight: "100vh"}}>
+        <div style={{background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)", padding: "48px 32px"}}>
+          <div className="max-w-5xl mx-auto">
+            <h1 style={{color: "white", fontSize: "2.5rem", fontWeight: 800, marginBottom: "0.5rem"}}>My Bookings</h1>
+            <p style={{color: "#94a3b8", fontSize: "1.1rem"}}>View and manage your garage bookings</p>
           </div>
-        )}
-      </main>
+        </div>
+        <main className="max-w-5xl mx-auto px-8 py-12">
+          {bookings.length === 0 ? (
+            <div style={{background: "white", borderRadius: "16px", padding: "48px", textAlign: "center", boxShadow: "0 1px 4px rgba(0,0,0,0.06)"}}>
+              <p style={{fontSize: "3rem", marginBottom: "16px"}}>🔧</p>
+              <h2 style={{fontWeight: 700, fontSize: "1.25rem", marginBottom: "8px"}}>No bookings yet</h2>
+              <p style={{color: "#64748b", marginBottom: "24px"}}>Find a garage and book your first appointment</p>
+              <a href="/garages" style={{background: "#0f172a", color: "white", padding: "12px 24px", borderRadius: "10px", fontWeight: 700, textDecoration: "none"}}>
+                Find a Garage
+              </a>
+            </div>
+          ) : (
+            <div style={{display: "flex", flexDirection: "column", gap: "16px"}}>
+              {bookings.map((booking) => {
+                const garage = garageMap[booking.garageId]
+                return (
+                  <div key={booking.id} style={{background: "white", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: "16px"}}>
+                    <div>
+                      <h2 style={{fontWeight: 700, fontSize: "1.25rem", marginBottom: "4px"}}>{garage?.name || "Unknown Garage"}</h2>
+                      <p style={{color: "#64748b", marginBottom: "4px"}}>📍 {garage?.city}, {garage?.postcode}</p>
+                      <p style={{color: "#64748b", marginBottom: "4px"}}>🔧 {booking.service}</p>
+                      <p style={{color: "#64748b", marginBottom: "4px"}}>🚗 {booking.registration}</p>
+                      <p style={{color: "#64748b"}}>📅 {new Date(booking.date).toLocaleDateString()} at {booking.time}</p>
+                    </div>
+                    <div style={{textAlign: "right"}}>
+                      <span style={{background: "#fef3c7", color: "#92400e", padding: "6px 14px", borderRadius: "999px", fontSize: "0.875rem", fontWeight: 600}}>
+                        {booking.status}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </main>
+      </div>
     </>
   )
 }
