@@ -37,7 +37,7 @@ export default async function Home() {
               key={garage.id}
               id={garage.id}
               name={garage.name}
-              location={garage.location}
+              location={`${garage.city}, ${garage.postcode}`}
               rating={garage.rating.toString()}
               services={garage.services.join(", ")}
             />

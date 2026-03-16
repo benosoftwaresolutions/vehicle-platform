@@ -8,15 +8,16 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  clerkId   String    @unique
-  email     String    @unique
-  name      String?
-  role      String    @default("customer")
-  garageId  String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  vehicles  Vehicle[]
+  id              String    @id @default(cuid())
+  clerkId         String    @unique
+  email           String    @unique
+  name            String?
+  role            String    @default("pending")
+  garageId        String?
+  onboardingStep  Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  vehicles        Vehicle[]
 }
 
 model Vehicle {
@@ -59,11 +60,31 @@ model Booking {
 model GarageAvailability {
   id           String   @id @default(cuid())
   garageId     String   @unique
-  workingDays  String[]
-  startTime    String
-  endTime      String
   slotDuration Int
   capacity     Int
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  schedule     DaySchedule[]
+}
+
+model DaySchedule {
+  id             String             @id @default(cuid())
+  availabilityId String
+  day            String
+  isOpen         Boolean            @default(true)
+  startTime      String
+  endTime        String
+  availability   GarageAvailability @relation(fields: [availabilityId], references: [id])
+}
+
+model ServiceType {
+  id          String   @id @default(cuid())
+  garageId    String
+  name        String
+  duration    Int
+  price       Float?
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

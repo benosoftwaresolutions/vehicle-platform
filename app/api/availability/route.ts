@@ -7,12 +7,26 @@ export async function POST(req: Request) {
     const { userId } = await auth()
     if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 })
 
-    const { garageId, workingDays, startTime, endTime, slotDuration, capacity } = await req.json()
+    const { garageId, slotDuration, capacity, schedule } = await req.json()
 
     const availability = await prisma.garageAvailability.upsert({
       where: { garageId },
-      update: { workingDays, startTime, endTime, slotDuration, capacity },
-      create: { garageId, workingDays, startTime, endTime, slotDuration, capacity }
+      update: {
+        slotDuration,
+        capacity,
+        schedule: {
+          deleteMany: {},
+          create: schedule
+        }
+      },
+      create: {
+        garageId,
+        slotDuration,
+        capacity,
+        schedule: {
+          create: schedule
+        }
+      }
     })
 
     return NextResponse.json(availability)
