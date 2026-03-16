@@ -45,7 +45,7 @@ export async function POST(req: Request) {
         email: email_addresses[0].email_address,
         name: `${first_name || ""} ${last_name || ""}`.trim(),
         role: "customer",
-        onboarded: false,
+        onboardingStep: 0,
       }
     })
   }
