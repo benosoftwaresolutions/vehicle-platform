@@ -8,8 +8,13 @@ const isProtectedRoute = createRouteMatcher([
 ])
 
 const isOnboardingRoute = createRouteMatcher(["/onboarding(.*)"])
-const isPublicRoute = createRouteMatcher(["/", "/garages(.*)", "/api/webhooks(.*)"])
-
+const isPublicRoute = createRouteMatcher([
+  "/", 
+  "/garages(.*)", 
+  "/api/webhooks(.*)",
+  "/api/make-garage-owner",
+  "/onboarding(.*)"
+])
 export default clerkMiddleware(async (auth, req) => {
   const { userId } = await auth()
 

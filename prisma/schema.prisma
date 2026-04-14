@@ -45,16 +45,19 @@ model Garage {
 }
 
 model Booking {
-  id           String   @id @default(cuid())
-  clerkId      String
-  garageId     String
-  service      String
-  date         DateTime
-  time         String
-  registration String
-  status       String   @default("pending")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id              String    @id @default(cuid())
+  clerkId         String
+  garageId        String
+  service         String
+  date            DateTime
+  time            String
+  registration    String
+  status          String    @default("pending")
+  garageNote      String?
+  suggestedDate   DateTime?
+  suggestedTime   String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }
 
 model GarageAvailability {
