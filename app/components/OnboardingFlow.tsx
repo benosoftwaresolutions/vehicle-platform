@@ -23,6 +23,11 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
   const [garageAddress, setGarageAddress] = useState("")
   const [garageCity, setGarageCity] = useState("")
   const [garagePostcode, setGaragePostcode] = useState("")
+  // Track role locally so step 2 renders the correct form regardless of the stale
+  // user.role prop (which reflects the DB value at page-load time, before step 1 runs)
+  const [selectedRole, setSelectedRole] = useState<string | null>(
+    user.role !== "pending" ? user.role : null
+  )
 
   const chooseRole = async (role: string) => {
     setLoading(true)
@@ -31,9 +36,9 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ step: 1, role })
     })
+    setSelectedRole(role)
     setLoading(false)
-    if (role === "customer") setStep(2)
-    else setStep(2)
+    setStep(2)
   }
 
   const completeCustomer = async () => {
@@ -107,7 +112,7 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
   }
 
   // Step 2 — Customer profile
-  if (step === 2 && user.role === "customer") {
+  if (step === 2 && selectedRole === "customer") {
     return (
       <div style={{minHeight: "100vh", background: "#f8f9fb", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px"}}>
         <div style={{maxWidth: "480px", width: "100%", background: "white", borderRadius: "16px", padding: "40px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)"}}>
@@ -136,7 +141,7 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
   }
 
   // Step 2 — Garage owner details
-  if (step === 2 && user.role !== "customer") {
+  if (step === 2 && selectedRole === "garage_owner") {
     return (
       <div style={{minHeight: "100vh", background: "#f8f9fb", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px"}}>
         <div style={{maxWidth: "480px", width: "100%", background: "white", borderRadius: "16px", padding: "40px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)"}}>

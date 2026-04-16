@@ -62,7 +62,20 @@ export async function POST(req: Request) {
       })
     }
 
-    return NextResponse.json({ success: true })
+    const response = NextResponse.json({ success: true })
+
+    // On final step, set the cookie that middleware uses to bypass the onboarding
+    // redirect. Using a cookie avoids JWT token-cache timing issues.
+    if (step === 2) {
+      response.cookies.set("onboarding_complete", "1", {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 365,
+      })
+    }
+
+    return response
   } catch (error) {
     console.error("Onboarding error:", error)
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 })

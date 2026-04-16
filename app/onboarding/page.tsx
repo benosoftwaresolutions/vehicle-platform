@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
 import { redirect } from "next/navigation"
+import { cookies } from "next/headers"
 import OnboardingFlow from "@/app/components/OnboardingFlow"
 
 export default async function OnboardingPage() {
@@ -23,8 +24,16 @@ export default async function OnboardingPage() {
     })
   }
 
-  // Already onboarded — redirect to correct dashboard
+  // Already onboarded — set the cookie (covers cleared-cookies and pre-deploy users)
+  // then redirect to the correct dashboard
   if (user.onboardingStep >= 2 && user.role !== "pending") {
+    const cookieStore = await cookies()
+    cookieStore.set("onboarding_complete", "1", {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+    })
     if (user.role === "garage_owner") redirect("/garage-dashboard")
     else redirect("/")
   }
