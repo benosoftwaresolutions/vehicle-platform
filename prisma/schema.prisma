@@ -15,6 +15,7 @@ model User {
   role            String    @default("pending")
   garageId        String?
   onboardingStep  Int       @default(0)
+  profileComplete Boolean   @default(false)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   vehicles        Vehicle[]
@@ -33,15 +34,16 @@ model Vehicle {
 }
 
 model Garage {
-  id        String   @id @default(cuid())
-  name      String
-  address   String
-  city      String
-  postcode  String
-  rating    Float    @default(0)
-  services  String[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  address     String
+  city        String
+  postcode    String
+  description String?
+  rating      Float    @default(0)
+  services    String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Booking {

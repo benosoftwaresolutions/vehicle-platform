@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server"
+import { auth, currentUser } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
 import { redirect } from "next/navigation"
 import { cookies } from "next/headers"
@@ -12,15 +12,20 @@ export default async function OnboardingPage() {
     where: { clerkId: userId }
   })
 
-  // If no user record yet create one
+  // Webhook hasn't fired yet — create the record using the real email from Clerk
+  // so we don't hit the unique constraint on the email field with an empty string
   if (!user) {
-    user = await prisma.user.create({
-      data: {
+    const clerkUser = await currentUser()
+    const email = clerkUser?.emailAddresses[0]?.emailAddress ?? userId
+    user = await prisma.user.upsert({
+      where: { clerkId: userId },
+      update: {},
+      create: {
         clerkId: userId,
-        email: "",
+        email,
         role: "pending",
-        onboardingStep: 0
-      }
+        onboardingStep: 0,
+      },
     })
   }
 

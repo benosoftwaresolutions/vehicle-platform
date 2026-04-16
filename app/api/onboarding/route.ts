@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     if (step === 2 && role === "customer") {
       await prisma.user.update({
         where: { clerkId: userId },
-        data: { name, onboardingStep: 2 }
+        data: { name, onboardingStep: 2, profileComplete: true }
       })
     }
 
@@ -57,25 +57,13 @@ export async function POST(req: Request) {
           name,
           role: "garage_owner",
           garageId: garage.id,
-          onboardingStep: 2
+          onboardingStep: 2,
+          profileComplete: true,
         }
       })
     }
 
-    const response = NextResponse.json({ success: true })
-
-    // On final step, set the cookie that middleware uses to bypass the onboarding
-    // redirect. Using a cookie avoids JWT token-cache timing issues.
-    if (step === 2) {
-      response.cookies.set("onboarding_complete", "1", {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        maxAge: 60 * 60 * 24 * 365,
-      })
-    }
-
-    return response
+    return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Onboarding error:", error)
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 })

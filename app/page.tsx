@@ -1,13 +1,26 @@
 import GarageCard from "./components/GarageCard"
 import Navbar from "./components/Navbar"
+import OnboardingBanner from "./components/OnboardingBanner"
 import { prisma } from "./lib/prisma"
+import { auth } from "@clerk/nextjs/server"
 
 export default async function Home() {
-  const garages = await prisma.garage.findMany()
+  const { userId } = await auth()
+  const [garages, user] = await Promise.all([
+    prisma.garage.findMany(),
+    userId ? prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true, onboardingStep: true, profileComplete: true } }) : null,
+  ])
+
+  // Show banner when signed in but profile isn't complete.
+  // Also covers the webhook-race case: userId present but no DB record yet (user === null).
+  const showBanner = !!userId && (!user || !user.profileComplete)
+  const bannerRole = user?.role ?? "pending"
+  console.log("[homepage] userId:", userId, "dbUser:", user, "showBanner:", showBanner)
 
   return (
     <>
       <Navbar />
+      {showBanner && <OnboardingBanner role={bannerRole} />}
       <section style={{padding: "120px 32px", background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)"}} className="text-white overflow-hidden">
         <div className="max-w-5xl mx-auto">
           <p style={{color: "#f59e0b", fontWeight: 600, fontSize: "0.875rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem"}}>The smarter way to book</p>
