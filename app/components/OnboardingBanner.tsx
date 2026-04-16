@@ -3,13 +3,9 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 
-type Props = {
-  role: string
-}
-
 const DISMISS_KEY = "onboarding_banner_dismissed"
 
-export default function OnboardingBanner({ role }: Props) {
+export default function OnboardingBanner() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -25,8 +21,6 @@ export default function OnboardingBanner({ role }: Props) {
     setVisible(false)
   }
 
-  const isGarageOwner = role === "garage_owner"
-
   return (
     <div style={{
       background: "#fefce8",
@@ -38,11 +32,9 @@ export default function OnboardingBanner({ role }: Props) {
       gap: "16px",
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        <span style={{ fontSize: "1.25rem" }}>{isGarageOwner ? "🔧" : "👤"}</span>
+        <span style={{ fontSize: "1.25rem" }}>👤</span>
         <span style={{ fontSize: "0.9rem", color: "#78350f", fontWeight: 500 }}>
-          {isGarageOwner
-            ? "Your garage isn't set up yet. Add your details to start accepting bookings."
-            : "Your profile isn't complete. Finish setting up to book a garage."}
+          Your profile isn&apos;t complete.
         </span>
         <Link
           href="/onboarding"
@@ -57,7 +49,7 @@ export default function OnboardingBanner({ role }: Props) {
             whiteSpace: "nowrap",
           }}
         >
-          {isGarageOwner ? "Set up garage" : "Complete profile"}
+          Complete your profile
         </Link>
       </div>
       <button
