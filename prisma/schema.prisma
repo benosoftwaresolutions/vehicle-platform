@@ -48,13 +48,16 @@ model Garage {
 
 model Booking {
   id              String    @id @default(cuid())
-  clerkId         String
+  clerkId         String?
   garageId        String
   service         String
   date            DateTime
   time            String
   registration    String
   status          String    @default("pending")
+  isWalkIn        Boolean   @default(false)
+  customerName    String?
+  customerPhone   String?
   garageNote      String?
   suggestedDate   DateTime?
   suggestedTime   String?

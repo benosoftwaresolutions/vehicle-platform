@@ -3,6 +3,7 @@ import { prisma } from "@/app/lib/prisma"
 import { redirect } from "next/navigation"
 import Navbar from "@/app/components/Navbar"
 import BookingActions from "@/app/components/BookingActions"
+import WalkInBookingButton from "./WalkInBookingButton"
 import Link from "next/link"
 
 export default async function GarageDashboard() {
@@ -69,6 +70,7 @@ async function BookingsList({ garageId }: { garageId: string }) {
       <div style={{display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px"}}>
         <h2 style={{fontWeight: 700, fontSize: "1.25rem"}}>Bookings</h2>
         <div style={{display: "flex", gap: "12px"}}>
+          <WalkInBookingButton garageId={garageId} />
           <Link href="/garage-dashboard/settings" style={{background: "white", color: "#0f172a", border: "1px solid #e5e7eb", padding: "10px 20px", borderRadius: "10px", fontWeight: 600, fontSize: "0.875rem", textDecoration: "none"}}>
             Garage Settings
           </Link>
@@ -88,7 +90,20 @@ async function BookingsList({ garageId }: { garageId: string }) {
           {bookings.map((booking) => (
             <div key={booking.id} style={{background: "white", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", display: "grid", gridTemplateColumns: "1fr auto", alignItems: "start", gap: "24px"}}>
               <div>
-                <h2 style={{fontWeight: 700, fontSize: "1.25rem", marginBottom: "4px"}}>{booking.service}</h2>
+                <div style={{display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px"}}>
+                  <h2 style={{fontWeight: 700, fontSize: "1.25rem"}}>{booking.service}</h2>
+                  {booking.isWalkIn && (
+                    <span style={{background: "#fef3c7", color: "#92400e", padding: "2px 10px", borderRadius: "999px", fontSize: "0.75rem", fontWeight: 700}}>
+                      Walk-in
+                    </span>
+                  )}
+                </div>
+                {booking.isWalkIn && booking.customerName && (
+                  <p style={{color: "#0f172a", fontWeight: 600, marginBottom: "2px"}}>👤 {booking.customerName}</p>
+                )}
+                {booking.isWalkIn && booking.customerPhone && (
+                  <p style={{color: "#64748b", marginBottom: "4px"}}>📞 {booking.customerPhone}</p>
+                )}
                 <p style={{color: "#64748b", marginBottom: "4px"}}>🚗 {booking.registration}</p>
                 <p style={{color: "#64748b", marginBottom: "4px"}}>📅 {new Date(booking.date).toLocaleDateString()} at {booking.time}</p>
                 {booking.garageNote && (

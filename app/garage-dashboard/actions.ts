@@ -1,5 +1,6 @@
 "use server"
 
+import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { sendBookingConfirmedToCustomer, sendBookingDeclinedToCustomer } from "@/app/lib/email"
@@ -23,7 +24,7 @@ export async function updateBookingStatus(
 
   // Send email notification to customer
   const [customer, garage] = await Promise.all([
-    prisma.user.findUnique({ where: { clerkId: booking.clerkId } }),
+    booking.clerkId ? prisma.user.findUnique({ where: { clerkId: booking.clerkId } }) : null,
     prisma.garage.findUnique({ where: { id: booking.garageId } }),
   ])
 
@@ -55,6 +56,44 @@ export async function updateBookingStatus(
       }).catch((err) => console.error("Failed to send decline email:", err))
     }
   }
+
+  revalidatePath("/garage-dashboard")
+}
+
+export async function createWalkInBooking(data: {
+  garageId: string
+  customerName: string
+  customerPhone: string
+  registration: string
+  service: string
+  date: string
+  time: string
+}) {
+  const { userId } = await auth()
+  if (!userId) throw new Error("Unauthorised")
+
+  const user = await prisma.user.findUnique({
+    where: { clerkId: userId },
+    select: { garageId: true, role: true },
+  })
+
+  if (!user || user.role !== "garage_owner" || user.garageId !== data.garageId) {
+    throw new Error("Unauthorised")
+  }
+
+  await prisma.booking.create({
+    data: {
+      garageId: data.garageId,
+      service: data.service,
+      date: new Date(data.date),
+      time: data.time,
+      registration: data.registration.toUpperCase(),
+      status: "confirmed",
+      isWalkIn: true,
+      customerName: data.customerName.trim(),
+      customerPhone: data.customerPhone.trim(),
+    },
+  })
 
   revalidatePath("/garage-dashboard")
 }
