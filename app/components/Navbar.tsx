@@ -3,8 +3,13 @@
 import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs"
 import Link from "next/link"
 
-export default function Navbar() {
+type NavbarProps = {
+  role?: string
+}
+
+export default function Navbar({ role }: NavbarProps) {
   const { isSignedIn } = useAuth()
+  const isGarageOwner = role === "garage_owner"
 
   return (
     <nav className="bg-white border-b border-gray-100 px-8 py-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
@@ -14,7 +19,11 @@ export default function Navbar() {
       <div className="flex gap-6 items-center">
         <Link href="/" className="text-gray-500 hover:text-gray-900 transition text-sm font-medium">Home</Link>
         <Link href="/garages" className="text-gray-500 hover:text-gray-900 transition text-sm font-medium">Garages</Link>
-        <Link href="/bookings" className="text-gray-500 hover:text-gray-900 transition text-sm font-medium">My Bookings</Link>
+        {isGarageOwner ? (
+          <Link href="/garage-dashboard" className="text-gray-500 hover:text-gray-900 transition text-sm font-medium">Garage Dashboard</Link>
+        ) : (
+          <Link href="/bookings" className="text-gray-500 hover:text-gray-900 transition text-sm font-medium">My Bookings</Link>
+        )}
         {!isSignedIn ? (
           <>
             <SignInButton mode="modal">

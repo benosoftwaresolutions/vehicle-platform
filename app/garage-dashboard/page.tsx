@@ -18,7 +18,7 @@ export default async function GarageDashboard() {
 
   return (
     <>
-      <Navbar />
+      <Navbar role={user.role} />
       <div style={{background: "#f8f9fb", minHeight: "100vh"}}>
         <div style={{background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)", padding: "48px 32px"}}>
           <div className="max-w-5xl mx-auto">

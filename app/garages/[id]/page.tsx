@@ -1,6 +1,7 @@
 import Navbar from "@/app/components/Navbar"
 import BookingForm from "@/app/components/BookingForm"
 import { prisma } from "@/app/lib/prisma"
+import { auth } from "@clerk/nextjs/server"
 
 type Params = {
   params: Promise<{
@@ -10,14 +11,17 @@ type Params = {
 
 export default async function GarageDetail({ params }: Params) {
   const { id } = await params
-  const garage = await prisma.garage.findUnique({
-    where: { id }
-  })
+  const { userId } = await auth()
+
+  const [garage, user] = await Promise.all([
+    prisma.garage.findUnique({ where: { id } }),
+    userId ? prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true } }) : null,
+  ])
 
   if (!garage) {
     return (
       <>
-        <Navbar />
+        <Navbar role={user?.role} />
         <main className="max-w-4xl mx-auto p-8">
           <h1 className="text-4xl font-bold">Garage not found</h1>
         </main>
@@ -27,7 +31,7 @@ export default async function GarageDetail({ params }: Params) {
 
   return (
     <>
-      <Navbar />
+      <Navbar role={user?.role} />
       <div style={{background: "#f8f9fb", minHeight: "100vh"}}>
         <div style={{background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)", padding: "48px 32px"}}>
           <div className="max-w-5xl mx-auto">

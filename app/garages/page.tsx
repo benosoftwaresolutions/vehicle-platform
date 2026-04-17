@@ -1,27 +1,21 @@
-"use client"
-
-import { useState } from "react"
 import Navbar from "../components/Navbar"
+import GaragesSearch from "./GaragesSearch"
+import { auth } from "@clerk/nextjs/server"
+import { prisma } from "../lib/prisma"
 
-export default function Garages() {
-  const [search, setSearch] = useState("")
+export default async function Garages() {
+  const { userId } = await auth()
+  const user = userId
+    ? await prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true } })
+    : null
 
   return (
     <>
-      <Navbar />
+      <Navbar role={user?.role} />
       <main className="max-w-4xl mx-auto p-8">
         <h1 className="text-4xl font-bold mb-2">Find a Garage</h1>
         <p className="text-gray-500 mb-8">Search for a garage near you</p>
-        <input
-          type="text"
-          placeholder="Search by location or service..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full border rounded-lg px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        {search && (
-          <p className="mt-4 text-gray-500">Searching for: <span className="font-bold text-blue-600">{search}</span></p>
-        )}
+        <GaragesSearch />
       </main>
     </>
   )

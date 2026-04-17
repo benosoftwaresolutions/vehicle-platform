@@ -5,10 +5,13 @@ import { prisma } from "../lib/prisma"
 export default async function Bookings() {
   const { userId } = await auth()
 
-  const bookings = await prisma.booking.findMany({
-    where: { clerkId: userId! },
-    orderBy: { createdAt: "desc" }
-  })
+  const [bookings, user] = await Promise.all([
+    prisma.booking.findMany({
+      where: { clerkId: userId! },
+      orderBy: { createdAt: "desc" },
+    }),
+    userId ? prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true } }) : null,
+  ])
 
   const garageIds = bookings.map((b) => b.garageId)
   const garages = await prisma.garage.findMany({
@@ -19,7 +22,7 @@ export default async function Bookings() {
 
   return (
     <>
-      <Navbar />
+      <Navbar role={user?.role} />
       <div style={{background: "#f8f9fb", minHeight: "100vh"}}>
         <div style={{background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)", padding: "48px 32px"}}>
           <div className="max-w-5xl mx-auto">

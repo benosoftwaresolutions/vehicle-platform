@@ -8,7 +8,7 @@ export default async function Home() {
   const { userId } = await auth()
   const [garages, user] = await Promise.all([
     prisma.garage.findMany(),
-    userId ? prisma.user.findUnique({ where: { clerkId: userId }, select: { profileComplete: true } }) : null,
+    userId ? prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true, profileComplete: true } }) : null,
   ])
 
   // Show banner when signed in but profile isn't complete.
@@ -18,7 +18,7 @@ export default async function Home() {
 
   return (
     <>
-      <Navbar />
+      <Navbar role={user?.role} />
       {showBanner && <OnboardingBanner />}
       <section style={{padding: "120px 32px", background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)"}} className="text-white overflow-hidden">
         <div className="max-w-5xl mx-auto">
