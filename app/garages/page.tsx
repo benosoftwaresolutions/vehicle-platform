@@ -5,9 +5,18 @@ import { prisma } from "../lib/prisma"
 
 export default async function Garages() {
   const { userId } = await auth()
-  const user = userId
-    ? await prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true } })
-    : null
+
+  const [user, garages] = await Promise.all([
+    userId
+      ? prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true } })
+      : null,
+    prisma.garage.findMany({ orderBy: { name: "asc" } }),
+  ])
+
+  // Collect all unique services across all garages for the filter dropdown
+  const allServices = Array.from(
+    new Set(garages.flatMap((g) => g.services))
+  ).sort()
 
   return (
     <>
@@ -15,7 +24,7 @@ export default async function Garages() {
       <main className="max-w-4xl mx-auto p-8">
         <h1 className="text-4xl font-bold mb-2">Find a Garage</h1>
         <p className="text-gray-500 mb-8">Search for a garage near you</p>
-        <GaragesSearch />
+        <GaragesSearch garages={garages} allServices={allServices} />
       </main>
     </>
   )
