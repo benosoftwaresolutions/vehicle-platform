@@ -81,19 +81,24 @@ export async function createWalkInBooking(data: {
     throw new Error("Unauthorised")
   }
 
-  await prisma.booking.create({
-    data: {
-      garageId: data.garageId,
-      service: data.service,
-      date: new Date(data.date),
-      time: data.time,
-      registration: data.registration.toUpperCase(),
-      status: "confirmed",
-      isWalkIn: true,
-      customerName: data.customerName.trim(),
-      customerPhone: data.customerPhone.trim(),
-    },
-  })
+  try {
+    await prisma.booking.create({
+      data: {
+        garageId: data.garageId,
+        service: data.service,
+        date: new Date(data.date),
+        time: data.time,
+        registration: data.registration.toUpperCase(),
+        status: "confirmed",
+        isWalkIn: true,
+        customerName: data.customerName.trim(),
+        customerPhone: data.customerPhone.trim(),
+      },
+    })
+  } catch (err) {
+    console.error("[createWalkInBooking] Prisma error:", err)
+    throw err
+  }
 
   revalidatePath("/garage-dashboard")
 }

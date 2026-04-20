@@ -58,7 +58,8 @@ export default function WalkInBookingButton({ garageId }: { garageId: string }) 
       await createWalkInBooking({ garageId, customerName, customerPhone, registration, service, date, time })
       handleClose()
       router.refresh()
-    } catch {
+    } catch (err) {
+      console.error("[WalkInBookingButton] Submission error:", err)
       setError("Something went wrong. Please try again.")
     } finally {
       setLoading(false)
