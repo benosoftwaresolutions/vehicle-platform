@@ -93,6 +93,68 @@ export async function sendBookingConfirmedToCustomer({
   })
 }
 
+export async function sendAlternativeAcceptedToGarage({
+  garageOwnerEmail,
+  garageName,
+  customerName,
+  service,
+  confirmedDate,
+  confirmedTime,
+  registration,
+}: {
+  garageOwnerEmail: string
+  garageName: string
+  customerName: string
+  service: string
+  confirmedDate: Date
+  confirmedTime: string
+  registration: string
+}) {
+  await resend.emails.send({
+    from: FROM,
+    to: garageOwnerEmail,
+    subject: `Customer accepted alternative — ${service} on ${formatDate(confirmedDate)}`,
+    html: `
+      <h2>Customer Accepted Alternative Slot</h2>
+      <p><strong>${customerName}</strong> has accepted the alternative time you offered at <strong>${garageName}</strong>.</p>
+      <table cellpadding="8" style="border-collapse:collapse;">
+        <tr><td><strong>Service</strong></td><td>${service}</td></tr>
+        <tr><td><strong>Date</strong></td><td>${formatDate(confirmedDate)}</td></tr>
+        <tr><td><strong>Time</strong></td><td>${confirmedTime}</td></tr>
+        <tr><td><strong>Registration</strong></td><td>${registration}</td></tr>
+      </table>
+      <p>This booking is now confirmed.</p>
+    `,
+  })
+}
+
+export async function sendAlternativeDeclinedToGarage({
+  garageOwnerEmail,
+  garageName,
+  customerName,
+  service,
+  date,
+  time,
+}: {
+  garageOwnerEmail: string
+  garageName: string
+  customerName: string
+  service: string
+  date: Date
+  time: string
+}) {
+  await resend.emails.send({
+    from: FROM,
+    to: garageOwnerEmail,
+    subject: `Customer declined alternative — ${service}`,
+    html: `
+      <h2>Customer Declined Alternative Slot</h2>
+      <p><strong>${customerName}</strong> has declined the alternative time you offered at <strong>${garageName}</strong> for <strong>${service}</strong> on <strong>${formatDate(date)} at ${time}</strong>.</p>
+      <p>The booking has been closed.</p>
+    `,
+  })
+}
+
 export async function sendBookingDeclinedToCustomer({
   customerEmail,
   customerName,

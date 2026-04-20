@@ -1,6 +1,15 @@
 import Navbar from "../components/Navbar"
+import AlternativeResponseButtons from "../components/AlternativeResponseButtons"
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "../lib/prisma"
+
+const STATUS_STYLES: Record<string, { background: string; color: string; label: string }> = {
+  pending:              { background: "#fef3c7", color: "#92400e",  label: "Pending" },
+  confirmed:            { background: "#dcfce7", color: "#166534",  label: "Confirmed" },
+  declined:             { background: "#fee2e2", color: "#991b1b",  label: "Alternative offered" },
+  declined_by_customer: { background: "#f1f5f9", color: "#475569",  label: "Cancelled" },
+  completed:            { background: "#e0f2fe", color: "#0369a1",  label: "Completed" },
+}
 
 export default async function Bookings() {
   const { userId } = await auth()
@@ -44,20 +53,36 @@ export default async function Bookings() {
             <div style={{display: "flex", flexDirection: "column", gap: "16px"}}>
               {bookings.map((booking) => {
                 const garage = garageMap[booking.garageId]
+                const statusStyle = STATUS_STYLES[booking.status] ?? { background: "#f1f5f9", color: "#475569", label: booking.status }
+                const hasAlternative = booking.status === "declined" && booking.suggestedDate && booking.suggestedTime
+
                 return (
-                  <div key={booking.id} style={{background: "white", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: "16px"}}>
-                    <div>
-                      <h2 style={{fontWeight: 700, fontSize: "1.25rem", marginBottom: "4px"}}>{garage?.name || "Unknown Garage"}</h2>
-                      <p style={{color: "#64748b", marginBottom: "4px"}}>📍 {garage?.city}, {garage?.postcode}</p>
-                      <p style={{color: "#64748b", marginBottom: "4px"}}>🔧 {booking.service}</p>
-                      <p style={{color: "#64748b", marginBottom: "4px"}}>🚗 {booking.registration}</p>
-                      <p style={{color: "#64748b"}}>📅 {new Date(booking.date).toLocaleDateString()} at {booking.time}</p>
-                    </div>
-                    <div style={{textAlign: "right"}}>
-                      <span style={{background: "#fef3c7", color: "#92400e", padding: "6px 14px", borderRadius: "999px", fontSize: "0.875rem", fontWeight: 600}}>
-                        {booking.status}
+                  <div key={booking.id} style={{background: "white", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)"}}>
+                    <div style={{display: "grid", gridTemplateColumns: "1fr auto", alignItems: "start", gap: "16px"}}>
+                      <div>
+                        <h2 style={{fontWeight: 700, fontSize: "1.25rem", marginBottom: "4px"}}>{garage?.name || "Unknown Garage"}</h2>
+                        <p style={{color: "#64748b", marginBottom: "4px"}}>📍 {garage?.city}, {garage?.postcode}</p>
+                        <p style={{color: "#64748b", marginBottom: "4px"}}>🔧 {booking.service}</p>
+                        <p style={{color: "#64748b", marginBottom: "4px"}}>🚗 {booking.registration}</p>
+                        <p style={{color: "#64748b"}}>📅 {new Date(booking.date).toLocaleDateString()} at {booking.time}</p>
+                      </div>
+                      <span style={{
+                        background: statusStyle.background,
+                        color: statusStyle.color,
+                        padding: "6px 14px", borderRadius: "999px",
+                        fontSize: "0.875rem", fontWeight: 600,
+                        whiteSpace: "nowrap",
+                      }}>
+                        {statusStyle.label}
                       </span>
                     </div>
+                    {hasAlternative && (
+                      <AlternativeResponseButtons
+                        bookingId={booking.id}
+                        suggestedDate={booking.suggestedDate!}
+                        suggestedTime={booking.suggestedTime!}
+                      />
+                    )}
                   </div>
                 )
               })}
