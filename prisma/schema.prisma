@@ -41,8 +41,9 @@ model Garage {
   postcode    String
   description String?
   rating      Float    @default(0)
-  services    String[]
-  createdAt   DateTime @default(now())
+  services         String[]
+  specialistMakes  String[]
+  createdAt        DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 

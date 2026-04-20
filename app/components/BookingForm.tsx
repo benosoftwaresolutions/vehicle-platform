@@ -9,9 +9,10 @@ type SlotsResponse =
 
 type BookingFormProps = {
   garageId: string
+  services: string[]
 }
 
-export default function BookingForm({ garageId }: BookingFormProps) {
+export default function BookingForm({ garageId, services }: BookingFormProps) {
   const router = useRouter()
   const [service, setService] = useState("")
   const [date, setDate] = useState("")
@@ -83,14 +84,18 @@ export default function BookingForm({ garageId }: BookingFormProps) {
 
         <div>
           <label style={labelStyle}>Service</label>
-          <select value={service} onChange={(e) => setService(e.target.value)} style={inputStyle}>
-            <option value="">Select a service</option>
-            <option value="MOT">MOT</option>
-            <option value="Full Service">Full Service</option>
-            <option value="Oil Change">Oil Change</option>
-            <option value="Tyres">Tyres</option>
-            <option value="Brakes">Brakes</option>
-          </select>
+          {services.length === 0 ? (
+            <div style={{ background: "#f8f9fb", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "12px", color: "#64748b", fontSize: "0.875rem" }}>
+              This garage hasn&apos;t configured their services yet.
+            </div>
+          ) : (
+            <select value={service} onChange={(e) => setService(e.target.value)} style={inputStyle}>
+              <option value="">Select a service</option>
+              {services.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          )}
         </div>
 
         <div>
@@ -150,9 +155,9 @@ export default function BookingForm({ garageId }: BookingFormProps) {
 
         <button
           onClick={handleBooking}
-          disabled={loading || !service || !date || !time || !registration}
+          disabled={loading || !service || !date || !time || !registration || services.length === 0}
           style={{
-            background: loading || !service || !date || !time || !registration ? "#94a3b8" : "#0f172a",
+            background: loading || !service || !date || !time || !registration || services.length === 0 ? "#94a3b8" : "#0f172a",
             color: "white",
             padding: "12px",
             borderRadius: "10px",

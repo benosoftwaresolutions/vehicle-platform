@@ -60,17 +60,24 @@ function GarageSetupPrompt() {
 }
 
 async function BookingsList({ garageId }: { garageId: string }) {
-  const bookings = await prisma.booking.findMany({
-    where: { garageId },
-    orderBy: { createdAt: "desc" }
-  })
+  const [bookings, garage] = await Promise.all([
+    prisma.booking.findMany({
+      where: { garageId },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.garage.findUnique({
+      where: { id: garageId },
+      select: { services: true },
+    }),
+  ])
+  const garageServices = garage?.services ?? []
 
   return (
     <>
       <div style={{display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px"}}>
         <h2 style={{fontWeight: 700, fontSize: "1.25rem"}}>Bookings</h2>
         <div style={{display: "flex", gap: "12px"}}>
-          <WalkInBookingButton garageId={garageId} />
+          <WalkInBookingButton garageId={garageId} services={garageServices} />
           <Link href="/garage-dashboard/settings" style={{background: "white", color: "#0f172a", border: "1px solid #e5e7eb", padding: "10px 20px", borderRadius: "10px", fontWeight: 600, fontSize: "0.875rem", textDecoration: "none"}}>
             Garage Settings
           </Link>

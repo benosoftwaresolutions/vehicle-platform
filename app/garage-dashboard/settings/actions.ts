@@ -10,6 +10,8 @@ export async function updateGarageSettings(formData: {
   city: string
   postcode: string
   description: string
+  services: string[]
+  specialistMakes: string[]
 }) {
   const { userId } = await auth()
   if (!userId) throw new Error("Unauthorised")
@@ -31,6 +33,8 @@ export async function updateGarageSettings(formData: {
       city: formData.city.trim(),
       postcode: formData.postcode.trim().toUpperCase(),
       description: formData.description.trim() || null,
+      services: formData.services,
+      specialistMakes: formData.specialistMakes,
     },
   })
 

@@ -47,14 +47,30 @@ export default async function GarageDetail({ params }: Params) {
             <div className="md:col-span-2 flex flex-col gap-6">
               <div style={{background: "white", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)"}}>
                 <h2 style={{fontWeight: 700, fontSize: "1.25rem", marginBottom: "16px"}}>Services Offered</h2>
-                <div style={{display: "flex", gap: "8px", flexWrap: "wrap"}}>
-                  {garage.services.map((service) => (
-                    <span key={service} style={{background: "#fef3c7", color: "#92400e", padding: "6px 14px", borderRadius: "999px", fontSize: "0.875rem", fontWeight: 600}}>
-                      {service}
-                    </span>
-                  ))}
-                </div>
+                {garage.services.length === 0 ? (
+                  <p style={{color: "#64748b", fontSize: "0.875rem"}}>This garage hasn&apos;t configured their services yet.</p>
+                ) : (
+                  <div style={{display: "flex", gap: "8px", flexWrap: "wrap"}}>
+                    {garage.services.map((service) => (
+                      <span key={service} style={{background: "#fef3c7", color: "#92400e", padding: "6px 14px", borderRadius: "999px", fontSize: "0.875rem", fontWeight: 600}}>
+                        {service}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
+              {garage.specialistMakes.length > 0 && (
+                <div style={{background: "white", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)"}}>
+                  <h2 style={{fontWeight: 700, fontSize: "1.25rem", marginBottom: "16px"}}>Specialist Makes</h2>
+                  <div style={{display: "flex", gap: "8px", flexWrap: "wrap"}}>
+                    {garage.specialistMakes.map((make) => (
+                      <span key={make} style={{background: "#eff6ff", color: "#1e40af", padding: "6px 14px", borderRadius: "999px", fontSize: "0.875rem", fontWeight: 600}}>
+                        {make}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div style={{background: "white", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)"}}>
                 <h2 style={{fontWeight: 700, fontSize: "1.25rem", marginBottom: "16px"}}>Location</h2>
                 <p style={{color: "#64748b"}}>{garage.address}</p>
@@ -72,7 +88,7 @@ export default async function GarageDetail({ params }: Params) {
             </div>
             <div className="md:col-span-1">
               <div style={{background: "white", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", position: "sticky", top: "80px"}}>
-                <BookingForm garageId={garage.id} />
+                <BookingForm garageId={garage.id} services={garage.services} />
               </div>
             </div>
           </div>

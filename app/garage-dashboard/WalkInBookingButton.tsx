@@ -8,9 +8,7 @@ type SlotsResponse =
   | { open: false; reason: "no_availability" | "closed" }
   | { open: true; slots: string[] }
 
-const SERVICES = ["MOT", "Full Service", "Oil Change", "Tyres", "Brakes", "Diagnostics", "Welding", "Other"]
-
-export default function WalkInBookingButton({ garageId }: { garageId: string }) {
+export default function WalkInBookingButton({ garageId, services }: { garageId: string; services: string[] }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
 
@@ -67,7 +65,7 @@ export default function WalkInBookingButton({ garageId }: { garageId: string }) 
   }
 
   const today = new Date().toISOString().split("T")[0]
-  const canSubmit = customerName && customerPhone && registration && service && date && time
+  const canSubmit = customerName && customerPhone && registration && service && date && time && services.length > 0
 
   return (
     <>
@@ -148,10 +146,16 @@ export default function WalkInBookingButton({ garageId }: { garageId: string }) 
                 </div>
                 <div>
                   <label style={labelStyle}>Service</label>
-                  <select value={service} required onChange={e => setService(e.target.value)} style={inputStyle}>
-                    <option value="">Select a service</option>
-                    {SERVICES.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
+                  {services.length === 0 ? (
+                    <div style={{ background: "#f8f9fb", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "10px 13px", color: "#64748b", fontSize: "0.875rem" }}>
+                      No services configured. Add services in Garage Settings first.
+                    </div>
+                  ) : (
+                    <select value={service} required onChange={e => setService(e.target.value)} style={inputStyle}>
+                      <option value="">Select a service</option>
+                      {services.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  )}
                 </div>
               </div>
 
