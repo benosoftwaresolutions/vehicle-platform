@@ -4,7 +4,6 @@ import { redirect } from "next/navigation"
 import Navbar from "@/app/components/Navbar"
 import Link from "next/link"
 import GarageSettingsForm from "./GarageSettingsForm"
-import LogoUploader from "@/app/components/LogoUploader"
 
 export default async function GarageSettingsPage() {
   const { userId } = await auth()
@@ -30,19 +29,15 @@ export default async function GarageSettingsPage() {
       <Navbar role="garage_owner" />
       <div style={{ background: "#f8f9fb", minHeight: "100vh" }}>
         <div style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)", padding: "48px 32px" }}>
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-3xl mx-auto">
             <p style={{ color: "#94a3b8", fontSize: "0.875rem", marginBottom: "0.5rem" }}>
               <Link href="/garage-dashboard" style={{ color: "#94a3b8" }}>Dashboard</Link> → Settings
             </p>
-            <h1 style={{ color: "white", fontSize: "2.5rem", fontWeight: 800, marginBottom: "0.5rem" }}>Garage Settings</h1>
-            <p style={{ color: "#94a3b8", fontSize: "1.1rem" }}>Update your garage information</p>
+            <h1 style={{ color: "white", fontSize: "2.5rem", fontWeight: 800, marginBottom: "0.5rem" }}>Business Profile</h1>
+            <p style={{ color: "#94a3b8", fontSize: "1.1rem" }}>Manage how your garage appears to customers</p>
           </div>
         </div>
-        <main className="max-w-2xl mx-auto px-8 py-12">
-          <div style={{ background: "white", borderRadius: "16px", padding: "32px 40px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: "24px" }}>
-            <p style={{ fontWeight: 700, fontSize: "1rem", color: "#0f172a", marginBottom: "20px" }}>Garage Logo</p>
-            <LogoUploader currentLogoUrl={garage.logoUrl} />
-          </div>
+        <main className="max-w-3xl mx-auto px-8 py-10">
           <GarageSettingsForm garage={garage} />
         </main>
       </div>

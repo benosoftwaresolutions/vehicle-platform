@@ -4,7 +4,13 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { UploadButton } from "@/app/lib/uploadthing"
 
-export default function LogoUploader({ currentLogoUrl }: { currentLogoUrl?: string | null }) {
+export default function LogoUploader({
+  currentLogoUrl,
+  onLogoChange,
+}: {
+  currentLogoUrl?: string | null
+  onLogoChange?: (url: string) => void
+}) {
   const router = useRouter()
   const [logoUrl, setLogoUrl] = useState(currentLogoUrl ?? null)
 
@@ -30,7 +36,10 @@ export default function LogoUploader({ currentLogoUrl }: { currentLogoUrl?: stri
           endpoint="garageLogoUploader"
           onClientUploadComplete={(res) => {
             const url = res?.[0]?.serverData?.logoUrl ?? res?.[0]?.url
-            if (url) setLogoUrl(url)
+            if (url) {
+              setLogoUrl(url)
+              onLogoChange?.(url)
+            }
             router.refresh()
           }}
           onUploadError={(error: Error) => {

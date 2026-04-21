@@ -150,42 +150,138 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
 
   // Step 2 — Garage owner details
   if (step === 2 && selectedRole === "garage_owner") {
+    const canSubmit = !loading && name && garageName && garageAddress && garageCity && garagePostcode
     return (
-      <div style={{minHeight: "100vh", background: "#f8f9fb", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px"}}>
-        <div style={{maxWidth: "480px", width: "100%", background: "white", borderRadius: "16px", padding: "40px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)"}}>
-          <h1 style={{fontSize: "1.75rem", fontWeight: 800, marginBottom: "8px"}}>Your Garage</h1>
-          <p style={{color: "#64748b", marginBottom: "32px"}}>Tell us about your garage</p>
-          <div style={{display: "flex", flexDirection: "column", gap: "16px"}}>
-            <div>
-              <label style={{fontWeight: 600, fontSize: "0.875rem", display: "block", marginBottom: "8px"}}>Your Name</label>
-              <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your full name" style={{width: "100%", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "10px 14px"}} />
-            </div>
-            <div>
-              <label style={{fontWeight: 600, fontSize: "0.875rem", display: "block", marginBottom: "8px"}}>Garage Name</label>
-              <input type="text" value={garageName} onChange={e => setGarageName(e.target.value)} placeholder="e.g. Bens Garage" style={{width: "100%", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "10px 14px"}} />
-            </div>
-            <div>
-              <label style={{fontWeight: 600, fontSize: "0.875rem", display: "block", marginBottom: "8px"}}>Street Address</label>
-              <input type="text" value={garageAddress} onChange={e => setGarageAddress(e.target.value)} placeholder="123 High Street" style={{width: "100%", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "10px 14px"}} />
-            </div>
-            <div style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px"}}>
-              <div>
-                <label style={{fontWeight: 600, fontSize: "0.875rem", display: "block", marginBottom: "8px"}}>City</label>
-                <input type="text" value={garageCity} onChange={e => setGarageCity(e.target.value)} placeholder="Manchester" style={{width: "100%", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "10px 14px"}} />
+      <div style={{minHeight: "100vh", background: "#f8f9fb", padding: "48px 24px"}}>
+        <div style={{maxWidth: "600px", margin: "0 auto"}}>
+
+          {/* Header */}
+          <div style={{marginBottom: "32px"}}>
+            <div style={{display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px"}}>
+              <div style={{width: 40, height: 40, background: "#0f172a", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center"}}>
+                <span style={{fontSize: "1.25rem"}}>🔧</span>
               </div>
+              <span style={{fontWeight: 800, fontSize: "1.1rem", color: "#0f172a"}}>VehiclePlatform</span>
+            </div>
+            <h1 style={{fontSize: "2rem", fontWeight: 800, color: "#0f172a", marginBottom: "6px"}}>Set up your garage</h1>
+            <p style={{color: "#64748b", fontSize: "1rem"}}>This takes about 2 minutes. You can update everything later.</p>
+          </div>
+
+          {/* Progress indicator */}
+          <div style={{display: "flex", alignItems: "center", gap: "8px", marginBottom: "32px"}}>
+            <div style={{display: "flex", alignItems: "center", gap: "6px"}}>
+              <div style={{width: 24, height: 24, borderRadius: "50%", background: "#16a34a", display: "flex", alignItems: "center", justifyContent: "center"}}>
+                <span style={{color: "white", fontSize: "0.7rem", fontWeight: 700}}>✓</span>
+              </div>
+              <span style={{fontSize: "0.8rem", fontWeight: 600, color: "#16a34a"}}>Account type</span>
+            </div>
+            <div style={{flex: 1, height: 2, background: "#e5e7eb", borderRadius: 1}} />
+            <div style={{display: "flex", alignItems: "center", gap: "6px"}}>
+              <div style={{width: 24, height: 24, borderRadius: "50%", background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center"}}>
+                <span style={{color: "white", fontSize: "0.75rem", fontWeight: 700}}>2</span>
+              </div>
+              <span style={{fontSize: "0.8rem", fontWeight: 600, color: "#0f172a"}}>Garage details</span>
+            </div>
+            <div style={{flex: 1, height: 2, background: "#e5e7eb", borderRadius: 1}} />
+            <div style={{display: "flex", alignItems: "center", gap: "6px"}}>
+              <div style={{width: 24, height: 24, borderRadius: "50%", background: "#e5e7eb", display: "flex", alignItems: "center", justifyContent: "center"}}>
+                <span style={{color: "#94a3b8", fontSize: "0.75rem", fontWeight: 700}}>3</span>
+              </div>
+              <span style={{fontSize: "0.8rem", fontWeight: 600, color: "#94a3b8"}}>Logo</span>
+            </div>
+          </div>
+
+          {/* Owner name */}
+          <div style={{background: "white", border: "1px solid #e5e7eb", borderRadius: "14px", overflow: "hidden", marginBottom: "16px"}}>
+            <div style={{padding: "14px 20px", background: "#f8f9fb", borderBottom: "1px solid #e5e7eb", display: "flex", alignItems: "center", gap: "10px"}}>
+              <span>👤</span>
+              <p style={{fontWeight: 700, fontSize: "0.9rem", color: "#0f172a", margin: 0}}>Your details</p>
+            </div>
+            <div style={{padding: "20px"}}>
+              <label style={onboardingLabelStyle}>Your full name</label>
+              <input
+                type="text" value={name} onChange={e => setName(e.target.value)}
+                placeholder="e.g. Ben Smith"
+                style={onboardingInputStyle}
+              />
+            </div>
+          </div>
+
+          {/* Garage identity */}
+          <div style={{background: "white", border: "1px solid #e5e7eb", borderRadius: "14px", overflow: "hidden", marginBottom: "16px"}}>
+            <div style={{padding: "14px 20px", background: "#f8f9fb", borderBottom: "1px solid #e5e7eb", display: "flex", alignItems: "center", gap: "10px"}}>
+              <span>🏢</span>
               <div>
-                <label style={{fontWeight: 600, fontSize: "0.875rem", display: "block", marginBottom: "8px"}}>Postcode</label>
-                <input type="text" value={garagePostcode} onChange={e => setGaragePostcode(e.target.value.toUpperCase())} placeholder="M1 1AA" style={{width: "100%", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "10px 14px"}} />
+                <p style={{fontWeight: 700, fontSize: "0.9rem", color: "#0f172a", margin: 0}}>Garage identity</p>
+                <p style={{fontSize: "0.78rem", color: "#64748b", margin: 0}}>This appears on your public listing</p>
+              </div>
+            </div>
+            <div style={{padding: "20px"}}>
+              <label style={onboardingLabelStyle}>Garage name</label>
+              <input
+                type="text" value={garageName} onChange={e => setGarageName(e.target.value)}
+                placeholder="e.g. City Auto Centre"
+                style={onboardingInputStyle}
+              />
+            </div>
+          </div>
+
+          {/* Location */}
+          <div style={{background: "white", border: "1px solid #e5e7eb", borderRadius: "14px", overflow: "hidden", marginBottom: "28px"}}>
+            <div style={{padding: "14px 20px", background: "#f8f9fb", borderBottom: "1px solid #e5e7eb", display: "flex", alignItems: "center", gap: "10px"}}>
+              <span>📍</span>
+              <div>
+                <p style={{fontWeight: 700, fontSize: "0.9rem", color: "#0f172a", margin: 0}}>Location</p>
+                <p style={{fontSize: "0.78rem", color: "#64748b", margin: 0}}>Where customers will find you</p>
+              </div>
+            </div>
+            <div style={{padding: "20px", display: "flex", flexDirection: "column", gap: "16px"}}>
+              <div>
+                <label style={onboardingLabelStyle}>Street address</label>
+                <input
+                  type="text" value={garageAddress} onChange={e => setGarageAddress(e.target.value)}
+                  placeholder="e.g. 42 Industrial Way"
+                  style={onboardingInputStyle}
+                />
+              </div>
+              <div style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px"}}>
+                <div>
+                  <label style={onboardingLabelStyle}>City / Town</label>
+                  <input
+                    type="text" value={garageCity} onChange={e => setGarageCity(e.target.value)}
+                    placeholder="e.g. Manchester"
+                    style={onboardingInputStyle}
+                  />
+                </div>
+                <div>
+                  <label style={onboardingLabelStyle}>Postcode</label>
+                  <input
+                    type="text" value={garagePostcode} onChange={e => setGaragePostcode(e.target.value.toUpperCase())}
+                    placeholder="e.g. M1 1AA"
+                    style={onboardingInputStyle}
+                  />
+                </div>
               </div>
             </div>
           </div>
+
           <button
             onClick={completeGarageDetails}
-            disabled={loading || !name || !garageName || !garageAddress || !garageCity || !garagePostcode}
-            style={{background: "#0f172a", color: "white", padding: "14px 32px", borderRadius: "10px", fontWeight: 700, fontSize: "1rem", border: "none", cursor: "pointer", width: "100%", marginTop: "24px"}}
+            disabled={!canSubmit}
+            style={{
+              background: canSubmit ? "#0f172a" : "#94a3b8",
+              color: "white", padding: "16px 32px", borderRadius: "12px",
+              fontWeight: 700, fontSize: "1rem", border: "none",
+              cursor: canSubmit ? "pointer" : "not-allowed", width: "100%",
+              boxShadow: canSubmit ? "0 4px 16px rgba(15,23,42,0.25)" : "none",
+              transition: "all 0.2s",
+            }}
           >
-            {loading ? "Saving..." : "Create My Garage"}
+            {loading ? "Creating your garage..." : "Continue →"}
           </button>
+          <p style={{textAlign: "center", color: "#94a3b8", fontSize: "0.8rem", marginTop: "12px"}}>
+            You can add services, photos and more after setup
+          </p>
         </div>
       </div>
     )
@@ -222,4 +318,22 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
   }
 
   return null
+}
+
+const onboardingInputStyle: React.CSSProperties = {
+  width: "100%",
+  border: "1px solid #e5e7eb",
+  borderRadius: "8px",
+  padding: "11px 14px",
+  fontSize: "0.95rem",
+  boxSizing: "border-box",
+  outline: "none",
+}
+
+const onboardingLabelStyle: React.CSSProperties = {
+  fontWeight: 600,
+  fontSize: "0.875rem",
+  display: "block",
+  marginBottom: "6px",
+  color: "#374151",
 }
