@@ -62,7 +62,14 @@ export default async function GarageDetail({ params }: Params) {
             <p style={{ color: "#94a3b8", fontSize: "0.875rem", marginBottom: "0.5rem" }}>
               <a href="/" style={{ color: "#94a3b8" }}>Home</a> → <a href="/garages" style={{ color: "#94a3b8" }}>Garages</a> → {garage.name}
             </p>
-            <h1 style={{ color: "white", fontSize: "2.5rem", fontWeight: 800, marginBottom: "0.5rem" }}>{garage.name}</h1>
+            <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "0.5rem" }}>
+              {garage.logoUrl && (
+                <div style={{ width: 64, height: 64, borderRadius: "12px", overflow: "hidden", border: "2px solid rgba(255,255,255,0.15)", flexShrink: 0 }}>
+                  <img src={garage.logoUrl} alt={`${garage.name} logo`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                </div>
+              )}
+              <h1 style={{ color: "white", fontSize: "2.5rem", fontWeight: 800 }}>{garage.name}</h1>
+            </div>
             <p style={{ color: "#94a3b8", fontSize: "1.1rem", marginBottom: "12px" }}>📍 {garage.address}, {garage.city}, {garage.postcode}</p>
             {/* Rating summary in header */}
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>

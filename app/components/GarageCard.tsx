@@ -10,15 +10,19 @@ type GarageCardProps = {
   rating: string
   reviewCount: number
   services: string
+  logoUrl?: string | null
 }
 
-export default function GarageCard({ id, name, location, rating, reviewCount, services }: GarageCardProps) {
+export default function GarageCard({ id, name, location, rating, reviewCount, services, logoUrl }: GarageCardProps) {
   const [favourited, setFavourited] = useState(false)
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition overflow-hidden">
-      <div className="bg-gray-100 h-40 flex items-center justify-center">
-        <span className="text-5xl">🔧</span>
+      <div className="bg-gray-100 h-40 flex items-center justify-center overflow-hidden">
+        {logoUrl
+          ? <img src={logoUrl} alt={`${name} logo`} className="w-full h-full object-cover" />
+          : <span className="text-5xl">🔧</span>
+        }
       </div>
       <div className="p-5">
         <div className="flex justify-between items-start mb-2">

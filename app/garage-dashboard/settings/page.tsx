@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import Navbar from "@/app/components/Navbar"
 import Link from "next/link"
 import GarageSettingsForm from "./GarageSettingsForm"
+import LogoUploader from "@/app/components/LogoUploader"
 
 export default async function GarageSettingsPage() {
   const { userId } = await auth()
@@ -19,7 +20,7 @@ export default async function GarageSettingsPage() {
 
   const garage = await prisma.garage.findUnique({
     where: { id: user.garageId },
-    select: { name: true, address: true, city: true, postcode: true, description: true, services: true, specialistMakes: true },
+    select: { name: true, address: true, city: true, postcode: true, description: true, services: true, specialistMakes: true, logoUrl: true },
   })
 
   if (!garage) redirect("/")
@@ -38,6 +39,10 @@ export default async function GarageSettingsPage() {
           </div>
         </div>
         <main className="max-w-2xl mx-auto px-8 py-12">
+          <div style={{ background: "white", borderRadius: "16px", padding: "32px 40px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: "24px" }}>
+            <p style={{ fontWeight: 700, fontSize: "1rem", color: "#0f172a", marginBottom: "20px" }}>Garage Logo</p>
+            <LogoUploader currentLogoUrl={garage.logoUrl} />
+          </div>
           <GarageSettingsForm garage={garage} />
         </main>
       </div>

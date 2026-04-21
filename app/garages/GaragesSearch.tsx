@@ -12,6 +12,7 @@ type Garage = {
   rating: number
   reviewCount: number
   services: string[]
+  logoUrl: string | null
 }
 
 export default function GaragesSearch({
@@ -114,6 +115,7 @@ export default function GaragesSearch({
               rating={garage.rating.toFixed(1)}
               reviewCount={garage.reviewCount}
               services={garage.services.join(", ")}
+              logoUrl={garage.logoUrl}
             />
           ))}
         </div>

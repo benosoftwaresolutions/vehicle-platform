@@ -61,6 +61,8 @@ export async function POST(req: Request) {
           profileComplete: true,
         }
       })
+
+      return NextResponse.json({ success: true, garageId: garage.id })
     }
 
     return NextResponse.json({ success: true })

@@ -55,6 +55,7 @@ export default async function Home() {
               rating={garage.rating.toString()}
               reviewCount={reviewCountMap[garage.id] ?? 0}
               services={garage.services.join(", ")}
+              logoUrl={garage.logoUrl}
             />
           ))}
         </div>

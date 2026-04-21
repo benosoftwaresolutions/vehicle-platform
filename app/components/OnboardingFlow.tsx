@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import LogoUploader from "./LogoUploader"
 
 type User = {
   clerkId: string
@@ -28,6 +29,7 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
   const [selectedRole, setSelectedRole] = useState<string | null>(
     user.role !== "pending" ? user.role : null
   )
+  const [createdGarageId, setCreatedGarageId] = useState<string | null>(null)
 
   const chooseRole = async (role: string) => {
     setLoading(true)
@@ -54,7 +56,7 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
 
   const completeGarageDetails = async () => {
     setLoading(true)
-    await fetch("/api/onboarding", {
+    const res = await fetch("/api/onboarding", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -67,8 +69,14 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
         garagePostcode
       })
     })
+    const data = await res.json()
     setLoading(false)
-    router.push("/garage-dashboard")
+    if (data.garageId) {
+      setCreatedGarageId(data.garageId)
+      setStep(3)
+    } else {
+      router.push("/garage-dashboard")
+    }
   }
 
   // Step 0 — Choose role
@@ -178,6 +186,36 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
           >
             {loading ? "Saving..." : "Create My Garage"}
           </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Step 3 — Logo upload (garage owners only, optional)
+  if (step === 3 && selectedRole === "garage_owner") {
+    return (
+      <div style={{minHeight: "100vh", background: "#f8f9fb", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px"}}>
+        <div style={{maxWidth: "480px", width: "100%", background: "white", borderRadius: "16px", padding: "40px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)"}}>
+          <div style={{textAlign: "center", marginBottom: "32px"}}>
+            <p style={{fontSize: "3rem", marginBottom: "12px"}}>🎉</p>
+            <h1 style={{fontSize: "1.75rem", fontWeight: 800, marginBottom: "8px"}}>Garage Created!</h1>
+            <p style={{color: "#64748b"}}>Add a logo to help customers recognise your garage. You can always do this later in Settings.</p>
+          </div>
+          <LogoUploader currentLogoUrl={null} />
+          <div style={{marginTop: "32px", display: "flex", flexDirection: "column", gap: "12px"}}>
+            <button
+              onClick={() => router.push("/garage-dashboard")}
+              style={{background: "#0f172a", color: "white", padding: "14px 32px", borderRadius: "10px", fontWeight: 700, fontSize: "1rem", border: "none", cursor: "pointer", width: "100%"}}
+            >
+              Go to Dashboard
+            </button>
+            <button
+              onClick={() => router.push("/garage-dashboard")}
+              style={{background: "none", color: "#64748b", padding: "10px", border: "none", cursor: "pointer", fontSize: "0.875rem"}}
+            >
+              Skip for now
+            </button>
+          </div>
         </div>
       </div>
     )
