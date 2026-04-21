@@ -6,10 +6,12 @@ import { auth } from "@clerk/nextjs/server"
 
 export default async function Home() {
   const { userId } = await auth()
-  const [garages, user] = await Promise.all([
+  const [garages, user, reviewCounts] = await Promise.all([
     prisma.garage.findMany(),
     userId ? prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true, profileComplete: true } }) : null,
+    prisma.review.groupBy({ by: ["garageId"], _count: { id: true } }),
   ])
+  const reviewCountMap = Object.fromEntries(reviewCounts.map((r) => [r.garageId, r._count.id]))
 
   // Show banner when signed in but profile isn't complete.
   // Also covers the webhook-race case: userId present but no DB record yet (user === null).
@@ -51,6 +53,7 @@ export default async function Home() {
               name={garage.name}
               location={`${garage.city}, ${garage.postcode}`}
               rating={garage.rating.toString()}
+              reviewCount={reviewCountMap[garage.id] ?? 0}
               services={garage.services.join(", ")}
             />
           ))}

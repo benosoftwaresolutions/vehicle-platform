@@ -1,0 +1,65 @@
+import { NextResponse } from "next/server"
+import { auth } from "@clerk/nextjs/server"
+import { prisma } from "@/app/lib/prisma"
+
+export async function POST(req: Request) {
+  try {
+    const { userId } = await auth()
+    if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 })
+
+    const { garageId, rating, comment } = await req.json()
+
+    if (!garageId || !rating || !comment?.trim()) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
+    if (rating < 1 || rating > 5 || !Number.isInteger(rating)) {
+      return NextResponse.json({ error: "Rating must be an integer 1–5" }, { status: 400 })
+    }
+
+    // Must have a confirmed booking at this garage
+    const confirmedBooking = await prisma.booking.findFirst({
+      where: { garageId, clerkId: userId, status: "confirmed" },
+    })
+    if (!confirmedBooking) {
+      return NextResponse.json({ error: "You must have a confirmed booking to leave a review" }, { status: 403 })
+    }
+
+    // Must not have already reviewed
+    const existing = await prisma.review.findUnique({
+      where: { garageId_clerkId: { garageId, clerkId: userId } },
+    })
+    if (existing) {
+      return NextResponse.json({ error: "You have already reviewed this garage" }, { status: 409 })
+    }
+
+    const customer = await prisma.user.findUnique({
+      where: { clerkId: userId },
+      select: { name: true, email: true },
+    })
+
+    const review = await prisma.review.create({
+      data: {
+        garageId,
+        clerkId: userId,
+        customerName: customer?.name ?? customer?.email ?? "Customer",
+        rating,
+        comment: comment.trim(),
+      },
+    })
+
+    // Recalculate average rating
+    const agg = await prisma.review.aggregate({
+      where: { garageId },
+      _avg: { rating: true },
+    })
+    await prisma.garage.update({
+      where: { id: garageId },
+      data: { rating: Math.round((agg._avg.rating ?? 0) * 10) / 10 },
+    })
+
+    return NextResponse.json(review, { status: 201 })
+  } catch (error) {
+    console.error("Review error:", error)
+    return NextResponse.json({ error: "Something went wrong" }, { status: 500 })
+  }
+}

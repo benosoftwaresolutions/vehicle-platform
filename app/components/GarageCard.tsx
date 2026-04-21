@@ -8,10 +8,11 @@ type GarageCardProps = {
   name: string
   location: string
   rating: string
+  reviewCount: number
   services: string
 }
 
-export default function GarageCard({ id, name, location, rating, services }: GarageCardProps) {
+export default function GarageCard({ id, name, location, rating, reviewCount, services }: GarageCardProps) {
   const [favourited, setFavourited] = useState(false)
 
   return (
@@ -29,8 +30,13 @@ export default function GarageCard({ id, name, location, rating, services }: Gar
           </button>
         </div>
         <p className="text-gray-500 text-sm mb-1">📍 {location}</p>
-        <p className="text-amber-500 text-sm font-medium mb-3">⭐ {rating}/5</p>
-        <p className="text-gray-400 text-xs">{services}</p>
+        <p className="text-amber-500 text-sm font-medium mb-1">
+          ⭐ {parseFloat(rating) > 0 ? `${rating}/5` : "No ratings yet"}
+          {reviewCount > 0 && (
+            <span className="text-gray-400 font-normal"> ({reviewCount} {reviewCount === 1 ? "review" : "reviews"})</span>
+          )}
+        </p>
+        <p className="text-gray-400 text-xs mb-3">{services || "No services listed"}</p>
         <Link href={`/garages/${id}`} className="mt-4 block text-center bg-gray-900 text-white py-2 rounded-xl text-sm font-bold hover:bg-gray-800 transition">
           View Garage
         </Link>

@@ -10,6 +10,7 @@ type Garage = {
   city: string
   postcode: string
   rating: number
+  reviewCount: number
   services: string[]
 }
 
@@ -111,6 +112,7 @@ export default function GaragesSearch({
               name={garage.name}
               location={`${garage.city}, ${garage.postcode}`}
               rating={garage.rating.toFixed(1)}
+              reviewCount={garage.reviewCount}
               services={garage.services.join(", ")}
             />
           ))}

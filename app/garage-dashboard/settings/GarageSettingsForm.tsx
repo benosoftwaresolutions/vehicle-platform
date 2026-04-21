@@ -4,8 +4,23 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { updateGarageSettings } from "./actions"
 
-const COMMON_SERVICES = ["MOT", "Full Service", "Oil Change", "Tyres", "Brakes", "Diagnostics", "Air Con", "Cambelt"]
-const COMMON_MAKES = ["BMW", "Ford", "VW", "Toyota", "Mercedes", "Audi", "Vauxhall", "Honda", "Nissan", "Peugeot"]
+const COMMON_SERVICES = [
+  "MOT", "Full Service", "Interim Service", "Oil Change", "Tyres", "Wheel Alignment", "Wheel Balancing",
+  "Brakes", "Brake Fluid Change", "Clutch Replacement", "Gearbox Repair", "Suspension", "Steering",
+  "Exhaust", "Catalytic Converter", "Engine Diagnostics", "Air Con Service", "Air Con Regas", "Cambelt",
+  "Timing Chain", "Battery Replacement", "Alternator", "Starter Motor", "Radiator", "Coolant Flush",
+  "Transmission Service", "4WD Service", "Pre-purchase Inspection", "ADAS Calibration", "DPF Cleaning",
+  "EGR Cleaning", "Welding", "Bodywork", "Windscreen Repair", "Windscreen Replacement", "Tow Bar Fitting",
+  "Alloy Wheel Repair",
+]
+const COMMON_MAKES = [
+  "Abarth", "Alfa Romeo", "Audi", "BMW", "Bentley", "Bugatti", "Cadillac", "Chevrolet", "Chrysler",
+  "Citroen", "Cupra", "DS", "Dacia", "Dodge", "Ferrari", "Fiat", "Ford", "Genesis", "Honda", "Hyundai",
+  "Infiniti", "Jaguar", "Jeep", "Kia", "Lamborghini", "Land Rover", "Lexus", "Lotus", "MG", "MINI",
+  "Maserati", "Mazda", "McLaren", "Mercedes", "Mitsubishi", "Nissan", "Peugeot", "Porsche", "Renault",
+  "Rolls-Royce", "SEAT", "SKODA", "Ssangyong", "Subaru", "Suzuki", "Tesla", "Toyota", "Vauxhall",
+  "Volkswagen", "Volvo",
+]
 
 type Garage = {
   name: string
