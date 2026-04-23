@@ -3,18 +3,13 @@
 import { useState } from "react"
 import { updateBookingStatus } from "@/app/garage-dashboard/actions"
 
-type BookingActionsProps = {
-  bookingId: string
-  currentStatus: string
-}
-
 const timeSlots = [
-  "08:00", "08:30", "09:00", "09:30", "10:00", "10:30",
-  "11:00", "11:30", "12:00", "12:30", "13:00", "13:30",
-  "14:00", "14:30", "15:00", "15:30", "16:00", "16:30"
+  "08:00","08:30","09:00","09:30","10:00","10:30",
+  "11:00","11:30","12:00","12:30","13:00","13:30",
+  "14:00","14:30","15:00","15:30","16:00","16:30",
 ]
 
-export default function BookingActions({ bookingId, currentStatus }: BookingActionsProps) {
+export default function BookingActions({ bookingId, currentStatus }: { bookingId: string; currentStatus: string }) {
   const [showDeclineForm, setShowDeclineForm] = useState(false)
   const [garageNote, setGarageNote] = useState("")
   const [suggestedDate, setSuggestedDate] = useState("")
@@ -34,18 +29,47 @@ export default function BookingActions({ bookingId, currentStatus }: BookingActi
     setShowDeclineForm(false)
   }
 
+  if (currentStatus === "completed") {
+    return (
+      <span style={{ background: "#eceae4", color: "#111110", padding: "6px 14px", borderRadius: 100, fontSize: "0.8rem", fontWeight: 600 }}>
+        Completed
+      </span>
+    )
+  }
+
   if (currentStatus === "confirmed") {
     return (
-      <span style={{background: "#dcfce7", color: "#166534", padding: "6px 14px", borderRadius: "999px", fontSize: "0.875rem", fontWeight: 600}}>
-        ✅ Confirmed
-      </span>
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px", alignItems: "flex-end" }}>
+        <span style={{ background: "#111110", color: "#ffffff", padding: "6px 14px", borderRadius: 100, fontSize: "0.8rem", fontWeight: 600 }}>
+          Confirmed
+        </span>
+        <button
+          onClick={async () => {
+            setLoading(true)
+            await updateBookingStatus(bookingId, "completed")
+            setLoading(false)
+          }}
+          disabled={loading}
+          style={{ background: "transparent", color: "#444441", padding: "5px 14px", borderRadius: 100, fontSize: "0.78rem", fontWeight: 600, border: "0.5px solid rgba(0,0,0,0.2)", cursor: "pointer", opacity: loading ? 0.5 : 1, whiteSpace: "nowrap" }}
+        >
+          Mark completed
+        </button>
+      </div>
     )
   }
 
   if (currentStatus === "declined") {
     return (
-      <span style={{background: "#fee2e2", color: "#991b1b", padding: "6px 14px", borderRadius: "999px", fontSize: "0.875rem", fontWeight: 600}}>
-        ❌ Declined
+      <span style={{ background: "#eceae4", color: "#111110", padding: "6px 14px", borderRadius: 100, fontSize: "0.8rem", fontWeight: 600, textDecoration: "line-through" }}>
+        Declined
+      </span>
+    )
+  }
+
+  if (currentStatus === "declined_by_customer") {
+    return (
+      <span style={{ background: "#f4f3ef", color: "#6b6a66", padding: "6px 14px", borderRadius: 100, fontSize: "0.8rem", fontWeight: 600 }}>
+        Cancelled
       </span>
     )
   }
@@ -53,69 +77,58 @@ export default function BookingActions({ bookingId, currentStatus }: BookingActi
   return (
     <div>
       {!showDeclineForm ? (
-        <div style={{display: "flex", gap: "8px", flexDirection: "column"}}>
+        <div style={{ display: "flex", gap: "8px", flexDirection: "column" }}>
           <button
             onClick={handleAccept}
             disabled={loading}
-            style={{background: "#0f172a", color: "white", padding: "8px 16px", borderRadius: "8px", fontWeight: 600, fontSize: "0.875rem", border: "none", cursor: "pointer"}}
+            style={{ background: "#111110", color: "#ffffff", padding: "8px 18px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "none", cursor: "pointer", opacity: loading ? 0.5 : 1 }}
           >
-            ✅ Accept
+            Accept
           </button>
           <button
             onClick={() => setShowDeclineForm(true)}
             disabled={loading}
-            style={{background: "white", color: "#991b1b", padding: "8px 16px", borderRadius: "8px", fontWeight: 600, fontSize: "0.875rem", border: "1px solid #fca5a5", cursor: "pointer"}}
+            style={{ background: "transparent", color: "#111110", padding: "8px 18px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "0.5px solid rgba(0,0,0,0.2)", cursor: "pointer" }}
           >
-            ❌ Decline
+            Decline
           </button>
         </div>
       ) : (
-        <div style={{background: "#fff7ed", border: "1px solid #fed7aa", borderRadius: "12px", padding: "16px", minWidth: "240px"}}>
-          <p style={{fontWeight: 700, fontSize: "0.875rem", marginBottom: "12px"}}>Decline Booking</p>
-          <div style={{marginBottom: "10px"}}>
-            <label style={{fontSize: "0.75rem", fontWeight: 600, display: "block", marginBottom: "4px"}}>Reason (optional)</label>
+        <div style={{ background: "#f4f3ef", border: "0.5px solid rgba(0,0,0,0.10)", borderRadius: 12, padding: "16px", minWidth: 240 }}>
+          <p style={{ fontWeight: 700, fontSize: "0.875rem", color: "#111110", marginBottom: "12px" }}>Decline Booking</p>
+          <div style={{ marginBottom: "10px" }}>
+            <label style={lbl}>Reason (optional)</label>
             <textarea
               value={garageNote}
               onChange={e => setGarageNote(e.target.value)}
               placeholder="e.g. Fully booked on that day"
               rows={2}
-              style={{width: "100%", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "8px", fontSize: "0.875rem"}}
+              style={inp}
             />
           </div>
-          <p style={{fontSize: "0.75rem", fontWeight: 600, marginBottom: "8px", color: "#92400e"}}>Suggest alternative (optional)</p>
-          <div style={{marginBottom: "10px"}}>
-            <label style={{fontSize: "0.75rem", color: "#64748b", display: "block", marginBottom: "4px"}}>Date</label>
-            <input
-              type="date"
-              value={suggestedDate}
-              onChange={e => setSuggestedDate(e.target.value)}
-              style={{width: "100%", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "8px"}}
-            />
+          <p style={{ fontSize: "0.75rem", fontWeight: 600, marginBottom: "8px", color: "#444441" }}>Suggest alternative (optional)</p>
+          <div style={{ marginBottom: "10px" }}>
+            <label style={lbl}>Date</label>
+            <input type="date" value={suggestedDate} onChange={e => setSuggestedDate(e.target.value)} style={inp} />
           </div>
-          <div style={{marginBottom: "12px"}}>
-            <label style={{fontSize: "0.75rem", color: "#64748b", display: "block", marginBottom: "4px"}}>Time</label>
-            <select
-              value={suggestedTime}
-              onChange={e => setSuggestedTime(e.target.value)}
-              style={{width: "100%", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "8px"}}
-            >
+          <div style={{ marginBottom: "12px" }}>
+            <label style={lbl}>Time</label>
+            <select value={suggestedTime} onChange={e => setSuggestedTime(e.target.value)} style={inp}>
               <option value="">Select time</option>
-              {timeSlots.map(slot => (
-                <option key={slot} value={slot}>{slot}</option>
-              ))}
+              {timeSlots.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
-          <div style={{display: "flex", gap: "8px"}}>
+          <div style={{ display: "flex", gap: "8px" }}>
             <button
               onClick={handleDecline}
               disabled={loading}
-              style={{background: "#dc2626", color: "white", padding: "8px 16px", borderRadius: "8px", fontWeight: 600, fontSize: "0.875rem", border: "none", cursor: "pointer", flex: 1}}
+              style={{ background: "#111110", color: "#ffffff", padding: "8px 16px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "none", cursor: "pointer", flex: 1 }}
             >
               {loading ? "Saving..." : "Confirm Decline"}
             </button>
             <button
               onClick={() => setShowDeclineForm(false)}
-              style={{background: "white", color: "#64748b", padding: "8px 16px", borderRadius: "8px", fontWeight: 600, fontSize: "0.875rem", border: "1px solid #e5e7eb", cursor: "pointer"}}
+              style={{ background: "transparent", color: "#444441", padding: "8px 16px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "0.5px solid rgba(0,0,0,0.15)", cursor: "pointer" }}
             >
               Cancel
             </button>
@@ -125,3 +138,6 @@ export default function BookingActions({ bookingId, currentStatus }: BookingActi
     </div>
   )
 }
+
+const lbl: React.CSSProperties = { fontSize: "0.75rem", fontWeight: 600, display: "block", marginBottom: "4px", color: "#444441" }
+const inp: React.CSSProperties = { width: "100%", border: "0.5px solid rgba(0,0,0,0.15)", borderRadius: 8, padding: "8px 12px", fontSize: "0.875rem", background: "#ffffff", color: "#111110" }

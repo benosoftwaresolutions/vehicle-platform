@@ -2,19 +2,22 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/app/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
 import { sendNewBookingToGarage } from "@/app/lib/email"
+import { rateLimit } from "@/app/lib/rateLimit"
+import { headers } from "next/headers"
 
 export async function POST(req: Request) {
   try {
     const { userId } = await auth()
-    console.log("userId:", userId)
-
     if (!userId) {
       return NextResponse.json({ error: "Unauthorised" }, { status: 401 })
     }
 
-    const body = await req.json()
-    console.log("body:", body)
+    const ip = (await headers()).get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown"
+    if (!rateLimit(`bookings:${ip}`, 5, 60_000)) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 })
+    }
 
+    const body = await req.json()
     const { garageId, service, date, time, registration } = body
 
     const booking = await prisma.booking.create({
@@ -28,8 +31,6 @@ export async function POST(req: Request) {
         status: "pending"
       }
     })
-
-    console.log("booking created:", booking)
 
     // Send email notification to garage owner
     const [customer, garage, garageOwner] = await Promise.all([

@@ -24,8 +24,6 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
   const [garageAddress, setGarageAddress] = useState("")
   const [garageCity, setGarageCity] = useState("")
   const [garagePostcode, setGaragePostcode] = useState("")
-  // Track role locally so step 2 renders the correct form regardless of the stale
-  // user.role prop (which reflects the DB value at page-load time, before step 1 runs)
   const [selectedRole, setSelectedRole] = useState<string | null>(
     user.role !== "pending" ? user.role : null
   )
@@ -59,15 +57,7 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
     const res = await fetch("/api/onboarding", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        step: 2,
-        role: "garage_owner",
-        name,
-        garageName,
-        garageAddress,
-        garageCity,
-        garagePostcode
-      })
+      body: JSON.stringify({ step: 2, role: "garage_owner", name, garageName, garageAddress, garageCity, garagePostcode })
     })
     const data = await res.json()
     setLoading(false)
@@ -79,39 +69,38 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
     }
   }
 
-  // Step 0 — Choose role
+  // Step 0/1 — Choose role
   if (step === 0 || step === 1) {
     return (
-      <div style={{minHeight: "100vh", background: "#f8f9fb", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px"}}>
-        <div style={{maxWidth: "600px", width: "100%"}}>
-          <div style={{textAlign: "center", marginBottom: "48px"}}>
-            <h1 style={{fontSize: "2.5rem", fontWeight: 800, marginBottom: "12px"}}>
-              Welcome to <span style={{color: "#f59e0b"}}>VehiclePlatform</span>
+      <div style={{ minHeight: "100vh", background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px" }}>
+        <div style={{ maxWidth: "560px", width: "100%" }}>
+          <div style={{ marginBottom: "48px" }}>
+            <DryvnMark />
+            <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "clamp(28px,4vw,40px)", letterSpacing: "-0.03em", color: "#111110", marginBottom: "10px", marginTop: "32px" }}>
+              Welcome to dryvn
             </h1>
-            <p style={{color: "#64748b", fontSize: "1.1rem"}}>How will you be using the platform?</p>
+            <p style={{ color: "#6b6a66", fontSize: "1rem" }}>How will you be using the platform?</p>
           </div>
-          <div style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px"}}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
             <button
               onClick={() => chooseRole("customer")}
               disabled={loading}
-              style={{background: "white", border: "2px solid #e5e7eb", borderRadius: "16px", padding: "32px 24px", cursor: "pointer", textAlign: "center", transition: "all 0.2s"}}
-              onMouseEnter={e => (e.currentTarget.style.borderColor = "#0f172a")}
-              onMouseLeave={e => (e.currentTarget.style.borderColor = "#e5e7eb")}
+              style={{ background: "#f4f3ef", border: "0.5px solid rgba(0,0,0,0.10)", borderRadius: 14, padding: "28px 20px", cursor: "pointer", textAlign: "left", transition: "background 0.15s" }}
+              onMouseEnter={e => (e.currentTarget.style.background = "#eceae4")}
+              onMouseLeave={e => (e.currentTarget.style.background = "#f4f3ef")}
             >
-              <p style={{fontSize: "3rem", marginBottom: "16px"}}>🚗</p>
-              <h2 style={{fontWeight: 700, fontSize: "1.25rem", marginBottom: "8px"}}>I need a garage</h2>
-              <p style={{color: "#64748b", fontSize: "0.875rem"}}>Find and book garages for your vehicle</p>
+              <p style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.1rem", color: "#111110", marginBottom: "6px" }}>I need a garage</p>
+              <p style={{ color: "#6b6a66", fontSize: "0.85rem", lineHeight: 1.5 }}>Find and book garages for your vehicle</p>
             </button>
             <button
               onClick={() => chooseRole("garage_owner")}
               disabled={loading}
-              style={{background: "white", border: "2px solid #e5e7eb", borderRadius: "16px", padding: "32px 24px", cursor: "pointer", textAlign: "center", transition: "all 0.2s"}}
-              onMouseEnter={e => (e.currentTarget.style.borderColor = "#0f172a")}
-              onMouseLeave={e => (e.currentTarget.style.borderColor = "#e5e7eb")}
+              style={{ background: "#f4f3ef", border: "0.5px solid rgba(0,0,0,0.10)", borderRadius: 14, padding: "28px 20px", cursor: "pointer", textAlign: "left", transition: "background 0.15s" }}
+              onMouseEnter={e => (e.currentTarget.style.background = "#eceae4")}
+              onMouseLeave={e => (e.currentTarget.style.background = "#f4f3ef")}
             >
-              <p style={{fontSize: "3rem", marginBottom: "16px"}}>🔧</p>
-              <h2 style={{fontWeight: 700, fontSize: "1.25rem", marginBottom: "8px"}}>I own a garage</h2>
-              <p style={{color: "#64748b", fontSize: "0.875rem"}}>List your garage and manage bookings</p>
+              <p style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.1rem", color: "#111110", marginBottom: "6px" }}>I own a garage</p>
+              <p style={{ color: "#6b6a66", fontSize: "0.85rem", lineHeight: 1.5 }}>List your garage and manage bookings</p>
             </button>
           </div>
         </div>
@@ -122,26 +111,27 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
   // Step 2 — Customer profile
   if (step === 2 && selectedRole === "customer") {
     return (
-      <div style={{minHeight: "100vh", background: "#f8f9fb", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px"}}>
-        <div style={{maxWidth: "480px", width: "100%", background: "white", borderRadius: "16px", padding: "40px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)"}}>
-          <h1 style={{fontSize: "1.75rem", fontWeight: 800, marginBottom: "8px"}}>Your Profile</h1>
-          <p style={{color: "#64748b", marginBottom: "32px"}}>Just a few details to get started</p>
-          <div style={{marginBottom: "20px"}}>
-            <label style={{fontWeight: 600, fontSize: "0.875rem", display: "block", marginBottom: "8px"}}>Full Name</label>
+      <div style={{ minHeight: "100vh", background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px" }}>
+        <div style={{ maxWidth: "440px", width: "100%" }}>
+          <DryvnMark />
+          <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.75rem", letterSpacing: "-0.03em", color: "#111110", marginBottom: "6px", marginTop: "28px" }}>
+            Your Profile
+          </h1>
+          <p style={{ color: "#6b6a66", marginBottom: "28px" }}>Just a few details to get started</p>
+          <div style={{ marginBottom: "20px" }}>
+            <label style={lbl}>Full Name</label>
             <input
-              type="text"
-              value={name}
-              onChange={e => setName(e.target.value)}
+              type="text" value={name} onChange={e => setName(e.target.value)}
               placeholder="Your full name"
-              style={{width: "100%", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "10px 14px"}}
+              style={inp}
             />
           </div>
           <button
             onClick={completeCustomer}
             disabled={loading || !name}
-            style={{background: "#0f172a", color: "white", padding: "14px 32px", borderRadius: "10px", fontWeight: 700, fontSize: "1rem", border: "none", cursor: "pointer", width: "100%"}}
+            style={{ background: loading || !name ? "#eceae4" : "#111110", color: loading || !name ? "#6b6a66" : "#ffffff", padding: "14px", borderRadius: 100, fontWeight: 600, fontSize: "1rem", border: "none", cursor: loading || !name ? "not-allowed" : "pointer", width: "100%" }}
           >
-            {loading ? "Saving..." : "Get Started"}
+            {loading ? "Saving…" : "Get Started"}
           </button>
         </div>
       </div>
@@ -152,114 +142,57 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
   if (step === 2 && selectedRole === "garage_owner") {
     const canSubmit = !loading && name && garageName && garageAddress && garageCity && garagePostcode
     return (
-      <div style={{minHeight: "100vh", background: "#f8f9fb", padding: "48px 24px"}}>
-        <div style={{maxWidth: "600px", margin: "0 auto"}}>
+      <div style={{ minHeight: "100vh", background: "#ffffff", padding: "48px 24px" }}>
+        <div style={{ maxWidth: "560px", margin: "0 auto" }}>
 
-          {/* Header */}
-          <div style={{marginBottom: "32px"}}>
-            <div style={{display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px"}}>
-              <div style={{width: 40, height: 40, background: "#0f172a", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center"}}>
-                <span style={{fontSize: "1.25rem"}}>🔧</span>
-              </div>
-              <span style={{fontWeight: 800, fontSize: "1.1rem", color: "#0f172a"}}>VehiclePlatform</span>
-            </div>
-            <h1 style={{fontSize: "2rem", fontWeight: 800, color: "#0f172a", marginBottom: "6px"}}>Set up your garage</h1>
-            <p style={{color: "#64748b", fontSize: "1rem"}}>This takes about 2 minutes. You can update everything later.</p>
+          <DryvnMark />
+
+          {/* Progress */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", margin: "28px 0 32px" }}>
+            <Step label="Account type" state="done" />
+            <div style={{ flex: 1, height: "0.5px", background: "#d1d0cb" }} />
+            <Step label="Garage details" state="active" />
+            <div style={{ flex: 1, height: "0.5px", background: "#d1d0cb" }} />
+            <Step label="Logo" state="upcoming" />
           </div>
 
-          {/* Progress indicator */}
-          <div style={{display: "flex", alignItems: "center", gap: "8px", marginBottom: "32px"}}>
-            <div style={{display: "flex", alignItems: "center", gap: "6px"}}>
-              <div style={{width: 24, height: 24, borderRadius: "50%", background: "#16a34a", display: "flex", alignItems: "center", justifyContent: "center"}}>
-                <span style={{color: "white", fontSize: "0.7rem", fontWeight: 700}}>✓</span>
-              </div>
-              <span style={{fontSize: "0.8rem", fontWeight: 600, color: "#16a34a"}}>Account type</span>
-            </div>
-            <div style={{flex: 1, height: 2, background: "#e5e7eb", borderRadius: 1}} />
-            <div style={{display: "flex", alignItems: "center", gap: "6px"}}>
-              <div style={{width: 24, height: 24, borderRadius: "50%", background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center"}}>
-                <span style={{color: "white", fontSize: "0.75rem", fontWeight: 700}}>2</span>
-              </div>
-              <span style={{fontSize: "0.8rem", fontWeight: 600, color: "#0f172a"}}>Garage details</span>
-            </div>
-            <div style={{flex: 1, height: 2, background: "#e5e7eb", borderRadius: 1}} />
-            <div style={{display: "flex", alignItems: "center", gap: "6px"}}>
-              <div style={{width: 24, height: 24, borderRadius: "50%", background: "#e5e7eb", display: "flex", alignItems: "center", justifyContent: "center"}}>
-                <span style={{color: "#94a3b8", fontSize: "0.75rem", fontWeight: 700}}>3</span>
-              </div>
-              <span style={{fontSize: "0.8rem", fontWeight: 600, color: "#94a3b8"}}>Logo</span>
-            </div>
-          </div>
+          <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.75rem", letterSpacing: "-0.03em", color: "#111110", marginBottom: "6px" }}>
+            Set up your garage
+          </h1>
+          <p style={{ color: "#6b6a66", marginBottom: "28px" }}>This takes about 2 minutes. You can update everything later.</p>
 
           {/* Owner name */}
-          <div style={{background: "white", border: "1px solid #e5e7eb", borderRadius: "14px", overflow: "hidden", marginBottom: "16px"}}>
-            <div style={{padding: "14px 20px", background: "#f8f9fb", borderBottom: "1px solid #e5e7eb", display: "flex", alignItems: "center", gap: "10px"}}>
-              <span>👤</span>
-              <p style={{fontWeight: 700, fontSize: "0.9rem", color: "#0f172a", margin: 0}}>Your details</p>
-            </div>
-            <div style={{padding: "20px"}}>
-              <label style={onboardingLabelStyle}>Your full name</label>
-              <input
-                type="text" value={name} onChange={e => setName(e.target.value)}
-                placeholder="e.g. Ben Smith"
-                style={onboardingInputStyle}
-              />
-            </div>
+          <div style={card}>
+            <p style={cardTitle}>Your details</p>
+            <label style={lbl}>Your full name</label>
+            <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Ben Smith" style={inp} />
           </div>
 
           {/* Garage identity */}
-          <div style={{background: "white", border: "1px solid #e5e7eb", borderRadius: "14px", overflow: "hidden", marginBottom: "16px"}}>
-            <div style={{padding: "14px 20px", background: "#f8f9fb", borderBottom: "1px solid #e5e7eb", display: "flex", alignItems: "center", gap: "10px"}}>
-              <span>🏢</span>
-              <div>
-                <p style={{fontWeight: 700, fontSize: "0.9rem", color: "#0f172a", margin: 0}}>Garage identity</p>
-                <p style={{fontSize: "0.78rem", color: "#64748b", margin: 0}}>This appears on your public listing</p>
-              </div>
-            </div>
-            <div style={{padding: "20px"}}>
-              <label style={onboardingLabelStyle}>Garage name</label>
-              <input
-                type="text" value={garageName} onChange={e => setGarageName(e.target.value)}
-                placeholder="e.g. City Auto Centre"
-                style={onboardingInputStyle}
-              />
-            </div>
+          <div style={{ ...card, marginTop: "14px" }}>
+            <p style={cardTitle}>Garage identity</p>
+            <p style={{ fontSize: "0.78rem", color: "#6b6a66", marginBottom: "14px" }}>This appears on your public listing</p>
+            <label style={lbl}>Garage name</label>
+            <input type="text" value={garageName} onChange={e => setGarageName(e.target.value)} placeholder="e.g. City Auto Centre" style={inp} />
           </div>
 
           {/* Location */}
-          <div style={{background: "white", border: "1px solid #e5e7eb", borderRadius: "14px", overflow: "hidden", marginBottom: "28px"}}>
-            <div style={{padding: "14px 20px", background: "#f8f9fb", borderBottom: "1px solid #e5e7eb", display: "flex", alignItems: "center", gap: "10px"}}>
-              <span>📍</span>
+          <div style={{ ...card, marginTop: "14px", marginBottom: "28px" }}>
+            <p style={cardTitle}>Location</p>
+            <p style={{ fontSize: "0.78rem", color: "#6b6a66", marginBottom: "14px" }}>Where customers will find you</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
               <div>
-                <p style={{fontWeight: 700, fontSize: "0.9rem", color: "#0f172a", margin: 0}}>Location</p>
-                <p style={{fontSize: "0.78rem", color: "#64748b", margin: 0}}>Where customers will find you</p>
+                <label style={lbl}>Street address</label>
+                <input type="text" value={garageAddress} onChange={e => setGarageAddress(e.target.value)} placeholder="e.g. 42 Industrial Way" style={inp} />
               </div>
-            </div>
-            <div style={{padding: "20px", display: "flex", flexDirection: "column", gap: "16px"}}>
-              <div>
-                <label style={onboardingLabelStyle}>Street address</label>
-                <input
-                  type="text" value={garageAddress} onChange={e => setGarageAddress(e.target.value)}
-                  placeholder="e.g. 42 Industrial Way"
-                  style={onboardingInputStyle}
-                />
-              </div>
-              <div style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px"}}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                 <div>
-                  <label style={onboardingLabelStyle}>City / Town</label>
-                  <input
-                    type="text" value={garageCity} onChange={e => setGarageCity(e.target.value)}
-                    placeholder="e.g. Manchester"
-                    style={onboardingInputStyle}
-                  />
+                  <label style={lbl}>City / Town</label>
+                  <input type="text" value={garageCity} onChange={e => setGarageCity(e.target.value)} placeholder="e.g. Manchester" style={inp} />
                 </div>
                 <div>
-                  <label style={onboardingLabelStyle}>Postcode</label>
-                  <input
-                    type="text" value={garagePostcode} onChange={e => setGaragePostcode(e.target.value.toUpperCase())}
-                    placeholder="e.g. M1 1AA"
-                    style={onboardingInputStyle}
-                  />
+                  <label style={lbl}>Postcode</label>
+                  <input type="text" value={garagePostcode} onChange={e => setGaragePostcode(e.target.value.toUpperCase())} placeholder="e.g. M1 1AA" style={inp} />
                 </div>
               </div>
             </div>
@@ -268,18 +201,11 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
           <button
             onClick={completeGarageDetails}
             disabled={!canSubmit}
-            style={{
-              background: canSubmit ? "#0f172a" : "#94a3b8",
-              color: "white", padding: "16px 32px", borderRadius: "12px",
-              fontWeight: 700, fontSize: "1rem", border: "none",
-              cursor: canSubmit ? "pointer" : "not-allowed", width: "100%",
-              boxShadow: canSubmit ? "0 4px 16px rgba(15,23,42,0.25)" : "none",
-              transition: "all 0.2s",
-            }}
+            style={{ background: canSubmit ? "#111110" : "#eceae4", color: canSubmit ? "#ffffff" : "#6b6a66", padding: "15px 32px", borderRadius: 100, fontWeight: 600, fontSize: "1rem", border: "none", cursor: canSubmit ? "pointer" : "not-allowed", width: "100%" }}
           >
-            {loading ? "Creating your garage..." : "Continue →"}
+            {loading ? "Creating your garage…" : "Continue →"}
           </button>
-          <p style={{textAlign: "center", color: "#94a3b8", fontSize: "0.8rem", marginTop: "12px"}}>
+          <p style={{ textAlign: "center", color: "#6b6a66", fontSize: "0.8rem", marginTop: "12px" }}>
             You can add services, photos and more after setup
           </p>
         </div>
@@ -287,27 +213,29 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
     )
   }
 
-  // Step 3 — Logo upload (garage owners only, optional)
+  // Step 3 — Logo upload
   if (step === 3 && selectedRole === "garage_owner") {
     return (
-      <div style={{minHeight: "100vh", background: "#f8f9fb", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px"}}>
-        <div style={{maxWidth: "480px", width: "100%", background: "white", borderRadius: "16px", padding: "40px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)"}}>
-          <div style={{textAlign: "center", marginBottom: "32px"}}>
-            <p style={{fontSize: "3rem", marginBottom: "12px"}}>🎉</p>
-            <h1 style={{fontSize: "1.75rem", fontWeight: 800, marginBottom: "8px"}}>Garage Created!</h1>
-            <p style={{color: "#64748b"}}>Add a logo to help customers recognise your garage. You can always do this later in Settings.</p>
-          </div>
+      <div style={{ minHeight: "100vh", background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px" }}>
+        <div style={{ maxWidth: "440px", width: "100%" }}>
+          <DryvnMark />
+          <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.75rem", letterSpacing: "-0.03em", color: "#111110", marginBottom: "8px", marginTop: "28px" }}>
+            Garage created!
+          </h1>
+          <p style={{ color: "#6b6a66", marginBottom: "28px", lineHeight: 1.6 }}>
+            Add a logo to help customers recognise your garage. You can always do this later in Settings.
+          </p>
           <LogoUploader currentLogoUrl={null} />
-          <div style={{marginTop: "32px", display: "flex", flexDirection: "column", gap: "12px"}}>
+          <div style={{ marginTop: "28px", display: "flex", flexDirection: "column", gap: "10px" }}>
             <button
               onClick={() => router.push("/garage-dashboard")}
-              style={{background: "#0f172a", color: "white", padding: "14px 32px", borderRadius: "10px", fontWeight: 700, fontSize: "1rem", border: "none", cursor: "pointer", width: "100%"}}
+              style={{ background: "#111110", color: "#ffffff", padding: "14px", borderRadius: 100, fontWeight: 600, fontSize: "1rem", border: "none", cursor: "pointer", width: "100%" }}
             >
               Go to Dashboard
             </button>
             <button
               onClick={() => router.push("/garage-dashboard")}
-              style={{background: "none", color: "#64748b", padding: "10px", border: "none", cursor: "pointer", fontSize: "0.875rem"}}
+              style={{ background: "none", color: "#6b6a66", padding: "10px", border: "none", cursor: "pointer", fontSize: "0.875rem" }}
             >
               Skip for now
             </button>
@@ -320,20 +248,38 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
   return null
 }
 
-const onboardingInputStyle: React.CSSProperties = {
-  width: "100%",
-  border: "1px solid #e5e7eb",
-  borderRadius: "8px",
-  padding: "11px 14px",
-  fontSize: "0.95rem",
-  boxSizing: "border-box",
-  outline: "none",
+function DryvnMark() {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+      <div style={{ width: 28, height: 28, background: "#111110", borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <svg width="13" height="13" viewBox="0 0 22 22" fill="none">
+          <path d="M11 17V5M11 5L5 11M11 5L17 11" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+      <span style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1rem", color: "#111110", letterSpacing: "-0.03em" }}>dryvn</span>
+    </div>
+  )
 }
 
-const onboardingLabelStyle: React.CSSProperties = {
-  fontWeight: 600,
-  fontSize: "0.875rem",
-  display: "block",
-  marginBottom: "6px",
-  color: "#374151",
+function Step({ label, state }: { label: string; state: "done" | "active" | "upcoming" }) {
+  const bg = state === "done" ? "#111110" : state === "active" ? "#111110" : "#eceae4"
+  const textColor = state === "upcoming" ? "#6b6a66" : "#111110"
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
+      <div style={{ width: 22, height: 22, borderRadius: "50%", background: bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        {state === "done"
+          ? <span style={{ color: "#ffffff", fontSize: "0.65rem", fontWeight: 700 }}>✓</span>
+          : <span style={{ color: state === "active" ? "#ffffff" : "#6b6a66", fontSize: "0.65rem", fontWeight: 700 }}>
+              {state === "active" ? "2" : "3"}
+            </span>
+        }
+      </div>
+      <span style={{ fontSize: "0.78rem", fontWeight: 600, color: textColor }}>{label}</span>
+    </div>
+  )
 }
+
+const card: React.CSSProperties = { background: "#f4f3ef", borderRadius: 14, padding: "20px 22px" }
+const cardTitle: React.CSSProperties = { fontWeight: 700, fontSize: "0.875rem", color: "#111110", marginBottom: "14px" }
+const lbl: React.CSSProperties = { fontWeight: 600, fontSize: "0.85rem", color: "#444441", display: "block", marginBottom: "6px" }
+const inp: React.CSSProperties = { width: "100%", border: "0.5px solid rgba(0,0,0,0.15)", borderRadius: 8, padding: "11px 14px", fontSize: "0.95rem", boxSizing: "border-box", outline: "none", background: "#ffffff", color: "#111110" }

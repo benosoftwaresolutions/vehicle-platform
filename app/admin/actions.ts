@@ -5,8 +5,10 @@ import { prisma } from "@/app/lib/prisma"
 import { revalidatePath } from "next/cache"
 
 async function assertAdmin() {
+  const adminId = process.env.ADMIN_USER_ID
+  if (!adminId) throw new Error("ADMIN_USER_ID environment variable is not set")
   const { userId } = await auth()
-  if (!userId || userId !== process.env.ADMIN_USER_ID) {
+  if (!userId || userId !== adminId) {
     throw new Error("Unauthorised")
   }
 }

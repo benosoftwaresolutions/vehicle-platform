@@ -1,11 +1,18 @@
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
+import { rateLimit } from "@/app/lib/rateLimit"
+import { headers } from "next/headers"
 
 export async function POST(req: Request) {
   try {
     const { userId } = await auth()
     if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 })
+
+    const ip = (await headers()).get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown"
+    if (!rateLimit(`reviews:${ip}`, 3, 60_000)) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 })
+    }
 
     const { garageId, rating, comment } = await req.json()
 

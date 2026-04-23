@@ -3,32 +3,22 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 
-const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
 
-type DaySchedule = {
-  day: string
-  isOpen: boolean
-  startTime: string
-  endTime: string
-}
-
-type AvailabilityFormProps = {
+type DaySchedule = { day: string; isOpen: boolean; startTime: string; endTime: string }
+type Props = {
   garageId: string
-  existing: {
-    slotDuration: number
-    capacity: number
-    schedule: DaySchedule[]
-  } | null
+  existing: { slotDuration: number; capacity: number; schedule: DaySchedule[] } | null
 }
 
 const defaultSchedule: DaySchedule[] = days.map(day => ({
   day,
-  isOpen: !["Saturday", "Sunday"].includes(day),
+  isOpen: !["Saturday","Sunday"].includes(day),
   startTime: "08:00",
-  endTime: "17:00"
+  endTime: "17:00",
 }))
 
-export default function AvailabilityForm({ garageId, existing }: AvailabilityFormProps) {
+export default function AvailabilityForm({ garageId, existing }: Props) {
   const router = useRouter()
   const [slotDuration, setSlotDuration] = useState(existing?.slotDuration || 60)
   const [capacity, setCapacity] = useState(existing?.capacity || 2)
@@ -38,99 +28,81 @@ export default function AvailabilityForm({ garageId, existing }: AvailabilityFor
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
 
-  const updateDay = (day: string, field: keyof DaySchedule, value: string | boolean) => {
+  const updateDay = (day: string, field: keyof DaySchedule, value: string | boolean) =>
     setSchedule(prev => prev.map(d => d.day === day ? { ...d, [field]: value } : d))
-  }
 
   const handleSave = async () => {
     setLoading(true)
     const res = await fetch("/api/availability", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ garageId, slotDuration, capacity, schedule })
+      body: JSON.stringify({ garageId, slotDuration, capacity, schedule }),
     })
-    if (res.ok) {
-      setSuccess(true)
-      router.refresh()
-    }
+    if (res.ok) { setSuccess(true); router.refresh() }
     setLoading(false)
   }
 
   return (
-    <div style={{display: "flex", flexDirection: "column", gap: "24px"}}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       {success && (
-        <div style={{background: "#f0fdf4", border: "1px solid #86efac", borderRadius: "12px", padding: "16px", color: "#166534", fontWeight: 700}}>
-          ✅ Availability saved successfully!
+        <div style={{ background: "#f4f3ef", borderRadius: 10, padding: "14px 16px", color: "#111110", fontWeight: 600 }}>
+          Availability saved.
         </div>
       )}
 
-      <div style={{background: "white", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)"}}>
-        <h2 style={{fontWeight: 700, fontSize: "1.1rem", marginBottom: "20px"}}>General Settings</h2>
-        <div style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px"}}>
+      {/* General settings */}
+      <div style={card}>
+        <h3 style={h3}>General settings</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
           <div>
-            <label style={{fontWeight: 600, fontSize: "0.875rem", display: "block", marginBottom: "8px"}}>Slot Duration</label>
-            <select
-              value={slotDuration}
-              onChange={e => setSlotDuration(Number(e.target.value))}
-              style={{width: "100%", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "10px 14px"}}
-            >
+            <label style={lbl}>Slot duration</label>
+            <select value={slotDuration} onChange={e => setSlotDuration(Number(e.target.value))} style={inp}>
               <option value={30}>30 minutes</option>
               <option value={60}>1 hour</option>
             </select>
           </div>
           <div>
-            <label style={{fontWeight: 600, fontSize: "0.875rem", display: "block", marginBottom: "8px"}}>Daily Capacity (vehicles)</label>
+            <label style={lbl}>Daily capacity (vehicles)</label>
             <input
-              type="number"
-              value={capacity}
+              type="number" value={capacity}
               onChange={e => setCapacity(Number(e.target.value))}
-              min={1}
-              max={20}
-              style={{width: "100%", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "10px 14px"}}
+              min={1} max={20}
+              style={inp}
             />
           </div>
         </div>
       </div>
 
-      <div style={{background: "white", borderRadius: "16px", padding: "24px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)"}}>
-        <h2 style={{fontWeight: 700, fontSize: "1.1rem", marginBottom: "20px"}}>Opening Hours</h2>
-        <div style={{display: "flex", flexDirection: "column", gap: "16px"}}>
+      {/* Opening hours */}
+      <div style={card}>
+        <h3 style={h3}>Opening hours</h3>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {schedule.map(day => (
-            <div key={day.day} style={{display: "grid", gridTemplateColumns: "120px 80px 1fr 1fr", alignItems: "center", gap: "16px"}}>
-              <span style={{fontWeight: 600, fontSize: "0.95rem"}}>{day.day}</span>
-              <label style={{display: "flex", alignItems: "center", gap: "8px", cursor: "pointer"}}>
+            <div key={day.day} style={{ display: "grid", gridTemplateColumns: "110px 80px 1fr 1fr", alignItems: "center", gap: 12 }}>
+              <span style={{ fontWeight: 600, fontSize: "0.9rem", color: "#111110" }}>{day.day}</span>
+              <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
                 <input
                   type="checkbox"
                   checked={day.isOpen}
                   onChange={e => updateDay(day.day, "isOpen", e.target.checked)}
                 />
-                <span style={{fontSize: "0.875rem", color: day.isOpen ? "#0f172a" : "#94a3b8"}}>
+                <span style={{ fontSize: "0.85rem", color: day.isOpen ? "#111110" : "#6b6a66" }}>
                   {day.isOpen ? "Open" : "Closed"}
                 </span>
               </label>
               {day.isOpen ? (
                 <>
                   <div>
-                    <label style={{fontSize: "0.75rem", color: "#64748b", display: "block", marginBottom: "4px"}}>Opens</label>
-                    <input
-                      type="time"
-                      value={day.startTime}
-                      onChange={e => updateDay(day.day, "startTime", e.target.value)}
-                      style={{width: "100%", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "8px 12px"}}
-                    />
+                    <label style={{ ...lbl, fontSize: "0.72rem" }}>Opens</label>
+                    <input type="time" value={day.startTime} onChange={e => updateDay(day.day, "startTime", e.target.value)} style={inp} />
                   </div>
                   <div>
-                    <label style={{fontSize: "0.75rem", color: "#64748b", display: "block", marginBottom: "4px"}}>Closes</label>
-                    <input
-                      type="time"
-                      value={day.endTime}
-                      onChange={e => updateDay(day.day, "endTime", e.target.value)}
-                      style={{width: "100%", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "8px 12px"}}
-                    />
+                    <label style={{ ...lbl, fontSize: "0.72rem" }}>Closes</label>
+                    <input type="time" value={day.endTime} onChange={e => updateDay(day.day, "endTime", e.target.value)} style={inp} />
                   </div>
                 </>
               ) : (
-                <span style={{color: "#94a3b8", fontSize: "0.875rem", gridColumn: "span 2"}}>Closed all day</span>
+                <span style={{ color: "#6b6a66", fontSize: "0.85rem", gridColumn: "span 2" }}>Closed all day</span>
               )}
             </div>
           ))}
@@ -140,10 +112,21 @@ export default function AvailabilityForm({ garageId, existing }: AvailabilityFor
       <button
         onClick={handleSave}
         disabled={loading}
-        style={{background: "#0f172a", color: "white", padding: "14px 32px", borderRadius: "10px", fontWeight: 700, fontSize: "1rem", border: "none", cursor: "pointer", width: "100%"}}
+        style={{
+          background: loading ? "#eceae4" : "#111110",
+          color: loading ? "#6b6a66" : "#ffffff",
+          padding: "13px 32px", borderRadius: 100,
+          fontWeight: 600, fontSize: "0.95rem",
+          border: "none", cursor: loading ? "not-allowed" : "pointer",
+        }}
       >
-        {loading ? "Saving..." : "Save Availability"}
+        {loading ? "Saving…" : "Save availability"}
       </button>
     </div>
   )
 }
+
+const card: React.CSSProperties = { background: "#f4f3ef", borderRadius: 14, padding: 22 }
+const h3: React.CSSProperties = { fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: 17, color: "#111110", letterSpacing: "-0.02em", marginBottom: 16 }
+const lbl: React.CSSProperties = { fontSize: "0.8rem", fontWeight: 600, color: "#444441", display: "block", marginBottom: 5 }
+const inp: React.CSSProperties = { width: "100%", border: "0.5px solid rgba(0,0,0,0.15)", borderRadius: 8, padding: "9px 12px", fontSize: "0.875rem", background: "#ffffff", color: "#111110" }

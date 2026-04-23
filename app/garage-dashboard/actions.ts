@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
 import { revalidatePath } from "next/cache"
-import { sendBookingConfirmedToCustomer, sendBookingDeclinedToCustomer } from "@/app/lib/email"
+import { sendBookingConfirmedToCustomer, sendBookingDeclinedToCustomer, sendWalkInBookingToGarage } from "@/app/lib/email"
 
 export async function updateBookingStatus(
   bookingId: string,
@@ -98,6 +98,25 @@ export async function createWalkInBooking(data: {
   } catch (err) {
     console.error("[createWalkInBooking] Prisma error:", err)
     throw err
+  }
+
+  // Email notification to garage owner
+  const [garage, garageOwner] = await Promise.all([
+    prisma.garage.findUnique({ where: { id: data.garageId }, select: { name: true } }),
+    prisma.user.findFirst({ where: { garageId: data.garageId, role: "garage_owner" }, select: { email: true } }),
+  ])
+
+  if (garage && garageOwner) {
+    await sendWalkInBookingToGarage({
+      garageOwnerEmail: garageOwner.email,
+      garageName: garage.name,
+      customerName: data.customerName,
+      customerPhone: data.customerPhone,
+      service: data.service,
+      date: new Date(data.date),
+      time: data.time,
+      registration: data.registration.toUpperCase(),
+    }).catch((err) => console.error("Failed to send walk-in booking email:", err))
   }
 
   revalidatePath("/garage-dashboard")

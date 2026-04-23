@@ -27,20 +27,22 @@ export default async function GarageSettingsPage() {
   return (
     <>
       <Navbar role="garage_owner" />
-      <div style={{ background: "#f8f9fb", minHeight: "100vh" }}>
-        <div style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)", padding: "48px 32px" }}>
-          <div className="max-w-3xl mx-auto">
-            <p style={{ color: "#94a3b8", fontSize: "0.875rem", marginBottom: "0.5rem" }}>
-              <Link href="/garage-dashboard" style={{ color: "#94a3b8" }}>Dashboard</Link> → Settings
-            </p>
-            <h1 style={{ color: "white", fontSize: "2.5rem", fontWeight: 800, marginBottom: "0.5rem" }}>Business Profile</h1>
-            <p style={{ color: "#94a3b8", fontSize: "1.1rem" }}>Manage how your garage appears to customers</p>
-          </div>
+      <div style={{ borderBottom: "0.5px solid rgba(0,0,0,0.08)", padding: "56px 32px 40px", background: "#ffffff" }}>
+        <div style={{ maxWidth: "760px", margin: "0 auto" }}>
+          <p style={{ fontSize: "0.8rem", color: "#6b6a66", marginBottom: "14px" }}>
+            <Link href="/garage-dashboard" style={{ color: "#6b6a66", textDecoration: "none" }}>Dashboard</Link>
+            <span style={{ margin: "0 6px" }}>→</span>
+            Settings
+          </p>
+          <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "clamp(28px,4vw,40px)", letterSpacing: "-0.03em", color: "#111110", marginBottom: "6px" }}>
+            Business Profile
+          </h1>
+          <p style={{ color: "#6b6a66", fontSize: "0.95rem" }}>Manage how your garage appears to customers</p>
         </div>
-        <main className="max-w-3xl mx-auto px-8 py-10">
-          <GarageSettingsForm garage={garage} />
-        </main>
       </div>
+      <main style={{ maxWidth: "760px", margin: "0 auto", padding: "40px 32px" }}>
+        <GarageSettingsForm garage={garage} />
+      </main>
     </>
   )
 }

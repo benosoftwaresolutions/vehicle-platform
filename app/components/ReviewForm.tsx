@@ -15,8 +15,7 @@ export default function ReviewForm({ garageId }: { garageId: string }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!rating || !comment.trim()) return
-    setLoading(true)
-    setError("")
+    setLoading(true); setError("")
     try {
       const res = await fetch("/api/reviews", {
         method: "POST",
@@ -39,8 +38,8 @@ export default function ReviewForm({ garageId }: { garageId: string }) {
 
   if (submitted) {
     return (
-      <div style={{ background: "#f0fdf4", border: "1px solid #86efac", borderRadius: "12px", padding: "16px", color: "#166534", fontWeight: 600, fontSize: "0.95rem" }}>
-        ✓ Thank you for your review!
+      <div style={{ background: "#f4f3ef", borderRadius: 10, padding: "14px 16px", color: "#111110", fontWeight: 600, fontSize: "0.9rem" }}>
+        Thank you for your review!
       </div>
     )
   }
@@ -48,11 +47,11 @@ export default function ReviewForm({ garageId }: { garageId: string }) {
   const display = hovered || rating
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       <div>
-        <p style={{ fontWeight: 600, fontSize: "0.875rem", color: "#374151", marginBottom: "10px" }}>Your rating</p>
-        <div style={{ display: "flex", gap: "6px" }}>
-          {[1, 2, 3, 4, 5].map((star) => (
+        <p style={{ fontWeight: 600, fontSize: "0.85rem", color: "#444441", marginBottom: 8 }}>Your rating</p>
+        <div style={{ display: "flex", gap: 4 }}>
+          {[1, 2, 3, 4, 5].map(star => (
             <button
               key={star}
               type="button"
@@ -61,53 +60,57 @@ export default function ReviewForm({ garageId }: { garageId: string }) {
               onMouseLeave={() => setHovered(0)}
               style={{
                 background: "none", border: "none", cursor: "pointer",
-                fontSize: "2rem", lineHeight: 1, padding: "2px",
-                color: star <= display ? "#f59e0b" : "#d1d5db",
-                transition: "color 0.1s",
+                fontSize: "1.75rem", lineHeight: 1, padding: "2px",
+                color: star <= display ? "#111110" : "#d1d0cb",
               }}
-            >
-              ★
-            </button>
+            >★</button>
           ))}
         </div>
         {rating > 0 && (
-          <p style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "4px" }}>
-            {["", "Poor", "Below average", "Average", "Good", "Excellent"][rating]}
+          <p style={{ fontSize: "0.78rem", color: "#6b6a66", marginTop: 4 }}>
+            {["","Poor","Below average","Average","Good","Excellent"][rating]}
           </p>
         )}
       </div>
 
       <div>
-        <label style={{ fontWeight: 600, fontSize: "0.875rem", color: "#374151", display: "block", marginBottom: "6px" }}>
+        <label style={{ fontWeight: 600, fontSize: "0.85rem", color: "#444441", display: "block", marginBottom: 6 }}>
           Your review
         </label>
         <textarea
           value={comment}
-          onChange={(e) => setComment(e.target.value)}
+          onChange={e => setComment(e.target.value)}
           required
           rows={4}
-          placeholder="Tell others about your experience..."
+          placeholder="Tell others about your experience…"
           style={{
-            width: "100%", border: "1px solid #e5e7eb", borderRadius: "8px",
-            padding: "10px 14px", fontSize: "0.9rem", resize: "vertical",
+            width: "100%",
+            border: "0.5px solid rgba(0,0,0,0.15)",
+            borderRadius: 10,
+            padding: "10px 14px",
+            fontSize: "0.9rem",
+            resize: "vertical",
             boxSizing: "border-box",
+            color: "#111110",
+            background: "#ffffff",
           }}
         />
       </div>
 
-      {error && <p style={{ color: "#dc2626", fontSize: "0.875rem", fontWeight: 600 }}>{error}</p>}
+      {error && <p style={{ color: "#dc2626", fontSize: "0.85rem" }}>{error}</p>}
 
       <button
         type="submit"
         disabled={loading || !rating || !comment.trim()}
         style={{
-          background: loading || !rating || !comment.trim() ? "#94a3b8" : "#0f172a",
-          color: "white", padding: "12px", borderRadius: "10px",
-          fontWeight: 700, fontSize: "0.95rem", border: "none",
-          cursor: loading || !rating || !comment.trim() ? "not-allowed" : "pointer",
+          background: (!rating || !comment.trim() || loading) ? "#eceae4" : "#111110",
+          color: (!rating || !comment.trim() || loading) ? "#6b6a66" : "#ffffff",
+          padding: "12px", borderRadius: 100,
+          fontWeight: 600, fontSize: "0.9rem", border: "none",
+          cursor: (!rating || !comment.trim() || loading) ? "not-allowed" : "pointer",
         }}
       >
-        {loading ? "Submitting..." : "Submit Review"}
+        {loading ? "Submitting…" : "Submit Review"}
       </button>
     </form>
   )

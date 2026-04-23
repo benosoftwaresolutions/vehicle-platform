@@ -9,9 +9,7 @@ export default function OnboardingBanner() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    // Only show if the user hasn't already dismissed this session
-    const dismissed = localStorage.getItem(DISMISS_KEY)
-    if (!dismissed) setVisible(true)
+    if (!localStorage.getItem(DISMISS_KEY)) setVisible(true)
   }, [])
 
   if (!visible) return null
@@ -23,30 +21,28 @@ export default function OnboardingBanner() {
 
   return (
     <div style={{
-      background: "#fefce8",
-      borderBottom: "1px solid #fde68a",
-      padding: "12px 32px",
+      background: "#f4f3ef",
+      borderBottom: "0.5px solid rgba(0,0,0,0.10)",
+      padding: "10px 28px",
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
       gap: "16px",
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        <span style={{ fontSize: "1.25rem" }}>👤</span>
-        <span style={{ fontSize: "0.9rem", color: "#78350f", fontWeight: 500 }}>
+        <span style={{ fontSize: "0.875rem", color: "#444441", fontWeight: 500 }}>
           Your profile isn&apos;t complete.
         </span>
         <Link
           href="/onboarding"
           style={{
-            background: "#f59e0b",
-            color: "#0f172a",
+            background: "#111110",
+            color: "#ffffff",
             padding: "6px 16px",
-            borderRadius: "8px",
-            fontWeight: 700,
+            borderRadius: 100,
+            fontWeight: 600,
             fontSize: "0.8rem",
             textDecoration: "none",
-            whiteSpace: "nowrap",
           }}
         >
           Complete your profile
@@ -56,14 +52,8 @@ export default function OnboardingBanner() {
         onClick={dismiss}
         aria-label="Dismiss"
         style={{
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          color: "#92400e",
-          fontSize: "1.1rem",
-          lineHeight: 1,
-          padding: "4px",
-          flexShrink: 0,
+          background: "none", border: "none", cursor: "pointer",
+          color: "#6b6a66", fontSize: "1rem", lineHeight: 1, padding: "4px",
         }}
       >
         ✕

@@ -44,26 +44,36 @@ export default function GaragesSearch({
   return (
     <>
       {/* Filters */}
-      <div style={{ display: "flex", gap: "12px", marginBottom: "28px", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: "10px", marginBottom: "28px", flexWrap: "wrap" }}>
         <input
           type="text"
-          placeholder="Search by name, city, or postcode..."
+          placeholder="Search by name, city, or postcode…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{
-            flex: "1 1 260px", border: "1px solid #e5e7eb", borderRadius: "10px",
-            padding: "10px 16px", fontSize: "0.95rem", outline: "none",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+            flex: "1 1 260px",
+            border: "0.5px solid rgba(0,0,0,0.15)",
+            borderRadius: 100,
+            padding: "10px 18px",
+            fontSize: "0.9rem",
+            outline: "none",
+            background: "#ffffff",
+            color: "#111110",
           }}
         />
         <select
           value={serviceFilter}
           onChange={(e) => setServiceFilter(e.target.value)}
           style={{
-            flex: "0 1 200px", border: "1px solid #e5e7eb", borderRadius: "10px",
-            padding: "10px 16px", fontSize: "0.95rem", outline: "none",
-            background: "white", cursor: "pointer",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+            flex: "0 1 200px",
+            border: "0.5px solid rgba(0,0,0,0.15)",
+            borderRadius: 100,
+            padding: "10px 18px",
+            fontSize: "0.9rem",
+            outline: "none",
+            background: "#ffffff",
+            color: "#111110",
+            cursor: "pointer",
           }}
         >
           <option value="">All services</option>
@@ -75,8 +85,12 @@ export default function GaragesSearch({
           <button
             onClick={() => { setSearch(""); setServiceFilter("") }}
             style={{
-              background: "none", border: "1px solid #e5e7eb", borderRadius: "10px",
-              padding: "10px 16px", fontSize: "0.875rem", color: "#64748b",
+              background: "transparent",
+              border: "0.5px solid rgba(0,0,0,0.15)",
+              borderRadius: 100,
+              padding: "10px 18px",
+              fontSize: "0.875rem",
+              color: "#444441",
               cursor: "pointer",
             }}
           >
@@ -87,20 +101,16 @@ export default function GaragesSearch({
 
       {/* Result count */}
       {(search || serviceFilter) && (
-        <p style={{ color: "#64748b", fontSize: "0.875rem", marginBottom: "16px" }}>
+        <p style={{ color: "#6b6a66", fontSize: "0.875rem", marginBottom: "20px" }}>
           {filtered.length} {filtered.length === 1 ? "garage" : "garages"} found
         </p>
       )}
 
       {/* Results */}
       {filtered.length === 0 ? (
-        <div style={{
-          background: "white", borderRadius: "16px", padding: "48px",
-          textAlign: "center", boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
-        }}>
-          <p style={{ fontSize: "2.5rem", marginBottom: "12px" }}>🔍</p>
-          <h2 style={{ fontWeight: 700, fontSize: "1.25rem", marginBottom: "8px" }}>No garages found</h2>
-          <p style={{ color: "#64748b" }}>
+        <div style={{ background: "#f4f3ef", borderRadius: 14, padding: "48px", textAlign: "center" }}>
+          <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.25rem", color: "#111110", marginBottom: "8px" }}>No garages found</h2>
+          <p style={{ color: "#6b6a66" }}>
             Try adjusting your search or removing the service filter.
           </p>
         </div>

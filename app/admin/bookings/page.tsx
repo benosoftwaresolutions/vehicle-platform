@@ -32,8 +32,8 @@ export default async function AdminBookings() {
   return (
     <div style={{ padding: "40px" }}>
       <div style={{ marginBottom: "28px" }}>
-        <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "#0f172a", marginBottom: "4px" }}>Bookings</h1>
-        <p style={{ color: "#64748b", fontSize: "0.9rem" }}>{bookings.length} total</p>
+        <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.6rem", letterSpacing: "-0.03em", color: "#111110", marginBottom: "4px" }}>Bookings</h1>
+        <p style={{ color: "#6b6a66", fontSize: "0.9rem" }}>{bookings.length} total</p>
       </div>
       <BookingsTable bookings={rows} />
     </div>

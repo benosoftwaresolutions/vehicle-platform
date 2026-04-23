@@ -37,26 +37,21 @@ type Garage = {
 // ─── Section wrapper ──────────────────────────────────────────────────────────
 
 function Section({
-  icon,
   title,
   subtitle,
   children,
 }: {
-  icon: string
   title: string
   subtitle: string
   children: React.ReactNode
 }) {
   return (
-    <div style={{ border: "1px solid #e5e7eb", borderRadius: "14px", overflow: "hidden" }}>
-      <div style={{ padding: "16px 24px", background: "#f8f9fb", borderBottom: "1px solid #e5e7eb", display: "flex", alignItems: "center", gap: "12px" }}>
-        <span style={{ fontSize: "1.25rem" }}>{icon}</span>
-        <div>
-          <p style={{ fontWeight: 700, fontSize: "0.95rem", color: "#0f172a", margin: 0 }}>{title}</p>
-          <p style={{ fontSize: "0.8rem", color: "#64748b", margin: 0 }}>{subtitle}</p>
-        </div>
+    <div style={{ background: "#f4f3ef", borderRadius: 14, overflow: "hidden" }}>
+      <div style={{ padding: "16px 22px", borderBottom: "0.5px solid rgba(0,0,0,0.08)" }}>
+        <p style={{ fontWeight: 700, fontSize: "0.9rem", color: "#111110", margin: 0 }}>{title}</p>
+        <p style={{ fontSize: "0.78rem", color: "#6b6a66", margin: "2px 0 0" }}>{subtitle}</p>
       </div>
-      <div style={{ padding: "24px", background: "white" }}>
+      <div style={{ padding: "22px" }}>
         {children}
       </div>
     </div>
@@ -91,36 +86,35 @@ function TagCheckboxGroup({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "7px" }}>
         {commonItems.map((item) => {
           const checked = selected.includes(item)
           return (
             <button key={item} type="button" onClick={() => toggle(item)} style={{
-              padding: "6px 13px", borderRadius: "8px",
-              border: checked ? "2px solid #0f172a" : "1px solid #e5e7eb",
-              background: checked ? "#0f172a" : "white",
-              color: checked ? "white" : "#374151",
-              fontWeight: 600, fontSize: "0.8rem", cursor: "pointer",
-              transition: "all 0.1s",
+              padding: "5px 13px", borderRadius: 100,
+              border: checked ? "none" : "0.5px solid rgba(0,0,0,0.15)",
+              background: checked ? "#111110" : "#ffffff",
+              color: checked ? "#ffffff" : "#444441",
+              fontWeight: 600, fontSize: "0.78rem", cursor: "pointer",
             }}>
-              {checked ? "✓ " : ""}{item}
+              {item}
             </button>
           )
         })}
       </div>
 
       {customItems.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "7px" }}>
           {customItems.map((item) => (
             <span key={item} style={{
               display: "inline-flex", alignItems: "center", gap: "6px",
-              background: "#f0fdf4", border: "1px solid #86efac",
-              color: "#166534", padding: "5px 10px", borderRadius: "8px",
-              fontSize: "0.8rem", fontWeight: 600,
+              background: "#111110", color: "#ffffff",
+              padding: "5px 10px", borderRadius: 100,
+              fontSize: "0.78rem", fontWeight: 600,
             }}>
               {item}
               <button type="button" onClick={() => onChange(selected.filter((s) => s !== item))}
-                style={{ background: "none", border: "none", cursor: "pointer", color: "#166534", padding: 0, lineHeight: 1, fontSize: "1rem" }}>
+                style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.7)", padding: 0, lineHeight: 1, fontSize: "1rem" }}>
                 ×
               </button>
             </span>
@@ -137,9 +131,9 @@ function TagCheckboxGroup({
           style={{ ...inputStyle, flex: 1 }}
         />
         <button type="button" onClick={addCustom} disabled={!customInput.trim()} style={{
-          background: customInput.trim() ? "#0f172a" : "#e5e7eb",
-          color: customInput.trim() ? "white" : "#9ca3af",
-          padding: "10px 16px", borderRadius: "8px",
+          background: customInput.trim() ? "#111110" : "#eceae4",
+          color: customInput.trim() ? "#ffffff" : "#6b6a66",
+          padding: "9px 16px", borderRadius: 100,
           fontWeight: 600, fontSize: "0.875rem", border: "none",
           cursor: customInput.trim() ? "pointer" : "not-allowed", whiteSpace: "nowrap",
         }}>
@@ -168,17 +162,17 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
 
   // ── Profile completion ────────────────────────────────────────────────────
   const completionItems = useMemo(() => [
-    { label: "Logo uploaded",       done: !!logoUrl },
-    { label: "Description added",   done: description.trim().length > 0 },
-    { label: "Services selected",   done: services.length > 0 },
-    { label: "Specialist makes",    done: specialistMakes.length > 0 },
-    { label: "Address complete",    done: !!(address.trim() && city.trim() && postcode.trim()) },
+    { label: "Logo uploaded",     done: !!logoUrl },
+    { label: "Description added", done: description.trim().length > 0 },
+    { label: "Services selected", done: services.length > 0 },
+    { label: "Specialist makes",  done: specialistMakes.length > 0 },
+    { label: "Address complete",  done: !!(address.trim() && city.trim() && postcode.trim()) },
   ], [logoUrl, description, services, specialistMakes, address, city, postcode])
 
   const completionPct = Math.round(
     (completionItems.filter((i) => i.done).length / completionItems.length) * 100
   )
-  const barColor = completionPct === 100 ? "#16a34a" : completionPct >= 60 ? "#f59e0b" : "#ef4444"
+  const barColor = completionPct === 100 ? "#111110" : completionPct >= 60 ? "#444441" : "#6b6a66"
 
   // ── Save ──────────────────────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
@@ -199,25 +193,25 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
     <form onSubmit={handleSubmit} style={{ paddingBottom: 88 }}>
 
       {/* ── Profile completion bar ─────────────────────────────────────────── */}
-      <div style={{ background: "white", border: "1px solid #e5e7eb", borderRadius: "14px", padding: "20px 24px", marginBottom: "24px" }}>
+      <div style={{ background: "#f4f3ef", borderRadius: 14, padding: "20px 22px", marginBottom: "20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "10px" }}>
-          <p style={{ fontWeight: 700, fontSize: "0.95rem", color: "#0f172a" }}>Profile completeness</p>
-          <span style={{ fontWeight: 800, fontSize: "1.1rem", color: barColor }}>{completionPct}%</span>
+          <p style={{ fontWeight: 700, fontSize: "0.9rem", color: "#111110" }}>Profile completeness</p>
+          <span style={{ fontWeight: 700, fontSize: "1rem", color: barColor }}>{completionPct}%</span>
         </div>
-        <div style={{ background: "#f1f5f9", borderRadius: "999px", height: 8, overflow: "hidden" }}>
+        <div style={{ background: "#eceae4", borderRadius: 100, height: 6, overflow: "hidden" }}>
           <div style={{
-            height: "100%", borderRadius: "999px",
+            height: "100%", borderRadius: 100,
             width: `${completionPct}%`,
-            background: barColor,
-            transition: "width 0.4s ease, background 0.3s ease",
+            background: "#111110",
+            transition: "width 0.4s ease",
           }} />
         </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "14px" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginTop: "14px" }}>
           {completionItems.map((item) => (
             <span key={item.label} style={{
               display: "inline-flex", alignItems: "center", gap: "5px",
               fontSize: "0.78rem", fontWeight: 600,
-              color: item.done ? "#16a34a" : "#94a3b8",
+              color: item.done ? "#111110" : "#6b6a66",
             }}>
               <span>{item.done ? "✓" : "○"}</span> {item.label}
             </span>
@@ -226,11 +220,11 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
       </div>
 
       {/* ── Sections ──────────────────────────────────────────────────────── */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
 
         {/* Business Identity */}
-        <Section icon="🏢" title="Business Identity" subtitle="Your garage name, logo and public description">
-          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+        <Section title="Business Identity" subtitle="Your garage name, logo and public description">
+          <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
             <div>
               <label style={labelStyle}>Garage Name</label>
               <input type="text" value={name} onChange={(e) => setName(e.target.value)} required style={inputStyle} />
@@ -242,13 +236,13 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
             <div>
               <label style={labelStyle}>
                 Description{" "}
-                <span style={{ color: "#9ca3af", fontWeight: 400 }}>(optional)</span>
+                <span style={{ color: "#6b6a66", fontWeight: 400 }}>(optional)</span>
               </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
-                placeholder="Tell customers about your garage, your experience, specialisms..."
+                placeholder="Tell customers about your garage, your experience, specialisms…"
                 style={{ ...inputStyle, resize: "vertical" }}
               />
             </div>
@@ -256,13 +250,13 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
         </Section>
 
         {/* Location */}
-        <Section icon="📍" title="Location" subtitle="Your garage address shown on your listing">
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <Section title="Location" subtitle="Your garage address shown on your listing">
+          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
             <div>
               <label style={labelStyle}>Street Address</label>
               <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} required style={inputStyle} />
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
               <div>
                 <label style={labelStyle}>City</label>
                 <input type="text" value={city} onChange={(e) => setCity(e.target.value)} required style={inputStyle} />
@@ -276,27 +270,27 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
         </Section>
 
         {/* Services */}
-        <Section icon="⚙️" title="Services" subtitle="Select what you offer — shown on your listing and in the booking form">
+        <Section title="Services" subtitle="Select what you offer — shown on your listing and in the booking form">
           {services.length === 0 && (
-            <p style={{ fontSize: "0.8rem", color: "#f59e0b", fontWeight: 600, marginBottom: "12px" }}>
-              ⚠ No services selected — customers won&apos;t be able to book with you.
+            <p style={{ fontSize: "0.8rem", color: "#444441", fontWeight: 600, marginBottom: "12px" }}>
+              No services selected — customers won&apos;t be able to book with you.
             </p>
           )}
           <TagCheckboxGroup
             commonItems={COMMON_SERVICES}
             selected={services}
             onChange={setServices}
-            customPlaceholder="Add a custom service..."
+            customPlaceholder="Add a custom service…"
           />
         </Section>
 
         {/* Specialist Makes */}
-        <Section icon="🚗" title="Specialist Makes" subtitle="Makes you specialise in — helps customers searching by vehicle brand">
+        <Section title="Specialist Makes" subtitle="Makes you specialise in — helps customers searching by vehicle brand">
           <TagCheckboxGroup
             commonItems={COMMON_MAKES}
             selected={specialistMakes}
             onChange={setSpecialistMakes}
-            customPlaceholder="Add another make..."
+            customPlaceholder="Add another make…"
           />
         </Section>
 
@@ -305,25 +299,25 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
       {/* ── Sticky save bar ────────────────────────────────────────────────── */}
       <div style={{
         position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 20,
-        background: "white", borderTop: "1px solid #e5e7eb",
-        padding: "16px 32px",
+        background: "#ffffff", borderTop: "0.5px solid rgba(0,0,0,0.10)",
+        padding: "14px 32px",
         display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "16px",
-        boxShadow: "0 -4px 16px rgba(0,0,0,0.06)",
       }}>
-        {saved && <span style={{ color: "#16a34a", fontWeight: 600, fontSize: "0.875rem" }}>✓ Changes saved</span>}
+        {saved && <span style={{ color: "#111110", fontWeight: 600, fontSize: "0.875rem" }}>Changes saved</span>}
         {error && <span style={{ color: "#dc2626", fontWeight: 600, fontSize: "0.875rem" }}>{error}</span>}
         <button
           type="submit"
           disabled={saving}
           style={{
-            background: saving ? "#94a3b8" : "#0f172a",
-            color: "white", padding: "12px 32px", borderRadius: "10px",
-            fontWeight: 700, fontSize: "0.95rem", border: "none",
+            background: saving ? "#eceae4" : "#111110",
+            color: saving ? "#6b6a66" : "#ffffff",
+            padding: "12px 32px", borderRadius: 100,
+            fontWeight: 600, fontSize: "0.95rem", border: "none",
             cursor: saving ? "not-allowed" : "pointer",
             minWidth: 140,
           }}
         >
-          {saving ? "Saving..." : "Save changes"}
+          {saving ? "Saving…" : "Save changes"}
         </button>
       </div>
     </form>
@@ -332,17 +326,19 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  border: "1px solid #e5e7eb",
-  borderRadius: "8px",
+  border: "0.5px solid rgba(0,0,0,0.15)",
+  borderRadius: 8,
   padding: "10px 14px",
   fontSize: "0.95rem",
   boxSizing: "border-box",
+  background: "#ffffff",
+  color: "#111110",
 }
 
 const labelStyle: React.CSSProperties = {
   fontWeight: 600,
-  fontSize: "0.875rem",
+  fontSize: "0.85rem",
   display: "block",
   marginBottom: "6px",
-  color: "#374151",
+  color: "#444441",
 }

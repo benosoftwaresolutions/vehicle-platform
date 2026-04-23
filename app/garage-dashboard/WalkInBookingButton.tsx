@@ -12,7 +12,6 @@ export default function WalkInBookingButton({ garageId, services }: { garageId: 
   const router = useRouter()
   const [open, setOpen] = useState(false)
 
-  // Form state
   const [customerName, setCustomerName] = useState("")
   const [customerPhone, setCustomerPhone] = useState("")
   const [registration, setRegistration] = useState("")
@@ -20,15 +19,12 @@ export default function WalkInBookingButton({ garageId, services }: { garageId: 
   const [date, setDate] = useState("")
   const [time, setTime] = useState("")
 
-  // Slots state
   const [slotsData, setSlotsData] = useState<SlotsResponse | null>(null)
   const [slotsLoading, setSlotsLoading] = useState(false)
 
-  // Submission state
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
-  // Fetch slots when date changes
   useEffect(() => {
     if (!date) { setSlotsData(null); setTime(""); return }
     setSlotsLoading(true)
@@ -72,8 +68,8 @@ export default function WalkInBookingButton({ garageId, services }: { garageId: 
       <button
         onClick={() => setOpen(true)}
         style={{
-          background: "#f59e0b", color: "#0f172a", padding: "10px 20px",
-          borderRadius: "10px", fontWeight: 700, fontSize: "0.875rem",
+          background: "#111110", color: "#ffffff", padding: "9px 18px",
+          borderRadius: 100, fontWeight: 600, fontSize: "0.875rem",
           border: "none", cursor: "pointer",
         }}
       >
@@ -84,7 +80,7 @@ export default function WalkInBookingButton({ garageId, services }: { garageId: 
         <div
           onClick={handleClose}
           style={{
-            position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)",
             zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center",
             padding: "24px",
           }}
@@ -92,16 +88,18 @@ export default function WalkInBookingButton({ garageId, services }: { garageId: 
           <div
             onClick={e => e.stopPropagation()}
             style={{
-              background: "white", borderRadius: "16px", padding: "32px",
+              background: "#ffffff", borderRadius: 16, padding: "32px",
               width: "100%", maxWidth: "520px", maxHeight: "90vh",
-              overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+              overflowY: "auto", boxShadow: "0 24px 64px rgba(0,0,0,0.18)",
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-              <h2 style={{ fontWeight: 800, fontSize: "1.25rem" }}>Create Walk-in Booking</h2>
+              <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.2rem", letterSpacing: "-0.02em", color: "#111110" }}>
+                Create Walk-in Booking
+              </h2>
               <button
                 onClick={handleClose}
-                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "1.25rem", color: "#64748b" }}
+                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "1.1rem", color: "#6b6a66", lineHeight: 1 }}
               >
                 ✕
               </button>
@@ -110,48 +108,33 @@ export default function WalkInBookingButton({ garageId, services }: { garageId: 
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
 
               {/* Customer details */}
-              <div style={{ background: "#f8f9fb", borderRadius: "10px", padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
-                <p style={{ fontWeight: 700, fontSize: "0.8rem", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em" }}>Customer</p>
+              <div style={section}>
+                <p style={sectionLabel}>Customer</p>
                 <div>
-                  <label style={labelStyle}>Full Name</label>
-                  <input
-                    type="text" value={customerName} required
-                    onChange={e => setCustomerName(e.target.value)}
-                    placeholder="e.g. John Smith"
-                    style={inputStyle}
-                  />
+                  <label style={lbl}>Full Name</label>
+                  <input type="text" value={customerName} required onChange={e => setCustomerName(e.target.value)} placeholder="e.g. John Smith" style={inp} />
                 </div>
                 <div>
-                  <label style={labelStyle}>Phone Number</label>
-                  <input
-                    type="tel" value={customerPhone} required
-                    onChange={e => setCustomerPhone(e.target.value)}
-                    placeholder="e.g. 07700 900123"
-                    style={inputStyle}
-                  />
+                  <label style={lbl}>Phone Number</label>
+                  <input type="tel" value={customerPhone} required onChange={e => setCustomerPhone(e.target.value)} placeholder="e.g. 07700 900123" style={inp} />
                 </div>
               </div>
 
               {/* Vehicle & service */}
-              <div style={{ background: "#f8f9fb", borderRadius: "10px", padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
-                <p style={{ fontWeight: 700, fontSize: "0.8rem", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em" }}>Vehicle & Service</p>
+              <div style={section}>
+                <p style={sectionLabel}>Vehicle & Service</p>
                 <div>
-                  <label style={labelStyle}>Registration</label>
-                  <input
-                    type="text" value={registration} required
-                    onChange={e => setRegistration(e.target.value.toUpperCase())}
-                    placeholder="e.g. AB12 CDE"
-                    style={inputStyle}
-                  />
+                  <label style={lbl}>Registration</label>
+                  <input type="text" value={registration} required onChange={e => setRegistration(e.target.value.toUpperCase())} placeholder="e.g. AB12 CDE" style={inp} />
                 </div>
                 <div>
-                  <label style={labelStyle}>Service</label>
+                  <label style={lbl}>Service</label>
                   {services.length === 0 ? (
-                    <div style={{ background: "#f8f9fb", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "10px 13px", color: "#64748b", fontSize: "0.875rem" }}>
-                      No services configured. Add services in Garage Settings first.
+                    <div style={{ background: "#f4f3ef", borderRadius: 8, padding: "10px 13px", color: "#6b6a66", fontSize: "0.875rem" }}>
+                      No services configured. Add services in Settings first.
                     </div>
                   ) : (
-                    <select value={service} required onChange={e => setService(e.target.value)} style={inputStyle}>
+                    <select value={service} required onChange={e => setService(e.target.value)} style={inp}>
                       <option value="">Select a service</option>
                       {services.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
@@ -160,32 +143,28 @@ export default function WalkInBookingButton({ garageId, services }: { garageId: 
               </div>
 
               {/* Date & time */}
-              <div style={{ background: "#f8f9fb", borderRadius: "10px", padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
-                <p style={{ fontWeight: 700, fontSize: "0.8rem", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em" }}>Date & Time</p>
+              <div style={section}>
+                <p style={sectionLabel}>Date & Time</p>
                 <div>
-                  <label style={labelStyle}>Date</label>
-                  <input
-                    type="date" value={date} min={today} required
-                    onChange={e => setDate(e.target.value)}
-                    style={inputStyle}
-                  />
+                  <label style={lbl}>Date</label>
+                  <input type="date" value={date} min={today} required onChange={e => setDate(e.target.value)} style={inp} />
                 </div>
 
                 {date && (
                   <div>
-                    <label style={labelStyle}>Available Slots</label>
+                    <label style={lbl}>Available Slots</label>
                     {slotsLoading ? (
-                      <p style={{ color: "#64748b", fontSize: "0.875rem" }}>Checking availability...</p>
+                      <p style={{ color: "#6b6a66", fontSize: "0.875rem" }}>Checking availability…</p>
                     ) : !slotsData ? (
-                      <p style={{ color: "#64748b", fontSize: "0.875rem" }}>Could not load slots.</p>
+                      <p style={{ color: "#6b6a66", fontSize: "0.875rem" }}>Could not load slots.</p>
                     ) : !slotsData.open ? (
-                      <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "8px", padding: "10px", color: "#991b1b", fontSize: "0.875rem" }}>
+                      <div style={{ background: "#f4f3ef", borderRadius: 8, padding: "10px 14px", color: "#444441", fontSize: "0.875rem" }}>
                         {slotsData.reason === "no_availability"
                           ? "No availability set up for this garage."
                           : "Garage is closed on this day."}
                       </div>
                     ) : slotsData.slots.length === 0 ? (
-                      <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "8px", padding: "10px", color: "#991b1b", fontSize: "0.875rem" }}>
+                      <div style={{ background: "#f4f3ef", borderRadius: 8, padding: "10px 14px", color: "#444441", fontSize: "0.875rem" }}>
                         Fully booked on this day.
                       </div>
                     ) : (
@@ -195,10 +174,10 @@ export default function WalkInBookingButton({ garageId, services }: { garageId: 
                             key={slot} type="button"
                             onClick={() => setTime(slot)}
                             style={{
-                              padding: "7px 14px", borderRadius: "8px",
-                              border: time === slot ? "2px solid #0f172a" : "1px solid #e5e7eb",
-                              background: time === slot ? "#0f172a" : "white",
-                              color: time === slot ? "white" : "#0f172a",
+                              padding: "7px 14px", borderRadius: 100,
+                              border: time === slot ? "none" : "0.5px solid rgba(0,0,0,0.15)",
+                              background: time === slot ? "#111110" : "#ffffff",
+                              color: time === slot ? "#ffffff" : "#111110",
                               fontWeight: 600, fontSize: "0.875rem", cursor: "pointer",
                             }}
                           >
@@ -212,28 +191,30 @@ export default function WalkInBookingButton({ garageId, services }: { garageId: 
               </div>
 
               {error && (
-                <p style={{ color: "#dc2626", fontSize: "0.875rem", fontWeight: 600 }}>{error}</p>
+                <p style={{ color: "#dc2626", fontSize: "0.875rem" }}>{error}</p>
               )}
 
-              <div style={{ display: "flex", gap: "12px", marginTop: "4px" }}>
+              <div style={{ display: "flex", gap: "10px", marginTop: "4px" }}>
                 <button
                   type="submit"
                   disabled={loading || !canSubmit}
                   style={{
-                    flex: 1, background: loading || !canSubmit ? "#94a3b8" : "#0f172a",
-                    color: "white", padding: "12px", borderRadius: "10px",
-                    fontWeight: 700, fontSize: "0.95rem", border: "none",
+                    flex: 1,
+                    background: loading || !canSubmit ? "#eceae4" : "#111110",
+                    color: loading || !canSubmit ? "#6b6a66" : "#ffffff",
+                    padding: "12px", borderRadius: 100,
+                    fontWeight: 600, fontSize: "0.95rem", border: "none",
                     cursor: loading || !canSubmit ? "not-allowed" : "pointer",
                   }}
                 >
-                  {loading ? "Saving..." : "Create Walk-in Booking"}
+                  {loading ? "Saving…" : "Create Walk-in Booking"}
                 </button>
                 <button
                   type="button" onClick={handleClose}
                   style={{
-                    background: "white", color: "#64748b", padding: "12px 20px",
-                    borderRadius: "10px", fontWeight: 600, fontSize: "0.95rem",
-                    border: "1px solid #e5e7eb", cursor: "pointer",
+                    background: "transparent", color: "#444441", padding: "12px 20px",
+                    borderRadius: 100, fontWeight: 600, fontSize: "0.95rem",
+                    border: "0.5px solid rgba(0,0,0,0.15)", cursor: "pointer",
                   }}
                 >
                   Cancel
@@ -247,12 +228,7 @@ export default function WalkInBookingButton({ garageId, services }: { garageId: 
   )
 }
 
-const inputStyle: React.CSSProperties = {
-  width: "100%", border: "1px solid #e5e7eb", borderRadius: "8px",
-  padding: "9px 13px", fontSize: "0.9rem", background: "white",
-}
-
-const labelStyle: React.CSSProperties = {
-  fontSize: "0.8rem", fontWeight: 600, color: "#374151",
-  display: "block", marginBottom: "5px",
-}
+const section: React.CSSProperties = { background: "#f4f3ef", borderRadius: 12, padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }
+const sectionLabel: React.CSSProperties = { fontWeight: 700, fontSize: "0.75rem", color: "#6b6a66", textTransform: "uppercase", letterSpacing: "0.07em" }
+const lbl: React.CSSProperties = { fontSize: "0.8rem", fontWeight: 600, color: "#444441", display: "block", marginBottom: "5px" }
+const inp: React.CSSProperties = { width: "100%", border: "0.5px solid rgba(0,0,0,0.15)", borderRadius: 8, padding: "9px 13px", fontSize: "0.9rem", background: "#ffffff", color: "#111110" }

@@ -1,3 +1,118 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --font-fraunces: 'Fraunces', serif;
+  --font-dm-sans: 'DM Sans', sans-serif;
+
+  --bg:           #ffffff;
+  --surface:      #f4f3ef;
+  --surface-hover:#eceae4;
+  --text:         #111110;
+  --text-secondary:#444441;
+  --text-muted:   #6b6a66;
+  --border:       rgba(0,0,0,0.10);
+  --accent:       #111110;
+  --accent-text:  #ffffff;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-dm-sans), 'DM Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-fraunces), 'Fraunces', serif;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  font-weight: 600;
+}
+
+h1 { font-size: clamp(36px, 5.5vw, 52px); }
+h2 { font-size: 30px; }
+h3 { font-size: 18px; }
+
+/* Dryvn button base */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--text);
+  color: var(--accent-text);
+  border: none;
+  border-radius: 100px;
+  padding: 12px 26px;
+  font-family: var(--font-dm-sans), sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  text-decoration: none;
+}
+.btn-primary:hover { opacity: 0.82; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--text);
+  border: 0.5px solid rgba(0,0,0,0.2);
+  border-radius: 100px;
+  padding: 12px 26px;
+  font-family: var(--font-dm-sans), sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  text-decoration: none;
+}
+.btn-ghost:hover { background: var(--surface); }
+
+/* Card */
+.card {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 22px;
+}
+
+/* Eyebrow label */
+.eyebrow {
+  font-family: var(--font-dm-sans), sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Input */
+input, select, textarea {
+  font-family: var(--font-dm-sans), sans-serif;
+  color: var(--text);
+}
+input::placeholder, textarea::placeholder { color: var(--text-muted); }
+
+/* Divider */
+.divider {
+  height: 0.5px;
+  background: rgba(0,0,0,0.1);
+  margin: 0 24px;
+  border: none;
+}
+
+/* Section */
+.section { padding: 72px 24px; }
+.content-max { max-width: 900px; margin: 0 auto; }

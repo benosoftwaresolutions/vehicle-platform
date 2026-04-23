@@ -80,3 +80,19 @@ export async function respondToAlternative(bookingId: string, response: "accept"
 
   revalidatePath("/bookings")
 }
+
+export async function cancelBooking(bookingId: string) {
+  const { userId } = await auth()
+  if (!userId) throw new Error("Unauthorised")
+
+  const booking = await prisma.booking.findUnique({ where: { id: bookingId } })
+  if (!booking || booking.clerkId !== userId) throw new Error("Unauthorised")
+  if (!["pending", "confirmed"].includes(booking.status)) throw new Error("Booking cannot be cancelled")
+
+  await prisma.booking.update({
+    where: { id: bookingId },
+    data: { status: "declined_by_customer" },
+  })
+
+  revalidatePath("/bookings")
+}

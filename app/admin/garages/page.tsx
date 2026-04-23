@@ -1,5 +1,6 @@
 import { prisma } from "@/app/lib/prisma"
 import DeleteGarageButton from "./DeleteGarageButton"
+import Image from "next/image"
 
 export default async function AdminGarages() {
   const garages = await prisma.garage.findMany({ orderBy: { createdAt: "desc" } })
@@ -17,41 +18,43 @@ export default async function AdminGarages() {
   return (
     <div style={{ padding: "40px" }}>
       <div style={{ marginBottom: "28px" }}>
-        <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "#0f172a", marginBottom: "4px" }}>Garages</h1>
-        <p style={{ color: "#64748b", fontSize: "0.9rem" }}>{garages.length} registered</p>
+        <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.6rem", letterSpacing: "-0.03em", color: "#111110", marginBottom: "4px" }}>
+          Garages
+        </h1>
+        <p style={{ color: "#6b6a66", fontSize: "0.9rem" }}>{garages.length} registered</p>
       </div>
 
-      <div style={{ background: "white", border: "1px solid #e5e7eb", borderRadius: "14px", overflow: "hidden" }}>
+      <div style={{ background: "#ffffff", border: "0.5px solid rgba(0,0,0,0.08)", borderRadius: 14, overflow: "hidden" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.875rem" }}>
           <thead>
-            <tr style={{ background: "#f8f9fb", borderBottom: "1px solid #e5e7eb" }}>
+            <tr style={{ background: "#f4f3ef", borderBottom: "0.5px solid rgba(0,0,0,0.08)" }}>
               {["Logo", "Name", "City", "Rating", "Reviews", "Bookings", ""].map((h) => (
-                <th key={h} style={{ padding: "12px 16px", textAlign: "left", fontWeight: 700, color: "#374151", fontSize: "0.8rem", whiteSpace: "nowrap" }}>{h}</th>
+                <th key={h} style={{ padding: "12px 16px", textAlign: "left", fontWeight: 700, color: "#444441", fontSize: "0.75rem", whiteSpace: "nowrap", letterSpacing: "0.04em", textTransform: "uppercase" }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {garages.map((garage, i) => (
-              <tr key={garage.id} style={{ borderBottom: i < garages.length - 1 ? "1px solid #f1f5f9" : "none" }}>
+              <tr key={garage.id} style={{ borderBottom: i < garages.length - 1 ? "0.5px solid rgba(0,0,0,0.06)" : "none" }}>
                 <td style={{ padding: "12px 16px" }}>
-                  <div style={{ width: 36, height: 36, borderRadius: "8px", background: "#f1f5f9", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 8, background: "#f4f3ef", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
                     {garage.logoUrl
-                      ? <img src={garage.logoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                      : <span style={{ fontSize: "1rem" }}>🔧</span>
+                      ? <Image src={garage.logoUrl} alt="" fill sizes="36px" style={{ objectFit: "cover" }} />
+                      : <span style={{ fontSize: "0.75rem", color: "#6b6a66" }}>—</span>
                     }
                   </div>
                 </td>
-                <td style={{ padding: "12px 16px", fontWeight: 600, color: "#0f172a" }}>{garage.name}</td>
-                <td style={{ padding: "12px 16px", color: "#64748b" }}>{garage.city}</td>
-                <td style={{ padding: "12px 16px", color: "#64748b" }}>
+                <td style={{ padding: "12px 16px", fontWeight: 600, color: "#111110" }}>{garage.name}</td>
+                <td style={{ padding: "12px 16px", color: "#6b6a66" }}>{garage.city}</td>
+                <td style={{ padding: "12px 16px" }}>
                   {garage.rating > 0 ? (
-                    <span style={{ color: "#f59e0b", fontWeight: 600 }}>★ {garage.rating.toFixed(1)}</span>
+                    <span style={{ color: "#111110", fontWeight: 600 }}>★ {garage.rating.toFixed(1)}</span>
                   ) : (
-                    <span style={{ color: "#d1d5db" }}>—</span>
+                    <span style={{ color: "#d1d0cb" }}>—</span>
                   )}
                 </td>
-                <td style={{ padding: "12px 16px", color: "#64748b" }}>{reviewMap[garage.id] ?? 0}</td>
-                <td style={{ padding: "12px 16px", color: "#64748b" }}>{bookingMap[garage.id] ?? 0}</td>
+                <td style={{ padding: "12px 16px", color: "#6b6a66" }}>{reviewMap[garage.id] ?? 0}</td>
+                <td style={{ padding: "12px 16px", color: "#6b6a66" }}>{bookingMap[garage.id] ?? 0}</td>
                 <td style={{ padding: "12px 16px" }}>
                   <DeleteGarageButton garageId={garage.id} garageName={garage.name} />
                 </td>
@@ -60,7 +63,7 @@ export default async function AdminGarages() {
           </tbody>
         </table>
         {garages.length === 0 && (
-          <p style={{ padding: "48px", textAlign: "center", color: "#94a3b8" }}>No garages yet.</p>
+          <p style={{ padding: "48px", textAlign: "center", color: "#6b6a66" }}>No garages yet.</p>
         )}
       </div>
     </div>

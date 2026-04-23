@@ -20,13 +20,13 @@ export default function DeleteGarageButton({ garageId, garageName }: { garageId:
             router.refresh()
           }}
           disabled={loading}
-          style={{ background: "#dc2626", color: "white", border: "none", borderRadius: "6px", padding: "4px 10px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}
+          style={{ background: "#111110", color: "white", border: "none", borderRadius: 100, padding: "4px 12px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}
         >
-          {loading ? "..." : "Yes"}
+          {loading ? "…" : "Yes"}
         </button>
         <button
           onClick={() => setConfirming(false)}
-          style={{ background: "#f1f5f9", color: "#374151", border: "none", borderRadius: "6px", padding: "4px 10px", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer" }}
+          style={{ background: "transparent", color: "#444441", border: "0.5px solid rgba(0,0,0,0.15)", borderRadius: 100, padding: "4px 12px", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer" }}
         >
           No
         </button>
@@ -38,7 +38,7 @@ export default function DeleteGarageButton({ garageId, garageName }: { garageId:
     <button
       onClick={() => setConfirming(true)}
       title={`Delete ${garageName}`}
-      style={{ background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca", borderRadius: "6px", padding: "4px 10px", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer" }}
+      style={{ background: "transparent", color: "#dc2626", border: "0.5px solid rgba(220,38,38,0.3)", borderRadius: 100, padding: "4px 12px", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer" }}
     >
       Delete
     </button>
