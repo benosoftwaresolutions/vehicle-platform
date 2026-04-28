@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
 import { revalidatePath } from "next/cache"
-import { sendAlternativeAcceptedToGarage, sendAlternativeDeclinedToGarage } from "@/app/lib/email"
+import { sendAlternativeAcceptedToGarage, sendAlternativeDeclinedToGarage, sendBookingCancelledToGarage } from "@/app/lib/email"
 
 export async function respondToAlternative(bookingId: string, response: "accept" | "decline") {
   const { userId } = await auth()
@@ -93,6 +93,27 @@ export async function cancelBooking(bookingId: string) {
     where: { id: bookingId },
     data: { status: "declined_by_customer" },
   })
+
+  // Notify the garage so they don't prepare for a no-show
+  const [customer, garage] = await Promise.all([
+    prisma.user.findUnique({ where: { clerkId: userId }, select: { name: true, email: true } }),
+    prisma.garage.findUnique({ where: { id: booking.garageId } }),
+  ])
+  const garageOwner = garage
+    ? await prisma.user.findFirst({ where: { garageId: garage.id, role: "garage_owner" }, select: { email: true } })
+    : null
+
+  if (garageOwner && garage && customer) {
+    await sendBookingCancelledToGarage({
+      garageOwnerEmail: garageOwner.email,
+      garageName: garage.name,
+      customerName: customer.name ?? customer.email,
+      service: booking.service,
+      date: booking.date,
+      time: booking.time,
+      registration: booking.registration,
+    }).catch(err => console.error("Failed to send cancellation email:", err))
+  }
 
   revalidatePath("/bookings")
 }

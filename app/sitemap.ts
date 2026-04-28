@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next"
 import { prisma } from "@/app/lib/prisma"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://dryvn.co.uk"
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fyca.co.uk"
 
   const garages = await prisma.garage.findMany({ select: { id: true, updatedAt: true } })
 

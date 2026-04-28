@@ -12,6 +12,17 @@ export async function updateBookingStatus(
   suggestedDate?: string,
   suggestedTime?: string
 ) {
+  const { userId } = await auth()
+  if (!userId) throw new Error("Unauthorised")
+
+  const [user, targetBooking] = await Promise.all([
+    prisma.user.findUnique({ where: { clerkId: userId }, select: { garageId: true, role: true } }),
+    prisma.booking.findUnique({ where: { id: bookingId }, select: { garageId: true } }),
+  ])
+
+  if (!user || user.role !== "garage_owner" || !user.garageId) throw new Error("Unauthorised")
+  if (!targetBooking || targetBooking.garageId !== user.garageId) throw new Error("Unauthorised")
+
   const booking = await prisma.booking.update({
     where: { id: bookingId },
     data: {
@@ -64,6 +75,7 @@ export async function createWalkInBooking(data: {
   garageId: string
   customerName: string
   customerPhone: string
+  customerEmail: string
   registration: string
   service: string
   date: string
@@ -71,6 +83,10 @@ export async function createWalkInBooking(data: {
 }) {
   const { userId } = await auth()
   if (!userId) throw new Error("Unauthorised")
+
+  if (!data.customerPhone.trim() && !data.customerEmail.trim()) {
+    throw new Error("A phone number or email address is required")
+  }
 
   const user = await prisma.user.findUnique({
     where: { clerkId: userId },
@@ -92,7 +108,8 @@ export async function createWalkInBooking(data: {
         status: "confirmed",
         isWalkIn: true,
         customerName: data.customerName.trim(),
-        customerPhone: data.customerPhone.trim(),
+        customerPhone: data.customerPhone.trim() || null,
+        customerEmail: data.customerEmail.trim() || null,
       },
     })
   } catch (err) {
@@ -111,7 +128,8 @@ export async function createWalkInBooking(data: {
       garageOwnerEmail: garageOwner.email,
       garageName: garage.name,
       customerName: data.customerName,
-      customerPhone: data.customerPhone,
+      customerPhone: data.customerPhone.trim() || undefined,
+      customerEmail: data.customerEmail.trim() || undefined,
       service: data.service,
       date: new Date(data.date),
       time: data.time,

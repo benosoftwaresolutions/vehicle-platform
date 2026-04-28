@@ -29,6 +29,8 @@ type Garage = {
   city: string
   postcode: string
   description: string | null
+  email: string | null
+  phone: string | null
   services: string[]
   specialistMakes: string[]
   logoUrl: string | null
@@ -149,6 +151,8 @@ function TagCheckboxGroup({
 export default function GarageSettingsForm({ garage }: { garage: Garage }) {
   const router = useRouter()
   const [name, setName] = useState(garage.name)
+  const [email, setEmail] = useState(garage.email ?? "")
+  const [phone, setPhone] = useState(garage.phone ?? "")
   const [address, setAddress] = useState(garage.address)
   const [city, setCity] = useState(garage.city)
   const [postcode, setPostcode] = useState(garage.postcode)
@@ -163,11 +167,12 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
   // ── Profile completion ────────────────────────────────────────────────────
   const completionItems = useMemo(() => [
     { label: "Logo uploaded",     done: !!logoUrl },
+    { label: "Contact details",   done: !!(email.trim() && phone.trim()) },
     { label: "Description added", done: description.trim().length > 0 },
     { label: "Services selected", done: services.length > 0 },
     { label: "Specialist makes",  done: specialistMakes.length > 0 },
     { label: "Address complete",  done: !!(address.trim() && city.trim() && postcode.trim()) },
-  ], [logoUrl, description, services, specialistMakes, address, city, postcode])
+  ], [logoUrl, email, phone, description, services, specialistMakes, address, city, postcode])
 
   const completionPct = Math.round(
     (completionItems.filter((i) => i.done).length / completionItems.length) * 100
@@ -179,7 +184,7 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
     e.preventDefault()
     setSaving(true); setSaved(false); setError("")
     try {
-      await updateGarageSettings({ name, address, city, postcode, description, services, specialistMakes })
+      await updateGarageSettings({ name, email, phone, address, city, postcode, description, services, specialistMakes })
       setSaved(true)
       router.refresh()
     } catch {
@@ -245,6 +250,20 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
                 placeholder="Tell customers about your garage, your experience, specialisms…"
                 style={{ ...inputStyle, resize: "vertical" }}
               />
+            </div>
+          </div>
+        </Section>
+
+        {/* Contact */}
+        <Section title="Contact Details" subtitle="How customers and Fyca can reach you">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+            <div>
+              <label style={labelStyle}>Email address</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="hello@yourgarage.co.uk" style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Phone number</label>
+              <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required placeholder="01234 567890" style={inputStyle} />
             </div>
           </div>
         </Section>

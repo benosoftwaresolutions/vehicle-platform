@@ -14,6 +14,12 @@ type GarageCardProps = {
   logoUrl?: string | null
 }
 
+function initials(name: string) {
+  const words = name.trim().split(/\s+/)
+  if (words.length === 1) return words[0][0].toUpperCase()
+  return (words[0][0] + words[1][0]).toUpperCase()
+}
+
 export default function GarageCard({ id, name, location, rating, reviewCount, services, logoUrl }: GarageCardProps) {
   const [favourited, setFavourited] = useState(false)
 
@@ -33,10 +39,10 @@ export default function GarageCard({ id, name, location, rating, reviewCount, se
         {logoUrl
           ? <Image src={logoUrl} alt={`${name} logo`} fill sizes="140px" style={{ objectFit: "cover" }} />
           : (
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: "#111110", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                <path d="M11 17V5M11 5L5 11M11 5L17 11" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+            <div style={{ width: 56, height: 56, borderRadius: 14, background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", border: "0.5px solid rgba(0,0,0,0.08)" }}>
+              <span style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 700, fontSize: "1.1rem", color: "#111110", letterSpacing: "-0.02em" }}>
+                {initials(name)}
+              </span>
             </div>
           )
         }
@@ -76,7 +82,7 @@ export default function GarageCard({ id, name, location, rating, reviewCount, se
             fontSize: "0.85rem", fontWeight: 600, textDecoration: "none",
           }}
         >
-          View garage
+          Book now
         </Link>
       </div>
     </div>

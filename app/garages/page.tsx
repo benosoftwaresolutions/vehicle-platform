@@ -1,16 +1,18 @@
 import Navbar from "../components/Navbar"
+import DryvnFooter from "../components/DryvnFooter"
 import GaragesSearch from "./GaragesSearch"
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "../lib/prisma"
 
-export default async function Garages() {
+export default async function Garages({ searchParams }: { searchParams: Promise<{ q?: string; service?: string }> }) {
   const { userId } = await auth()
+  const params = await searchParams
 
   const [user, garages, reviewCounts] = await Promise.all([
     userId
       ? prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true } })
       : null,
-    prisma.garage.findMany({ orderBy: { name: "asc" } }),
+    prisma.garage.findMany({ where: { approved: true }, orderBy: { name: "asc" } }),
     prisma.review.groupBy({ by: ["garageId"], _count: { id: true } }),
   ])
 
@@ -37,8 +39,15 @@ export default async function Garages() {
         </div>
       </div>
       <main style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 32px" }}>
-        <GaragesSearch garages={garagesWithCounts} allServices={allServices} />
+        <GaragesSearch
+          key={`${params.q ?? ""}|${params.service ?? ""}`}
+          garages={garagesWithCounts}
+          allServices={allServices}
+          initialSearch={params.q ?? ""}
+          initialService={params.service ?? ""}
+        />
       </main>
+      <DryvnFooter />
     </>
   )
 }

@@ -18,12 +18,16 @@ type Garage = {
 export default function GaragesSearch({
   garages,
   allServices,
+  initialSearch = "",
+  initialService = "",
 }: {
   garages: Garage[]
   allServices: string[]
+  initialSearch?: string
+  initialService?: string
 }) {
-  const [search, setSearch] = useState("")
-  const [serviceFilter, setServiceFilter] = useState("")
+  const [search, setSearch] = useState(initialSearch)
+  const [serviceFilter, setServiceFilter] = useState(initialService)
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()

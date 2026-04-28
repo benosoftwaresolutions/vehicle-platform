@@ -19,7 +19,7 @@ export default async function GarageSettingsPage() {
 
   const garage = await prisma.garage.findUnique({
     where: { id: user.garageId },
-    select: { name: true, address: true, city: true, postcode: true, description: true, services: true, specialistMakes: true, logoUrl: true },
+    select: { name: true, email: true, phone: true, address: true, city: true, postcode: true, description: true, services: true, specialistMakes: true, logoUrl: true },
   })
 
   if (!garage) redirect("/")

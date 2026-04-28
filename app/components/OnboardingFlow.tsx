@@ -77,7 +77,7 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
           <div style={{ marginBottom: "48px" }}>
             <DryvnMark />
             <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "clamp(28px,4vw,40px)", letterSpacing: "-0.03em", color: "#111110", marginBottom: "10px", marginTop: "32px" }}>
-              Welcome to dryvn
+              Welcome to Fyca
             </h1>
             <p style={{ color: "#6b6a66", fontSize: "1rem" }}>How will you be using the platform?</p>
           </div>
@@ -251,12 +251,13 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
 function DryvnMark() {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-      <div style={{ width: 28, height: 28, background: "#111110", borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-        <svg width="13" height="13" viewBox="0 0 22 22" fill="none">
-          <path d="M11 17V5M11 5L5 11M11 5L17 11" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
+      <div style={{ width: 28, height: 28, background: "#111110", borderRadius: 11, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <span style={{ color: "#ffffff", fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 700, fontSize: 15, lineHeight: 1, letterSpacing: "-0.04em" }}>F</span>
       </div>
-      <span style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1rem", color: "#111110", letterSpacing: "-0.03em" }}>dryvn</span>
+      <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        <span style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 700, fontSize: "1rem", color: "#111110", letterSpacing: "-0.04em", lineHeight: 1 }}>Fyca</span>
+        <span style={{ fontSize: 8, fontWeight: 500, letterSpacing: "0.13em", textTransform: "uppercase" as const, color: "#aaa9a4", lineHeight: 1 }}>Fix Your Car Anywhere</span>
+      </div>
     </div>
   )
 }

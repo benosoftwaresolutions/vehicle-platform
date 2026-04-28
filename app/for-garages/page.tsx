@@ -7,8 +7,8 @@ import { prisma } from "@/app/lib/prisma"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "For Garages — dryvn",
-  description: "Fill your bay, not your inbox. dryvn lets customers book online 24/7 so you spend less time on the phone and more time doing the work.",
+  title: "For Garages — Fyca",
+  description: "Fill your bay, not your inbox. Fyca lets customers book online 24/7 so you spend less time on the phone and more time doing the work.",
 }
 
 // ─── Feature card icons ───────────────────────────────────────────────────────
@@ -100,7 +100,7 @@ const FEATURES = [
   {
     icon: <IconTool />,
     title: "Built for the real world",
-    body: "Set your opening hours, slot durations and daily capacity. Dryvn only shows availability that actually works for your schedule.",
+    body: "Set your opening hours, slot durations and daily capacity. Fyca only shows availability that actually works for your schedule.",
   },
 ]
 

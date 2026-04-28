@@ -25,17 +25,20 @@ export default function DryvnNav() {
         {/* Logo */}
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none" }}>
           <div style={{
-            width: 30, height: 30, borderRadius: 8, background: "#111110",
+            width: 30, height: 30, borderRadius: 11, background: "#111110",
             display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
           }}>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M7 12V2M7 2L2 7M7 2L12 7" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <span style={{ color: "#ffffff", fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 700, fontSize: 16, lineHeight: 1, letterSpacing: "-0.04em" }}>F</span>
           </div>
-          <span style={{
-            fontFamily: "var(--font-fraunces),'Fraunces',serif",
-            fontWeight: 600, fontSize: "1.05rem", letterSpacing: "-0.03em", color: "#111110",
-          }}>dryvn</span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <span style={{
+              fontFamily: "var(--font-fraunces),'Fraunces',serif",
+              fontWeight: 700, fontSize: "1.05rem", letterSpacing: "-0.04em", color: "#111110", lineHeight: 1,
+            }}>Fyca</span>
+            <span style={{ fontSize: 8, fontWeight: 500, letterSpacing: "0.13em", textTransform: "uppercase", color: "#aaa9a4", lineHeight: 1 }}>
+              Fix Your Car Anywhere
+            </span>
+          </div>
         </Link>
 
         {/* Toggle pill */}

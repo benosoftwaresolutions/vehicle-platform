@@ -4,8 +4,10 @@ import Link from "next/link"
 
 const NAV = [
   { href: "/admin",          label: "Overview", icon: "▦" },
+  { href: "/admin/pending",  label: "Pending",  icon: "◐" },
   { href: "/admin/garages",  label: "Garages",  icon: "◈" },
-  { href: "/admin/users",    label: "Users",    icon: "◉" },
+  { href: "/admin/users/owners",    label: "Garage owners", icon: "◈" },
+  { href: "/admin/users/customers", label: "Customers",     icon: "◉" },
   { href: "/admin/bookings", label: "Bookings", icon: "◎" },
 ]
 
@@ -28,7 +30,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       }}>
         <div style={{ padding: "24px 20px", borderBottom: "0.5px solid rgba(255,255,255,0.08)" }}>
           <p style={{ color: "rgba(255,255,255,0.4)", fontWeight: 700, fontSize: "0.7rem", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "6px" }}>Admin</p>
-          <p style={{ color: "#ffffff", fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1rem", letterSpacing: "-0.02em" }}>dryvn</p>
+          <p style={{ color: "#ffffff", fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 700, fontSize: "1rem", letterSpacing: "-0.04em" }}>Fyca</p>
         </div>
         <nav style={{ padding: "12px 10px", flex: 1 }}>
           {NAV.map((item) => (

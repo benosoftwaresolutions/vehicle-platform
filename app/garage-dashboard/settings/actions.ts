@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache"
 
 export async function updateGarageSettings(formData: {
   name: string
+  email: string
+  phone: string
   address: string
   city: string
   postcode: string
@@ -29,6 +31,8 @@ export async function updateGarageSettings(formData: {
     where: { id: user.garageId },
     data: {
       name: formData.name.trim(),
+      email: formData.email.trim() || null,
+      phone: formData.phone.trim() || null,
       address: formData.address.trim(),
       city: formData.city.trim(),
       postcode: formData.postcode.trim().toUpperCase(),

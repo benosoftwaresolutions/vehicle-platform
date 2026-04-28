@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 })
 
     const ip = (await headers()).get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown"
-    if (!rateLimit(`reviews:${ip}`, 3, 60_000)) {
+    if (!await rateLimit(`reviews:${ip}`, 3, 60_000)) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 })
     }
 

@@ -14,8 +14,10 @@ export default function WalkInBookingButton({ garageId, services }: { garageId: 
 
   const [customerName, setCustomerName] = useState("")
   const [customerPhone, setCustomerPhone] = useState("")
+  const [customerEmail, setCustomerEmail] = useState("")
   const [registration, setRegistration] = useState("")
   const [service, setService] = useState("")
+  const [customService, setCustomService] = useState("")
   const [date, setDate] = useState("")
   const [time, setTime] = useState("")
 
@@ -37,8 +39,8 @@ export default function WalkInBookingButton({ garageId, services }: { garageId: 
   }, [date, garageId])
 
   const resetForm = () => {
-    setCustomerName(""); setCustomerPhone(""); setRegistration("")
-    setService(""); setDate(""); setTime("")
+    setCustomerName(""); setCustomerPhone(""); setCustomerEmail(""); setRegistration("")
+    setService(""); setCustomService(""); setDate(""); setTime("")
     setSlotsData(null); setError("")
   }
 
@@ -49,7 +51,8 @@ export default function WalkInBookingButton({ garageId, services }: { garageId: 
     setLoading(true)
     setError("")
     try {
-      await createWalkInBooking({ garageId, customerName, customerPhone, registration, service, date, time })
+      const resolvedService = service === "__other__" ? customService.trim() : service
+      await createWalkInBooking({ garageId, customerName, customerPhone, customerEmail, registration, service: resolvedService, date, time })
       handleClose()
       router.refresh()
     } catch (err) {
@@ -61,7 +64,9 @@ export default function WalkInBookingButton({ garageId, services }: { garageId: 
   }
 
   const today = new Date().toISOString().split("T")[0]
-  const canSubmit = customerName && customerPhone && registration && service && date && time && services.length > 0
+  const hasContact = customerPhone.trim() || customerEmail.trim()
+  const serviceReady = service === "__other__" ? customService.trim().length > 0 : !!service
+  const canSubmit = customerName && hasContact && registration && serviceReady && date && time && services.length > 0
 
   return (
     <>
@@ -115,9 +120,22 @@ export default function WalkInBookingButton({ garageId, services }: { garageId: 
                   <input type="text" value={customerName} required onChange={e => setCustomerName(e.target.value)} placeholder="e.g. John Smith" style={inp} />
                 </div>
                 <div>
-                  <label style={lbl}>Phone Number</label>
-                  <input type="tel" value={customerPhone} required onChange={e => setCustomerPhone(e.target.value)} placeholder="e.g. 07700 900123" style={inp} />
+                  <label style={lbl}>
+                    Phone Number
+                    <span style={{ fontWeight: 400, color: "#9b9a96", marginLeft: 4 }}>(or email below)</span>
+                  </label>
+                  <input type="tel" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} placeholder="e.g. 07700 900123" style={inp} />
                 </div>
+                <div>
+                  <label style={lbl}>
+                    Email Address
+                    <span style={{ fontWeight: 400, color: "#9b9a96", marginLeft: 4 }}>(or phone above)</span>
+                  </label>
+                  <input type="email" value={customerEmail} onChange={e => setCustomerEmail(e.target.value)} placeholder="e.g. john@example.com" style={inp} />
+                </div>
+                {customerName && !hasContact && (
+                  <p style={{ fontSize: "0.8rem", color: "#dc2626", margin: 0 }}>A phone number or email is required.</p>
+                )}
               </div>
 
               {/* Vehicle & service */}
@@ -134,10 +152,22 @@ export default function WalkInBookingButton({ garageId, services }: { garageId: 
                       No services configured. Add services in Settings first.
                     </div>
                   ) : (
-                    <select value={service} required onChange={e => setService(e.target.value)} style={inp}>
-                      <option value="">Select a service</option>
-                      {services.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                    <>
+                      <select value={service} required onChange={e => setService(e.target.value)} style={inp}>
+                        <option value="">Select a service</option>
+                        {services.map(s => <option key={s} value={s}>{s}</option>)}
+                        <option value="__other__">Not sure — describe the issue</option>
+                      </select>
+                      {service === "__other__" && (
+                        <textarea
+                          placeholder="Describe what's wrong or what needs checking…"
+                          value={customService}
+                          onChange={e => setCustomService(e.target.value)}
+                          rows={3}
+                          style={{ ...inp, borderRadius: 8, resize: "vertical", marginTop: 8, padding: "9px 13px" }}
+                        />
+                      )}
+                    </>
                   )}
                 </div>
               </div>

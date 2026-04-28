@@ -1,30 +1,54 @@
-/**
- * Simple in-memory rate limiter for Next.js API routes.
- * Works per serverless instance. For distributed rate limiting at scale,
- * replace with Vercel KV / Upstash Redis.
- */
+import { Ratelimit } from "@upstash/ratelimit"
+import { Redis } from "@upstash/redis"
 
-type Entry = { count: number; resetAt: number }
+// ---------------------------------------------------------------------------
+// Distributed rate limiter backed by Upstash Redis.
+// Falls back to in-memory when env vars are absent (local dev / CI).
+// Production: set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.
+// ---------------------------------------------------------------------------
 
-const store = new Map<string, Entry>()
+type InMemoryEntry = { count: number; resetAt: number }
+const localStore = new Map<string, InMemoryEntry>()
 
-/**
- * Returns true if the request is allowed, false if the limit is exceeded.
- * @param key     Unique key (e.g. IP + route)
- * @param limit   Max requests per window
- * @param windowMs Window duration in milliseconds
- */
-export function rateLimit(key: string, limit: number, windowMs: number): boolean {
+function localRateLimit(key: string, limit: number, windowMs: number): boolean {
   const now = Date.now()
-  const entry = store.get(key)
-
+  const entry = localStore.get(key)
   if (!entry || now >= entry.resetAt) {
-    store.set(key, { count: 1, resetAt: now + windowMs })
+    localStore.set(key, { count: 1, resetAt: now + windowMs })
     return true
   }
-
   if (entry.count >= limit) return false
-
   entry.count++
   return true
+}
+
+function makeRedisLimiter(limit: number, windowSeconds: number) {
+  const redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL!,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  })
+  return new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(limit, `${windowSeconds}s`),
+    analytics: false,
+  })
+}
+
+// Cache limiters by signature so we don't recreate on every request
+const limiterCache = new Map<string, Ratelimit>()
+
+export async function rateLimit(key: string, limit: number, windowMs: number): Promise<boolean> {
+  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+    return localRateLimit(key, limit, windowMs)
+  }
+
+  const windowSeconds = Math.ceil(windowMs / 1000)
+  const sig = `${limit}:${windowSeconds}`
+  if (!limiterCache.has(sig)) {
+    limiterCache.set(sig, makeRedisLimiter(limit, windowSeconds))
+  }
+  const limiter = limiterCache.get(sig)!
+
+  const { success } = await limiter.limit(key)
+  return success
 }

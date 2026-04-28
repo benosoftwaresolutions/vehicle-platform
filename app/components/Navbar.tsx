@@ -4,24 +4,30 @@ import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
-function DryvnLogo() {
+function FycaLogo() {
   return (
     <Link href="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
       <div style={{
-        width: 30, height: 30, borderRadius: 8, background: "#111110",
+        width: 30, height: 30, borderRadius: 11, background: "#111110",
         display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
       }}>
-        <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-          <path d="M7.5 12V3M7.5 3L3 7.5M7.5 3L12 7.5" stroke="white" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
+        <span style={{ color: "#ffffff", fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 700, fontSize: 16, lineHeight: 1, letterSpacing: "-0.04em" }}>F</span>
       </div>
-      <span style={{
-        fontFamily: "var(--font-fraunces), 'Fraunces', serif",
-        fontSize: 18, fontWeight: 600, letterSpacing: "-0.03em",
-        color: "#111110",
-      }}>
-        dryvn
-      </span>
+      <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        <span style={{
+          fontFamily: "var(--font-fraunces), 'Fraunces', serif",
+          fontSize: 18, fontWeight: 700, letterSpacing: "-0.04em",
+          color: "#111110", lineHeight: 1,
+        }}>
+          Fyca
+        </span>
+        <span style={{
+          fontSize: 8, fontWeight: 500, letterSpacing: "0.13em",
+          textTransform: "uppercase", color: "#aaa9a4", lineHeight: 1,
+        }}>
+          Fix Your Car Anywhere
+        </span>
+      </div>
     </Link>
   )
 }
@@ -46,17 +52,17 @@ export default function Navbar({ role }: { role?: string }) {
       top: 0,
       zIndex: 50,
     }}>
-      <DryvnLogo />
+      <FycaLogo />
 
       {/* Centre: app nav + landing toggle */}
       <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
           <Link href="/" style={navLink}>Home</Link>
           <Link href="/garages" style={navLink}>Garages</Link>
-          {isGarageOwner
+          {isSignedIn && (isGarageOwner
             ? <Link href="/garage-dashboard" style={navLink}>Dashboard</Link>
             : <Link href="/bookings" style={navLink}>My Bookings</Link>
-          }
+          )}
         </div>
 
         {/* Divider */}

@@ -1,121 +1,14 @@
 import Link from "next/link"
 import Navbar from "@/app/components/Navbar"
 import DryvnFooter from "@/app/components/DryvnFooter"
+import GarageSearchPreview from "./GarageSearchPreview"
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "For Drivers — dryvn",
-  description: "Find and book a trusted garage in seconds. Search by service, read reviews, and confirm your slot — all online.",
-}
-
-// ─── Search bar mockup ────────────────────────────────────────────────────────
-
-const MOCK_GARAGES = [
-  {
-    initials: "CA",
-    name: "City Auto Centre",
-    meta: "MOT · Full Service · Diagnostics",
-    location: "Manchester",
-    distance: "0.8 mi",
-    stars: 4.9,
-    reviews: 124,
-  },
-  {
-    initials: "TG",
-    name: "Thornton Garage",
-    meta: "Tyres · Brakes · Wheel Alignment",
-    location: "Salford",
-    distance: "1.2 mi",
-    stars: 4.7,
-    reviews: 88,
-  },
-  {
-    initials: "PM",
-    name: "Premier Motors",
-    meta: "BMW Specialist · Servicing · Diagnostics",
-    location: "Bolton",
-    distance: "1.5 mi",
-    stars: 4.8,
-    reviews: 61,
-  },
-]
-
-function SearchMockup() {
-  return (
-    <div style={{
-      background: "#ffffff",
-      border: "0.5px solid rgba(0,0,0,0.10)",
-      borderRadius: 16,
-      overflow: "hidden",
-      maxWidth: 700,
-      margin: "0 auto",
-    }}>
-      {/* Search input */}
-      <div style={{
-        padding: "14px 20px",
-        borderBottom: "0.5px solid rgba(0,0,0,0.08)",
-        display: "flex", alignItems: "center", gap: 12,
-      }}>
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
-          <circle cx="8.5" cy="8.5" r="5.5" stroke="#6b6a66" strokeWidth="1.6"/>
-          <path d="M14 14l3.5 3.5" stroke="#6b6a66" strokeWidth="1.6" strokeLinecap="round"/>
-        </svg>
-        <span style={{ color: "#6b6a66", fontSize: "0.9rem" }}>
-          Service, location, or specialist make…
-        </span>
-      </div>
-
-      {/* Garage rows */}
-      {MOCK_GARAGES.map((g, i) => (
-        <div key={g.name} style={{
-          padding: "16px 20px",
-          borderBottom: i < MOCK_GARAGES.length - 1 ? "0.5px solid rgba(0,0,0,0.07)" : "none",
-          display: "flex", alignItems: "center", gap: 14,
-        }}>
-          {/* Avatar */}
-          <div style={{
-            width: 40, height: 40, borderRadius: 10, background: "#111110",
-            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-          }}>
-            <span style={{
-              fontFamily: "var(--font-fraunces),'Fraunces',serif",
-              fontSize: "0.78rem", fontWeight: 600, color: "#ffffff", letterSpacing: "0.02em",
-            }}>{g.initials}</span>
-          </div>
-
-          {/* Info */}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontWeight: 600, fontSize: "0.9rem", color: "#111110", margin: "0 0 2px" }}>{g.name}</p>
-            <p style={{ fontSize: "0.78rem", color: "#6b6a66", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-              {g.meta} · {g.location} · {g.distance}
-            </p>
-          </div>
-
-          {/* Rating */}
-          <div style={{ textAlign: "right", flexShrink: 0 }}>
-            <p style={{ fontSize: "0.82rem", fontWeight: 600, color: "#111110", margin: "0 0 2px" }}>
-              ★ {g.stars.toFixed(1)}
-            </p>
-            <p style={{ fontSize: "0.72rem", color: "#6b6a66", margin: 0 }}>
-              {g.reviews} reviews
-            </p>
-          </div>
-
-          {/* Book button */}
-          <div style={{ flexShrink: 0 }}>
-            <span style={{
-              background: "#111110", color: "#ffffff",
-              padding: "6px 14px", borderRadius: 100,
-              fontSize: "0.78rem", fontWeight: 600,
-              display: "inline-block",
-            }}>Book</span>
-          </div>
-        </div>
-      ))}
-    </div>
-  )
+  title: "For Drivers — Fyca",
+  description: "Find and book a trusted local garage in seconds. Search by service, read reviews, and confirm your slot — all online.",
 }
 
 // ─── How it works steps ───────────────────────────────────────────────────────
@@ -138,18 +31,22 @@ const STEPS = [
   },
 ]
 
-// ─── Specialist makes ────────────────────────────────────────────────────────
-
-const FEATURED_MAKES = ["BMW", "Mercedes", "Audi"]
-const OTHER_MAKES = ["Volkswagen", "Ford", "Vauxhall", "Toyota", "Honda", "Nissan", "Peugeot", "Renault"]
-
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default async function ForDriversPage() {
   const { userId } = await auth()
-  const user = userId
-    ? await prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true } })
-    : null
+  const [user, garages, reviewCounts] = await Promise.all([
+    userId ? prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true } }) : null,
+    prisma.garage.findMany({ orderBy: { rating: "desc" } }),
+    prisma.review.groupBy({ by: ["garageId"], _count: { id: true } }),
+  ])
+
+  const reviewCountMap = Object.fromEntries(reviewCounts.map(r => [r.garageId, r._count.id]))
+  const garagesWithCounts = garages.map(g => ({ ...g, reviewCount: reviewCountMap[g.id] ?? 0 }))
+
+  const liveServices = [...new Set(garages.flatMap(g => g.services))].slice(0, 8)
+  const liveMakes = [...new Set(garages.flatMap(g => g.specialistMakes))].slice(0, 10)
+  const liveCities = [...new Set(garages.map(g => g.city).filter(Boolean))].slice(0, 6)
 
   return (
     <>
@@ -167,7 +64,7 @@ export default async function ForDriversPage() {
             letterSpacing: "-0.035em", lineHeight: 1.04,
             color: "#111110", marginBottom: 22, maxWidth: 560,
           }}>
-            Your garage, booked in seconds.
+            Your chosen garage, booked in seconds.
           </h1>
 
           <p style={{ fontSize: "1.1rem", color: "#6b6a66", marginBottom: 36, maxWidth: 460, lineHeight: 1.65 }}>
@@ -192,8 +89,10 @@ export default async function ForDriversPage() {
             </a>
           </div>
 
-          {/* Search bar mockup */}
-          <SearchMockup />
+          {/* Live garage search preview */}
+          {garagesWithCounts.length > 0 && (
+            <GarageSearchPreview garages={garagesWithCounts} />
+          )}
 
         </div>
       </section>
@@ -248,59 +147,68 @@ export default async function ForDriversPage() {
         </div>
       </section>
 
-      {/* ─── Specialist makes ──────────────────────────────────────────────── */}
-      <section style={{ padding: "72px 24px", background: "#f4f3ef" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      {/* ─── Live services & locations ─────────────────────────────────────── */}
+      {(liveServices.length > 0 || liveCities.length > 0 || liveMakes.length > 0) && (
+        <section style={{ padding: "72px 24px", background: "#f4f3ef" }}>
+          <div style={{ maxWidth: 900, margin: "0 auto" }}>
 
-          <p className="eyebrow" style={{ marginBottom: 14 }}>Specialist garages for every make</p>
-          <h2 style={{
-            fontFamily: "var(--font-fraunces),'Fraunces',serif",
-            fontWeight: 600, fontSize: "clamp(26px, 3.5vw, 34px)",
-            letterSpacing: "-0.025em", color: "#111110", marginBottom: 36,
-          }}>
-            Find a specialist, not just a garage
-          </h2>
+            {liveServices.length > 0 && (
+              <>
+                <p className="eyebrow" style={{ marginBottom: 14 }}>Services available near you</p>
+                <h2 style={{
+                  fontFamily: "var(--font-fraunces),'Fraunces',serif",
+                  fontWeight: 600, fontSize: "clamp(26px, 3.5vw, 34px)",
+                  letterSpacing: "-0.025em", color: "#111110", marginBottom: 24,
+                }}>
+                  Find exactly what you need
+                </h2>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: liveMakes.length > 0 || liveCities.length > 0 ? 40 : 0 }}>
+                  {liveServices.map((s) => (
+                    <Link key={s} href="/garages" style={{
+                      background: "#111110", color: "#ffffff",
+                      padding: "9px 22px", borderRadius: 100,
+                      fontWeight: 600, fontSize: "0.9rem", textDecoration: "none",
+                    }}>{s}</Link>
+                  ))}
+                </div>
+              </>
+            )}
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-            {FEATURED_MAKES.map((make) => (
-              <Link
-                key={make}
-                href={`/garages`}
-                style={{
-                  background: "#111110", color: "#ffffff",
-                  padding: "9px 22px", borderRadius: 100,
-                  fontWeight: 600, fontSize: "0.9rem",
-                  textDecoration: "none",
-                }}
-              >
-                {make}
-              </Link>
-            ))}
-            {OTHER_MAKES.map((make) => (
-              <Link
-                key={make}
-                href="/garages"
-                style={{
-                  background: "transparent", color: "#444441",
-                  padding: "9px 22px", borderRadius: 100,
-                  fontWeight: 600, fontSize: "0.9rem",
-                  textDecoration: "none",
-                  border: "0.5px solid rgba(0,0,0,0.20)",
-                }}
-              >
-                {make}
-              </Link>
-            ))}
-            <span style={{
-              padding: "9px 22px", borderRadius: 100,
-              fontWeight: 600, fontSize: "0.9rem",
-              color: "#6b6a66",
-              border: "0.5px solid rgba(0,0,0,0.12)",
-            }}>+ more</span>
+            {liveMakes.length > 0 && (
+              <>
+                <p className="eyebrow" style={{ marginBottom: 14 }}>Specialist makes</p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: liveCities.length > 0 ? 40 : 0 }}>
+                  {liveMakes.map((make) => (
+                    <Link key={make} href="/garages" style={{
+                      background: "transparent", color: "#444441",
+                      padding: "9px 22px", borderRadius: 100,
+                      fontWeight: 600, fontSize: "0.9rem", textDecoration: "none",
+                      border: "0.5px solid rgba(0,0,0,0.20)",
+                    }}>{make}</Link>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {liveCities.length > 0 && (
+              <>
+                <p className="eyebrow" style={{ marginBottom: 14 }}>Locations</p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                  {liveCities.map((city) => (
+                    <Link key={city} href="/garages" style={{
+                      background: "transparent", color: "#444441",
+                      padding: "9px 22px", borderRadius: 100,
+                      fontWeight: 600, fontSize: "0.9rem", textDecoration: "none",
+                      border: "0.5px solid rgba(0,0,0,0.20)",
+                    }}>{city}</Link>
+                  ))}
+                </div>
+              </>
+            )}
+
           </div>
-
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ─── CTA ───────────────────────────────────────────────────────────── */}
       <section style={{ padding: "72px 24px", background: "#ffffff" }}>

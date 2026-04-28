@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     }
 
     const ip = (await headers()).get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown"
-    if (!rateLimit(`bookings:${ip}`, 5, 60_000)) {
+    if (!await rateLimit(`bookings:${ip}`, 5, 60_000)) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 })
     }
 

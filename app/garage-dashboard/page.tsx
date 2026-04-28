@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
 import { redirect } from "next/navigation"
 import Navbar from "@/app/components/Navbar"
+import DryvnFooter from "@/app/components/DryvnFooter"
 import BookingActions from "@/app/components/BookingActions"
 import WalkInBookingButton from "./WalkInBookingButton"
 import Link from "next/link"
@@ -139,6 +140,7 @@ async function BookingsList({ garageId }: { garageId: string }) {
           ))}
         </div>
       )}
+      <DryvnFooter />
     </>
   )
 }

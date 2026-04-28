@@ -13,6 +13,21 @@ async function assertAdmin() {
   }
 }
 
+export async function updateUserRole(userId: string, role: string) {
+  await assertAdmin()
+  await prisma.user.update({ where: { id: userId }, data: { role } })
+  revalidatePath("/admin/users")
+  revalidatePath("/admin/garages")
+}
+
+export async function approveGarage(garageId: string) {
+  await assertAdmin()
+  await prisma.garage.update({ where: { id: garageId }, data: { approved: true } })
+  revalidatePath("/admin/garages")
+  revalidatePath("/garages")
+  revalidatePath("/")
+}
+
 export async function deleteGarage(garageId: string) {
   await assertAdmin()
 

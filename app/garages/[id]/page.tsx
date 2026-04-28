@@ -3,6 +3,7 @@ import BookingForm from "@/app/components/BookingForm"
 import ReviewForm from "@/app/components/ReviewForm"
 import { prisma } from "@/app/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
+import { notFound } from "next/navigation"
 import Image from "next/image"
 import type { Metadata } from "next"
 
@@ -13,10 +14,10 @@ type Params = {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params
   const garage = await prisma.garage.findUnique({ where: { id }, select: { name: true, city: true, postcode: true, description: true } })
-  if (!garage) return { title: "Garage not found — dryvn" }
+  if (!garage) return { title: "Garage not found — Fyca" }
   return {
-    title: `${garage.name} — dryvn`,
-    description: garage.description ?? `Book ${garage.name} in ${garage.city}. Fast, online garage booking with dryvn.`,
+    title: `${garage.name} — Fyca`,
+    description: garage.description ?? `Book ${garage.name} in ${garage.city}. Fast, online garage booking with Fyca.`,
   }
 }
 
@@ -40,16 +41,7 @@ export default async function GarageDetail({ params }: Params) {
     prisma.review.findMany({ where: { garageId: id }, orderBy: { createdAt: "desc" } }),
   ])
 
-  if (!garage) {
-    return (
-      <>
-        <Navbar role={user?.role} />
-        <main style={{ maxWidth: "900px", margin: "0 auto", padding: "64px 32px" }}>
-          <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "2rem", color: "#111110" }}>Garage not found</h1>
-        </main>
-      </>
-    )
-  }
+  if (!garage) notFound()
 
   let canReview = false
   if (userId) {

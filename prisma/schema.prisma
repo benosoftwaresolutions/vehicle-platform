@@ -41,10 +41,13 @@ model Garage {
   city        String
   postcode    String
   description String?
+  email       String?
+  phone       String?
   rating      Float    @default(0)
   services         String[]
   specialistMakes  String[]
   logoUrl          String?
+  approved         Boolean  @default(false)
   createdAt        DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -61,6 +64,7 @@ model Booking {
   isWalkIn        Boolean   @default(false)
   customerName    String?
   customerPhone   String?
+  customerEmail   String?
   garageNote      String?
   suggestedDate   DateTime?
   suggestedTime   String?

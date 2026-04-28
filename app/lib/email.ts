@@ -3,6 +3,15 @@ import { Resend } from "resend"
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = process.env.RESEND_FROM ?? "onboarding@resend.dev"
 
+async function sendWithRetry(payload: Parameters<typeof resend.emails.send>[0], attempts = 3): Promise<void> {
+  for (let i = 0; i < attempts; i++) {
+    const { error } = await resend.emails.send(payload)
+    if (!error) return
+    if (i < attempts - 1) await new Promise(r => setTimeout(r, 500 * 2 ** i))
+    else console.error("[email] Failed after", attempts, "attempts:", error, "| subject:", payload.subject)
+  }
+}
+
 function formatDate(date: Date | string): string {
   return new Date(date).toLocaleDateString("en-GB", {
     weekday: "long",
@@ -29,10 +38,13 @@ function emailBase(content: string) {
           <td style="padding-bottom:24px;">
             <table cellpadding="0" cellspacing="0">
               <tr>
-                <td style="background:#111110;border-radius:7px;width:28px;height:28px;text-align:center;vertical-align:middle;">
-                  <span style="color:#ffffff;font-size:14px;line-height:28px;">&#8593;</span>
+                <td style="background:#111110;border-radius:11px;width:28px;height:28px;text-align:center;vertical-align:middle;">
+                  <span style="color:#ffffff;font-size:16px;font-weight:700;line-height:28px;letter-spacing:-0.04em;font-family:Georgia,serif;">F</span>
                 </td>
-                <td style="padding-left:8px;font-size:16px;font-weight:600;color:#111110;letter-spacing:-0.02em;">dryvn</td>
+                <td style="padding-left:8px;">
+                  <div style="font-size:16px;font-weight:700;color:#111110;letter-spacing:-0.04em;line-height:1;">Fyca</div>
+                  <div style="font-size:8px;font-weight:500;color:#aaa9a4;letter-spacing:0.13em;text-transform:uppercase;line-height:1;margin-top:2px;">Fix Your Car Anywhere</div>
+                </td>
               </tr>
             </table>
           </td>
@@ -48,7 +60,7 @@ function emailBase(content: string) {
         <!-- Footer -->
         <tr>
           <td style="padding-top:20px;text-align:center;font-size:12px;color:#6b6a66;">
-            dryvn — the smarter way to book a garage
+            Fyca — Fix Your Car Anywhere · fyca.co.uk
           </td>
         </tr>
 
@@ -90,7 +102,7 @@ export async function sendNewBookingToGarage({
   registration: string
   bookingId: string
 }) {
-  await resend.emails.send({
+  await sendWithRetry({
     from: FROM,
     to: garageOwnerEmail,
     subject: `New booking request — ${service} on ${formatDate(date)}`,
@@ -130,7 +142,7 @@ export async function sendBookingConfirmedToCustomer({
   time: string
   registration: string
 }) {
-  await resend.emails.send({
+  await sendWithRetry({
     from: FROM,
     to: customerEmail,
     subject: `Booking confirmed — ${service} at ${garageName}`,
@@ -167,7 +179,7 @@ export async function sendAlternativeAcceptedToGarage({
   confirmedTime: string
   registration: string
 }) {
-  await resend.emails.send({
+  await sendWithRetry({
     from: FROM,
     to: garageOwnerEmail,
     subject: `Customer accepted alternative — ${service} on ${formatDate(confirmedDate)}`,
@@ -200,7 +212,7 @@ export async function sendAlternativeDeclinedToGarage({
   date: Date
   time: string
 }) {
-  await resend.emails.send({
+  await sendWithRetry({
     from: FROM,
     to: garageOwnerEmail,
     subject: `Customer declined alternative — ${service}`,
@@ -217,6 +229,7 @@ export async function sendWalkInBookingToGarage({
   garageName,
   customerName,
   customerPhone,
+  customerEmail,
   service,
   date,
   time,
@@ -225,13 +238,18 @@ export async function sendWalkInBookingToGarage({
   garageOwnerEmail: string
   garageName: string
   customerName: string
-  customerPhone: string
+  customerPhone?: string
+  customerEmail?: string
   service: string
   date: Date
   time: string
   registration: string
 }) {
-  await resend.emails.send({
+  const contactRows: [string, string][] = []
+  if (customerPhone) contactRows.push(["Phone", customerPhone])
+  if (customerEmail) contactRows.push(["Email", customerEmail])
+
+  await sendWithRetry({
     from: FROM,
     to: garageOwnerEmail,
     subject: `Walk-in booked — ${service} on ${formatDate(date)}`,
@@ -244,8 +262,44 @@ export async function sendWalkInBookingToGarage({
         ["Time", time],
         ["Registration", registration],
         ["Customer", customerName],
-        ["Phone", customerPhone],
+        ...contactRows,
       ])}
+    `),
+  })
+}
+
+export async function sendBookingCancelledToGarage({
+  garageOwnerEmail,
+  garageName,
+  customerName,
+  service,
+  date,
+  time,
+  registration,
+}: {
+  garageOwnerEmail: string
+  garageName: string
+  customerName: string
+  service: string
+  date: Date
+  time: string
+  registration: string
+}) {
+  await sendWithRetry({
+    from: FROM,
+    to: garageOwnerEmail,
+    subject: `Booking cancelled — ${service} on ${formatDate(date)}`,
+    html: emailBase(`
+      <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Booking Cancelled</h2>
+      <p style="color:#6b6a66;font-size:14px;margin:0 0 4px;">A customer has cancelled their booking at <strong style="color:#111110;">${garageName}</strong>.</p>
+      ${dataTable([
+        ["Service", service],
+        ["Date", formatDate(date)],
+        ["Time", time],
+        ["Registration", registration],
+        ["Customer", customerName],
+      ])}
+      <p style="margin-top:24px;font-size:14px;color:#444441;">This slot is now free. No action is needed.</p>
     `),
   })
 }
@@ -279,7 +333,7 @@ export async function sendBookingDeclinedToCustomer({
     ? `<p style="margin-top:12px;font-size:14px;color:#444441;"><strong>Reason:</strong> ${garageNote}</p>`
     : ""
 
-  await resend.emails.send({
+  await sendWithRetry({
     from: FROM,
     to: customerEmail,
     subject: `Booking update — ${service} at ${garageName}`,

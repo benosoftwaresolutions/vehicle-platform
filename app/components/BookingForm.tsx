@@ -13,8 +13,10 @@ export default function BookingForm({ garageId, services }: { garageId: string; 
   const [date, setDate] = useState("")
   const [time, setTime] = useState("")
   const [registration, setRegistration] = useState("")
+  const [customService, setCustomService] = useState("")
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [slotsData, setSlotsData] = useState<SlotsResponse | null>(null)
   const [slotsLoading, setSlotsLoading] = useState(false)
 
@@ -30,15 +32,28 @@ export default function BookingForm({ garageId, services }: { garageId: string; 
   }, [date, garageId])
 
   const handleBooking = async () => {
-    if (!service || !date || !time || !registration || services.length === 0) return
+    const resolvedService = service === "__other__" ? customService.trim() : service
+    if (!resolvedService || !date || !time || !registration || services.length === 0) return
     setLoading(true)
-    const res = await fetch("/api/bookings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ garageId, service, date, time, registration }),
-    })
-    if (res.ok) { setSuccess(true); router.refresh() }
-    setLoading(false)
+    setError(null)
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ garageId, service: resolvedService, date, time, registration }),
+      })
+      if (res.ok) {
+        setSuccess(true)
+        router.refresh()
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setError(data.error ?? "Something went wrong — please try again.")
+      }
+    } catch {
+      setError("Could not connect — please check your connection and try again.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (success) {
@@ -50,7 +65,8 @@ export default function BookingForm({ garageId, services }: { garageId: string; 
   }
 
   const today = new Date().toISOString().split("T")[0]
-  const canBook = !loading && !!service && !!date && !!time && !!registration && services.length > 0
+  const serviceReady = service === "__other__" ? customService.trim().length > 0 : !!service
+  const canBook = !loading && serviceReady && !!date && !!time && !!registration && services.length > 0
 
   return (
     <div>
@@ -77,10 +93,22 @@ export default function BookingForm({ garageId, services }: { garageId: string; 
               No services configured yet.
             </p>
           ) : (
-            <select value={service} onChange={e => setService(e.target.value)} style={inp}>
-              <option value="">Select a service</option>
-              {services.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+            <>
+              <select value={service} onChange={e => setService(e.target.value)} style={inp}>
+                <option value="">Select a service</option>
+                {services.map(s => <option key={s} value={s}>{s}</option>)}
+                <option value="__other__">Not sure — describe your issue</option>
+              </select>
+              {service === "__other__" && (
+                <textarea
+                  placeholder="Describe what's wrong or what you'd like checked…"
+                  value={customService}
+                  onChange={e => setCustomService(e.target.value)}
+                  rows={3}
+                  style={{ ...inp, borderRadius: 12, resize: "vertical", marginTop: 8, padding: "10px 16px" }}
+                />
+              )}
+            </>
           )}
         </div>
 
@@ -126,6 +154,12 @@ export default function BookingForm({ garageId, services }: { garageId: string; 
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {error && (
+          <div style={{ background: "#fef2f2", border: "0.5px solid rgba(220,38,38,0.2)", borderRadius: 10, padding: "10px 14px", fontSize: "0.85rem", color: "#dc2626", fontWeight: 500 }}>
+            {error}
           </div>
         )}
 
