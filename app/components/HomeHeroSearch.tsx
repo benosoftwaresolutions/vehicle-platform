@@ -19,7 +19,7 @@ export default function HomeHeroSearch() {
   }
 
   return (
-    <form onSubmit={handleSearch} style={{
+    <form onSubmit={handleSearch} className="hero-search" style={{
       background: "#ffffff",
       border: "0.5px solid rgba(0,0,0,0.12)",
       borderRadius: 14,
@@ -46,7 +46,7 @@ export default function HomeHeroSearch() {
           minWidth: 0,
         }}
       />
-      <div style={{ width: "0.5px", background: "rgba(0,0,0,0.10)", alignSelf: "stretch", flexShrink: 0 }} />
+      <div className="search-divider" style={{ width: "0.5px", background: "rgba(0,0,0,0.10)", alignSelf: "stretch", flexShrink: 0 }} />
       <select
         value={service}
         onChange={e => setService(e.target.value)}

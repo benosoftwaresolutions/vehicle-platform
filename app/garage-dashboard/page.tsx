@@ -21,7 +21,7 @@ export default async function GarageDashboard() {
   return (
     <>
       <Navbar role={user.role} />
-      <div style={{ borderBottom: "0.5px solid rgba(0,0,0,0.08)", padding: "56px 32px 40px", background: "#ffffff" }}>
+      <div className="page-hd" style={{ borderBottom: "0.5px solid rgba(0,0,0,0.08)", padding: "56px 32px 40px", background: "#ffffff" }}>
         <div style={{ maxWidth: "900px", margin: "0 auto" }}>
           <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "clamp(28px,4vw,40px)", letterSpacing: "-0.03em", color: "#111110", marginBottom: "6px" }}>
             Garage Dashboard
@@ -29,7 +29,7 @@ export default async function GarageDashboard() {
           <p style={{ color: "#6b6a66", fontSize: "0.95rem" }}>Manage your incoming bookings</p>
         </div>
       </div>
-      <main style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 32px" }}>
+      <main className="page-body" style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 32px" }}>
         {!user.garageId ? (
           <GarageSetupPrompt />
         ) : (
@@ -81,7 +81,7 @@ async function BookingsList({ garageId }: { garageId: string }) {
         <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.15rem", letterSpacing: "-0.02em", color: "#111110" }}>
           Bookings
         </h2>
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+        <div className="dash-actions" style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
           <WalkInBookingButton garageId={garageId} services={garageServices} />
           <Link href="/garage-dashboard/settings" style={{ background: "transparent", color: "#111110", border: "0.5px solid rgba(0,0,0,0.2)", padding: "9px 18px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", textDecoration: "none" }}>
             Settings

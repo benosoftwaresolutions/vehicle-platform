@@ -27,7 +27,7 @@ export default async function GarageSettingsPage() {
   return (
     <>
       <Navbar role="garage_owner" />
-      <div style={{ borderBottom: "0.5px solid rgba(0,0,0,0.08)", padding: "56px 32px 40px", background: "#ffffff" }}>
+      <div className="page-hd" style={{ borderBottom: "0.5px solid rgba(0,0,0,0.08)", padding: "56px 32px 40px", background: "#ffffff" }}>
         <div style={{ maxWidth: "760px", margin: "0 auto" }}>
           <p style={{ fontSize: "0.8rem", color: "#6b6a66", marginBottom: "14px" }}>
             <Link href="/garage-dashboard" style={{ color: "#6b6a66", textDecoration: "none" }}>Dashboard</Link>
@@ -40,7 +40,7 @@ export default async function GarageSettingsPage() {
           <p style={{ color: "#6b6a66", fontSize: "0.95rem" }}>Manage how your garage appears to customers</p>
         </div>
       </div>
-      <main style={{ maxWidth: "760px", margin: "0 auto", padding: "40px 32px" }}>
+      <main className="page-body" style={{ maxWidth: "760px", margin: "0 auto", padding: "40px 32px" }}>
         <GarageSettingsForm garage={garage} />
       </main>
     </>

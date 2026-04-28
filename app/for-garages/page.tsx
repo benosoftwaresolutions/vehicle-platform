@@ -117,7 +117,7 @@ export default async function ForGaragesPage() {
       <Navbar role={user?.role} />
 
       {/* ─── Hero ──────────────────────────────────────────────────────────── */}
-      <section style={{ padding: "96px 24px 80px", background: "#ffffff", borderBottom: "0.5px solid rgba(0,0,0,0.08)" }}>
+      <section className="sect-hero" style={{ padding: "96px 24px 80px", background: "#ffffff", borderBottom: "0.5px solid rgba(0,0,0,0.08)" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
 
           <p className="eyebrow" style={{ marginBottom: 20 }}>For garage owners</p>
@@ -136,7 +136,7 @@ export default async function ForGaragesPage() {
             Let customers book online, manage appointments, and keep your diary full — without the back-and-forth.
           </p>
 
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 56 }}>
+          <div className="cta-row" style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 56 }}>
             <Link href="/sign-up" style={{
               background: "#111110", color: "#ffffff",
               padding: "14px 28px", borderRadius: 100,
@@ -155,7 +155,7 @@ export default async function ForGaragesPage() {
           </div>
 
           {/* Stats strip */}
-          <div style={{
+          <div className="stats-strip" style={{
             display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
             background: "#f4f3ef", borderRadius: 14,
             overflow: "hidden",
@@ -197,7 +197,7 @@ export default async function ForGaragesPage() {
           </h2>
 
           {/* 2-col grid, last card full-width */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             {FEATURES.slice(0, 4).map((f) => (
               <div key={f.title} style={{
                 background: "#ffffff", borderRadius: 14, padding: "26px 24px",

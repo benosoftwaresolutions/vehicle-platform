@@ -27,7 +27,7 @@ export default async function Home() {
       {showBanner && <OnboardingBanner />}
 
       {/* 1 — Hero */}
-      <section style={{ padding: "96px 32px 80px", background: "#ffffff", borderBottom: "0.5px solid rgba(0,0,0,0.08)" }}>
+      <section className="sect-hero" style={{ padding: "96px 32px 80px", background: "#ffffff", borderBottom: "0.5px solid rgba(0,0,0,0.08)" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <p style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#444441", marginBottom: 20 }}>
             The smarter way to book
@@ -43,7 +43,7 @@ export default async function Home() {
             maxWidth: 660,
           }}>
             Your garage,{" "}
-            <em style={{ fontStyle: "italic", color: "#6b6a66" }}>booked in minutes.</em>
+            <em className="hero-em" style={{ fontStyle: "italic", color: "#111110", fontWeight: 700 }}>booked in minutes.</em>
           </h1>
           <p style={{ fontSize: "1.05rem", color: "#6b6a66", marginBottom: 40, maxWidth: 460, lineHeight: 1.7 }}>
             Find a trusted local garage and book online — any time of day, no phone calls needed.
@@ -64,7 +64,7 @@ export default async function Home() {
       </section>
 
       {/* 3 — How it works */}
-      <section style={{ padding: "80px 32px", background: "#ffffff" }}>
+      <section className="sect" style={{ padding: "80px 32px", background: "#ffffff" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <p style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#444441", marginBottom: 14 }}>How it works</p>
           <h2 style={{
@@ -74,7 +74,7 @@ export default async function Home() {
           }}>
             Three steps to sorted
           </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
+          <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
             {[
               { n: "1", title: "Search", body: "Enter your location and the service you need. Filter by make, service type, or browse all." },
               { n: "2", title: "Book", body: "Pick a garage, choose a time that works for you, and confirm in seconds — no account needed." },
@@ -101,7 +101,7 @@ export default async function Home() {
 
       {/* 4 — Featured garages */}
       {featured.length > 0 && (
-        <section style={{ padding: "72px 32px", background: "#f4f3ef" }}>
+        <section className="sect" style={{ padding: "72px 32px", background: "#f4f3ef" }}>
           <div style={{ maxWidth: 900, margin: "0 auto" }}>
             <p style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#444441", marginBottom: 14 }}>Featured garages</p>
             <h2 style={{
@@ -111,7 +111,7 @@ export default async function Home() {
             }}>
               Trusted garages near you
             </h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16 }}>
+            <div className="grid-auto" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16 }}>
               {featured.map(garage => (
                 <GarageCard
                   key={garage.id}
@@ -175,8 +175,8 @@ export default async function Home() {
       )}
 
       {/* 6 — Split pitch */}
-      <section style={{ padding: "72px 32px", background: "#f4f3ef" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, alignItems: "stretch" }}>
+      <section className="sect" style={{ padding: "72px 32px", background: "#f4f3ef" }}>
+        <div className="grid-2" style={{ maxWidth: 900, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, alignItems: "stretch" }}>
 
           {/* Drivers */}
           <div style={{ background: "#111110", borderRadius: 20, padding: "44px 40px", display: "flex", flexDirection: "column" }}>
@@ -234,7 +234,7 @@ export default async function Home() {
       </section>
 
       {/* 7 — CTA band */}
-      <section style={{ padding: "80px 32px", background: "#111110" }}>
+      <section className="sect" style={{ padding: "80px 32px", background: "#111110" }}>
         <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
           <h2 style={{
             fontFamily: "var(--font-fraunces),'Fraunces',serif",
@@ -246,7 +246,7 @@ export default async function Home() {
           <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "1rem", marginBottom: 36 }}>
             Find a garage near you, or list yours for free in minutes.
           </p>
-          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+          <div className="cta-row" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
             <a href="/garages" style={{ background: "#ffffff", color: "#111110", padding: "14px 30px", borderRadius: 100, fontWeight: 700, fontSize: "0.95rem", textDecoration: "none" }}>
               Find a garage
             </a>

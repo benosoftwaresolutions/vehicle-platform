@@ -38,8 +38,8 @@ export default async function ContactPage() {
         </div>
       </section>
 
-      <section style={{ padding: "72px 24px", background: "#f4f3ef" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48, alignItems: "start" }}>
+      <section className="sect" style={{ padding: "72px 24px", background: "#f4f3ef" }}>
+        <div className="grid-2" style={{ maxWidth: 900, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48, alignItems: "start" }}>
 
           {/* Contact options */}
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>

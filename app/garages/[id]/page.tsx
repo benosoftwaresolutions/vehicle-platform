@@ -61,7 +61,7 @@ export default async function GarageDetail({ params }: Params) {
       <Navbar role={user?.role} />
 
       {/* Page header */}
-      <div style={{ borderBottom: "0.5px solid rgba(0,0,0,0.08)", padding: "48px 32px 36px", background: "#ffffff" }}>
+      <div className="page-hd" style={{ borderBottom: "0.5px solid rgba(0,0,0,0.08)", padding: "48px 32px 36px", background: "#ffffff" }}>
         <div style={{ maxWidth: "900px", margin: "0 auto" }}>
           <p style={{ fontSize: "0.8rem", color: "#6b6a66", marginBottom: "16px" }}>
             <a href="/" style={{ color: "#6b6a66", textDecoration: "none" }}>Home</a>
@@ -95,7 +95,7 @@ export default async function GarageDetail({ params }: Params) {
         </div>
       </div>
 
-      <main style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 32px" }}>
+      <main className="page-body" style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 32px" }}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 

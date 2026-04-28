@@ -20,7 +20,7 @@ export default async function AboutPage() {
       <Navbar role={user?.role} />
 
       {/* Hero */}
-      <section style={{ padding: "80px 24px 64px", background: "#ffffff", borderBottom: "0.5px solid rgba(0,0,0,0.08)" }}>
+      <section className="sect-hero" style={{ padding: "80px 24px 64px", background: "#ffffff", borderBottom: "0.5px solid rgba(0,0,0,0.08)" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <p style={{ fontSize: "0.78rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#444441", marginBottom: 20 }}>
             About
@@ -40,8 +40,8 @@ export default async function AboutPage() {
       </section>
 
       {/* Mission */}
-      <section style={{ padding: "72px 24px", background: "#f4f3ef" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48, alignItems: "start" }}>
+      <section className="sect" style={{ padding: "72px 24px", background: "#f4f3ef" }}>
+        <div className="grid-2" style={{ maxWidth: 900, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48, alignItems: "start" }}>
           <div>
             <p style={{ fontSize: "0.78rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#444441", marginBottom: 14 }}>Our mission</p>
             <h2 style={{
@@ -71,7 +71,7 @@ export default async function AboutPage() {
       </section>
 
       {/* Values */}
-      <section style={{ padding: "72px 24px", background: "#ffffff" }}>
+      <section className="sect" style={{ padding: "72px 24px", background: "#ffffff" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <p style={{ fontSize: "0.78rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#444441", marginBottom: 14 }}>What we stand for</p>
           <h2 style={{
@@ -81,7 +81,7 @@ export default async function AboutPage() {
           }}>
             Simple values, honest product
           </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+          <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
             {[
               { title: "Transparency", body: "No hidden fees, no surprise charges. What you see is what you get." },
               { title: "Trust", body: "Every garage on Fyca is vetted. Real reviews from real customers." },
@@ -97,7 +97,7 @@ export default async function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section style={{ padding: "72px 24px", background: "#f4f3ef" }}>
+      <section className="sect" style={{ padding: "72px 24px", background: "#f4f3ef" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <div style={{ background: "#111110", borderRadius: 20, padding: "56px 52px", textAlign: "center" }}>
             <h2 style={{
@@ -110,7 +110,7 @@ export default async function AboutPage() {
             <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "1rem", marginBottom: 32 }}>
               Find a garage near you, or list yours for free.
             </p>
-            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+            <div className="cta-row" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
               <a href="/garages" style={{ background: "#ffffff", color: "#111110", padding: "13px 28px", borderRadius: 100, fontWeight: 700, fontSize: "0.95rem", textDecoration: "none" }}>
                 Find a garage
               </a>

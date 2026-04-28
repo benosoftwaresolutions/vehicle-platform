@@ -53,7 +53,7 @@ export default async function ForDriversPage() {
       <Navbar role={user?.role} />
 
       {/* ─── Hero ──────────────────────────────────────────────────────────── */}
-      <section style={{ padding: "96px 24px 72px", background: "#ffffff", borderBottom: "0.5px solid rgba(0,0,0,0.08)" }}>
+      <section className="sect-hero" style={{ padding: "96px 24px 72px", background: "#ffffff", borderBottom: "0.5px solid rgba(0,0,0,0.08)" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
 
           <p className="eyebrow" style={{ marginBottom: 20 }}>For drivers</p>
@@ -71,7 +71,7 @@ export default async function ForDriversPage() {
             Find a trusted local garage, pick a time that works, and book online. No phone calls, no waiting on hold.
           </p>
 
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 56 }}>
+          <div className="cta-row" style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 56 }}>
             <Link href="/garages" style={{
               background: "#111110", color: "#ffffff",
               padding: "14px 28px", borderRadius: 100,
@@ -98,7 +98,7 @@ export default async function ForDriversPage() {
       </section>
 
       {/* ─── How it works ──────────────────────────────────────────────────── */}
-      <section id="how-it-works" style={{ padding: "72px 24px", background: "#ffffff" }}>
+      <section id="how-it-works" className="sect" style={{ padding: "72px 24px", background: "#ffffff" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
 
           <p className="eyebrow" style={{ marginBottom: 14 }}>How it works</p>
@@ -149,7 +149,7 @@ export default async function ForDriversPage() {
 
       {/* ─── Live services & locations ─────────────────────────────────────── */}
       {(liveServices.length > 0 || liveCities.length > 0 || liveMakes.length > 0) && (
-        <section style={{ padding: "72px 24px", background: "#f4f3ef" }}>
+        <section className="sect" style={{ padding: "72px 24px", background: "#f4f3ef" }}>
           <div style={{ maxWidth: 900, margin: "0 auto" }}>
 
             {liveServices.length > 0 && (
@@ -211,7 +211,7 @@ export default async function ForDriversPage() {
       )}
 
       {/* ─── CTA ───────────────────────────────────────────────────────────── */}
-      <section style={{ padding: "72px 24px", background: "#ffffff" }}>
+      <section className="sect" style={{ padding: "72px 24px", background: "#ffffff" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <div style={{
             background: "#111110", borderRadius: 20, padding: "60px 52px",

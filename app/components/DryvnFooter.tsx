@@ -2,12 +2,12 @@ import Link from "next/link"
 
 export default function DryvnFooter() {
   return (
-    <footer style={{
+    <footer className="footer-root" style={{
       borderTop: "0.5px solid rgba(0,0,0,0.10)",
       padding: "48px 28px 32px",
       background: "#ffffff",
     }}>
-      <div style={{
+      <div className="footer-body" style={{
         maxWidth: 900, margin: "0 auto",
         display: "flex", justifyContent: "space-between", alignItems: "flex-start",
         flexWrap: "wrap", gap: 32, marginBottom: 40,
@@ -38,7 +38,7 @@ export default function DryvnFooter() {
         </div>
 
         {/* Links */}
-        <div style={{ display: "flex", gap: 48, flexWrap: "wrap" }}>
+        <div className="footer-links" style={{ display: "flex", gap: 48, flexWrap: "wrap" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <p style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#aaa9a4", margin: 0 }}>Platform</p>
             {[
@@ -74,7 +74,7 @@ export default function DryvnFooter() {
       </div>
 
       {/* Copyright */}
-      <div style={{ maxWidth: 900, margin: "0 auto", borderTop: "0.5px solid rgba(0,0,0,0.08)", paddingTop: 20 }}>
+      <div className="footer-copyright" style={{ maxWidth: 900, margin: "0 auto", borderTop: "0.5px solid rgba(0,0,0,0.08)", paddingTop: 20 }}>
         <p style={{ fontSize: "0.78rem", color: "#aaa9a4", margin: 0 }}>
           © 2026 Fyca. All rights reserved.
         </p>
