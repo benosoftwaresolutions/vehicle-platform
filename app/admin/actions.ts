@@ -31,8 +31,10 @@ export async function approveGarage(garageId: string) {
 export async function deleteGarage(garageId: string) {
   await assertAdmin()
 
-  // Delete all associated records before the garage
+  // Delete all associated records before the garage (order matters for FK constraints)
+  const availability = await prisma.garageAvailability.findUnique({ where: { garageId }, select: { id: true } })
   await prisma.$transaction([
+    ...(availability ? [prisma.daySchedule.deleteMany({ where: { availabilityId: availability.id } })] : []),
     prisma.booking.deleteMany({ where: { garageId } }),
     prisma.review.deleteMany({ where: { garageId } }),
     prisma.serviceType.deleteMany({ where: { garageId } }),

@@ -30,7 +30,7 @@ export default async function Garages({ searchParams }: { searchParams: Promise<
   return (
     <>
       <Navbar role={user?.role} />
-      <div style={{ borderBottom: "0.5px solid rgba(0,0,0,0.08)", padding: "56px 32px 40px", background: "#ffffff" }}>
+      <div className="page-hd" style={{ borderBottom: "0.5px solid rgba(0,0,0,0.08)", padding: "56px 32px 40px", background: "#ffffff" }}>
         <div style={{ maxWidth: "900px", margin: "0 auto" }}>
           <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "clamp(30px,4vw,42px)", letterSpacing: "-0.03em", color: "#111110", marginBottom: "8px" }}>
             Find a Garage
@@ -38,7 +38,7 @@ export default async function Garages({ searchParams }: { searchParams: Promise<
           <p style={{ color: "#6b6a66", fontSize: "0.95rem" }}>Search for a garage near you</p>
         </div>
       </div>
-      <main style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 32px" }}>
+      <main className="page-body" style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 32px" }}>
         <GaragesSearch
           key={`${params.q ?? ""}|${params.service ?? ""}`}
           garages={garagesWithCounts}

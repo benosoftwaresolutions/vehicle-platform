@@ -116,3 +116,81 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
 /* Section */
 .section { padding: 72px 24px; }
 .content-max { max-width: 900px; margin: 0 auto; }
+
+/* ─── Responsive layout utilities ─────────────────────────────────────────── */
+
+/* Nav: mobile elements hidden by default, desktop shown */
+.nav-mobile { display: none; }
+
+/* Hero italic: Fraunces italic has thin strokes that look visually grey —
+   force dark color and heavier weight on all em/i inside h1 */
+.hero-em,
+h1 em,
+h1 i { color: #111110 !important; font-weight: 700 !important; }
+
+/* ─── Mobile breakpoint ────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  html, body { overflow-x: hidden; }
+
+  /* Nav */
+  .nav-desktop  { display: none !important; }
+  .nav-mobile   { display: flex !important; }
+
+  /* Logo: shrink wordmark, hide tagline */
+  .logo-wordmark { font-size: 16px !important; }
+  .logo-tagline  { display: none !important; }
+
+  /* Section padding */
+  .sect-hero { padding: 48px 20px 40px !important; }
+  .sect      { padding: 48px 20px !important; }
+  .page-hd   { padding: 40px 20px 28px !important; }
+  .page-body { padding: 32px 20px !important; }
+
+  /* Grids → single column */
+  .grid-2    { grid-template-columns: 1fr !important; gap: 16px !important; }
+  .grid-3    { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .grid-4    { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+  .grid-auto { grid-template-columns: 1fr !important; }
+
+  /* Stats strip (3-col in hero) → single col */
+  .stats-strip { grid-template-columns: 1fr !important; }
+  .stats-strip > * { border-right: none !important; border-bottom: 0.5px solid rgba(0,0,0,0.08); }
+  .stats-strip > *:last-child { border-bottom: none; }
+
+  /* CTA rows → stacked full-width */
+  .cta-row { flex-direction: column !important; align-items: stretch !important; }
+  .cta-row > * { width: 100% !important; text-align: center !important; box-sizing: border-box !important; }
+
+  /* Hero search → stacked */
+  .hero-search { flex-direction: column !important; gap: 4px !important; padding: 6px !important; }
+  .hero-search .search-divider { display: none !important; }
+  .hero-search input,
+  .hero-search select {
+    flex: none !important;
+    width: 100% !important;
+    border-radius: 10px !important;
+  }
+  .hero-search button {
+    width: 100% !important;
+    border-radius: 10px !important;
+    margin-top: 4px;
+  }
+
+  /* Admin tables → horizontal scroll */
+  .table-wrap       { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+  .table-wrap table { min-width: 680px; }
+
+  /* Booking card: status badge wraps below content */
+  .booking-card { grid-template-columns: 1fr !important; }
+  .booking-card .status-tag { justify-self: start; }
+
+  /* Dashboard action buttons wrap */
+  .dash-actions { flex-wrap: wrap !important; }
+  .dash-actions > * { flex-shrink: 0; }
+
+  /* Footer → single column, reduced padding */
+  .footer-root        { padding: 32px 20px !important; }
+  .footer-body        { flex-direction: column !important; align-items: flex-start !important; gap: 28px !important; }
+  .footer-links       { flex-direction: column !important; gap: 24px !important; width: 100% !important; }
+  .footer-copyright   { display: block !important; }
+}

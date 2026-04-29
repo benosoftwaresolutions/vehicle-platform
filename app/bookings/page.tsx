@@ -33,7 +33,7 @@ export default async function Bookings() {
   return (
     <>
       <Navbar role={user?.role} />
-      <div style={{ borderBottom: "0.5px solid rgba(0,0,0,0.08)", padding: "56px 32px 40px", background: "#ffffff" }}>
+      <div className="page-hd" style={{ borderBottom: "0.5px solid rgba(0,0,0,0.08)", padding: "56px 32px 40px", background: "#ffffff" }}>
         <div style={{ maxWidth: "900px", margin: "0 auto" }}>
           <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "clamp(28px,4vw,40px)", letterSpacing: "-0.03em", color: "#111110", marginBottom: "6px" }}>
             My Bookings
@@ -41,7 +41,7 @@ export default async function Bookings() {
           <p style={{ color: "#6b6a66", fontSize: "0.95rem" }}>View and manage your garage bookings</p>
         </div>
       </div>
-      <main style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 32px" }}>
+      <main className="page-body" style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 32px" }}>
         {bookings.length === 0 ? (
           <div style={{ background: "#f4f3ef", borderRadius: 14, padding: "48px", textAlign: "center" }}>
             <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.25rem", color: "#111110", marginBottom: "8px" }}>No bookings yet</h2>
@@ -59,7 +59,7 @@ export default async function Bookings() {
 
               return (
                 <div key={booking.id} style={{ background: "#f4f3ef", borderRadius: 14, padding: "22px 24px" }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr auto", alignItems: "start", gap: "16px" }}>
+                  <div className="booking-card" style={{ display: "grid", gridTemplateColumns: "1fr auto", alignItems: "start", gap: "16px" }}>
                     <div>
                       <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.1rem", letterSpacing: "-0.02em", color: "#111110", marginBottom: "6px" }}>
                         {garage?.name || "Unknown Garage"}

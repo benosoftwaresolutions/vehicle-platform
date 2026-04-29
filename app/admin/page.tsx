@@ -63,12 +63,12 @@ export default async function AdminOverview() {
         <p style={{ color: "#6b6a66", fontSize: "0.9rem" }}>Platform-wide stats</p>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px", marginBottom: "14px" }}>
+      <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px", marginBottom: "14px" }}>
         <StatCard label="Total Garages"  value={totalGarages} />
         <StatCard label="Total Users"    value={totalUsers} />
         <StatCard label="Total Bookings" value={totalBookings} />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px", marginBottom: "32px" }}>
+      <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px", marginBottom: "32px" }}>
         <StatCard label="Total Reviews"        value={totalReviews} />
         <StatCard label="Bookings This Month"  value={bookingsThisMonth} sub={now.toLocaleString("default", { month: "long", year: "numeric" })} />
         <StatCard label="New Users This Month" value={newUsersThisMonth} sub={now.toLocaleString("default", { month: "long", year: "numeric" })} />
