@@ -1,9 +1,16 @@
 import { Resend } from "resend"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = process.env.RESEND_FROM ?? "onboarding@resend.dev"
 
-async function sendWithRetry(payload: Parameters<typeof resend.emails.send>[0], attempts = 3): Promise<void> {
+// Lazy-initialise so missing key doesn't crash the build
+function getResend() {
+  const key = process.env.RESEND_API_KEY
+  if (!key) throw new Error("RESEND_API_KEY environment variable is not set")
+  return new Resend(key)
+}
+
+async function sendWithRetry(payload: Parameters<Resend["emails"]["send"]>[0], attempts = 3): Promise<void> {
+  const resend = getResend()
   for (let i = 0; i < attempts; i++) {
     const { error } = await resend.emails.send(payload)
     if (!error) return
