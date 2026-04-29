@@ -8,16 +8,26 @@ export default function DeleteGarageButton({ garageId, garageName }: { garageId:
   const router = useRouter()
   const [confirming, setConfirming] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   if (confirming) {
     return (
       <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-        <span style={{ fontSize: "0.75rem", color: "#dc2626", fontWeight: 600 }}>Sure?</span>
+        {error
+          ? <span style={{ fontSize: "0.75rem", color: "#dc2626", fontWeight: 600 }}>{error}</span>
+          : <span style={{ fontSize: "0.75rem", color: "#dc2626", fontWeight: 600 }}>Sure?</span>
+        }
         <button
           onClick={async () => {
             setLoading(true)
-            await deleteGarage(garageId)
-            router.refresh()
+            setError(null)
+            try {
+              await deleteGarage(garageId)
+              router.refresh()
+            } catch (e) {
+              setError(e instanceof Error ? e.message : "Failed")
+              setLoading(false)
+            }
           }}
           disabled={loading}
           style={{ background: "#111110", color: "white", border: "none", borderRadius: 100, padding: "4px 12px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}
@@ -25,7 +35,7 @@ export default function DeleteGarageButton({ garageId, garageName }: { garageId:
           {loading ? "…" : "Yes"}
         </button>
         <button
-          onClick={() => setConfirming(false)}
+          onClick={() => { setConfirming(false); setError(null) }}
           style={{ background: "transparent", color: "#444441", border: "0.5px solid rgba(0,0,0,0.15)", borderRadius: 100, padding: "4px 12px", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer" }}
         >
           No
