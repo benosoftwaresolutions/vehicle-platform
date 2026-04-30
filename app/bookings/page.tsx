@@ -4,6 +4,7 @@ import AlternativeResponseButtons from "../components/AlternativeResponseButtons
 import CancelBookingButton from "./CancelBookingButton"
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "../lib/prisma"
+import { getCachedUser } from "../lib/cache"
 
 const STATUS_STYLES: Record<string, { background: string; color: string; label: string; textDecoration?: string }> = {
   pending:              { background: "#f4f3ef", color: "#444441",  label: "Pending" },
@@ -21,7 +22,7 @@ export default async function Bookings() {
       where: { clerkId: userId! },
       orderBy: { createdAt: "desc" },
     }),
-    userId ? prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true } }) : null,
+    userId ? getCachedUser(userId) : null,
     prisma.garage.findMany({ select: { id: true, name: true, city: true, postcode: true } }),
   ])
 

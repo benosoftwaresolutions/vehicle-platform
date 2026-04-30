@@ -15,7 +15,8 @@ async function assertAdmin() {
 
 export async function updateUserRole(userId: string, role: string) {
   await assertAdmin()
-  await prisma.user.update({ where: { id: userId }, data: { role } })
+  const updated = await prisma.user.update({ where: { id: userId }, data: { role }, select: { clerkId: true } })
+  updateTag(`user-${updated.clerkId}`)
   revalidatePath("/admin/users")
   revalidatePath("/admin/garages")
 }
