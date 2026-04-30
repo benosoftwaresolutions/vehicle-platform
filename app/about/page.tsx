@@ -1,3 +1,4 @@
+import Link from "next/link"
 import Navbar from "@/app/components/Navbar"
 import DryvnFooter from "@/app/components/DryvnFooter"
 import { auth } from "@clerk/nextjs/server"
@@ -111,12 +112,12 @@ export default async function AboutPage() {
               Find a garage near you, or list yours for free.
             </p>
             <div className="cta-row" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-              <a href="/garages" style={{ background: "#ffffff", color: "#111110", padding: "13px 28px", borderRadius: 100, fontWeight: 700, fontSize: "0.95rem", textDecoration: "none" }}>
+              <Link href="/garages" style={{ background: "#ffffff", color: "#111110", padding: "13px 28px", borderRadius: 100, fontWeight: 700, fontSize: "0.95rem", textDecoration: "none" }}>
                 Find a garage
-              </a>
-              <a href="/for-garages" style={{ background: "transparent", color: "#ffffff", padding: "13px 28px", borderRadius: 100, fontWeight: 600, fontSize: "0.95rem", textDecoration: "none", border: "0.5px solid rgba(255,255,255,0.3)" }}>
+              </Link>
+              <Link href="/for-garages" style={{ background: "transparent", color: "#ffffff", padding: "13px 28px", borderRadius: 100, fontWeight: 600, fontSize: "0.95rem", textDecoration: "none", border: "0.5px solid rgba(255,255,255,0.3)" }}>
                 List your garage
-              </a>
+              </Link>
             </div>
           </div>
         </div>

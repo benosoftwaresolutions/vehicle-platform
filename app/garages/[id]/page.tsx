@@ -1,3 +1,4 @@
+import Link from "next/link"
 import Navbar from "@/app/components/Navbar"
 import BookingForm from "@/app/components/BookingForm"
 import ReviewForm from "@/app/components/ReviewForm"
@@ -64,9 +65,9 @@ export default async function GarageDetail({ params }: Params) {
       <div className="page-hd" style={{ borderBottom: "0.5px solid rgba(0,0,0,0.08)", padding: "48px 32px 36px", background: "#ffffff" }}>
         <div style={{ maxWidth: "900px", margin: "0 auto" }}>
           <p style={{ fontSize: "0.8rem", color: "#6b6a66", marginBottom: "16px" }}>
-            <a href="/" style={{ color: "#6b6a66", textDecoration: "none" }}>Home</a>
+            <Link href="/" style={{ color: "#6b6a66", textDecoration: "none" }}>Home</Link>
             <span style={{ margin: "0 6px" }}>→</span>
-            <a href="/garages" style={{ color: "#6b6a66", textDecoration: "none" }}>Garages</a>
+            <Link href="/garages" style={{ color: "#6b6a66", textDecoration: "none" }}>Garages</Link>
             <span style={{ margin: "0 6px" }}>→</span>
             {garage.name}
           </p>

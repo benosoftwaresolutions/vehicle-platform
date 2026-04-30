@@ -117,6 +117,14 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
 .section { padding: 72px 24px; }
 .content-max { max-width: 900px; margin: 0 auto; }
 
+/* Loading spinner */
+@keyframes fyca-spin { to { transform: rotate(360deg); } }
+.loading-spinner {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 2px solid #eceae4; border-top-color: #111110;
+  animation: fyca-spin 0.7s linear infinite;
+}
+
 /* ─── Interactive element baseline ────────────────────────────────────────── */
 
 /* Remove iOS blue tap flash on all interactive elements */

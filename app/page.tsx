@@ -1,3 +1,4 @@
+import Link from "next/link"
 import Navbar from "./components/Navbar"
 import DryvnFooter from "./components/DryvnFooter"
 import GarageCard from "./components/GarageCard"
@@ -126,9 +127,9 @@ export default async function Home() {
               ))}
             </div>
             <div style={{ marginTop: 28, textAlign: "center" }}>
-              <a href="/garages" style={{ fontSize: "0.875rem", fontWeight: 600, color: "#111110", textDecoration: "none", borderBottom: "0.5px solid rgba(0,0,0,0.3)", paddingBottom: 1 }}>
+              <Link href="/garages" style={{ fontSize: "0.875rem", fontWeight: 600, color: "#111110", textDecoration: "none", borderBottom: "0.5px solid rgba(0,0,0,0.3)", paddingBottom: 1 }}>
                 View all garages →
-              </a>
+              </Link>
             </div>
           </div>
         </section>
@@ -150,7 +151,7 @@ export default async function Home() {
               {allMakes.map(make => {
                 const isPremium = PREMIUM_MAKES.has(make)
                 return (
-                  <a
+                  <Link
                     key={make}
                     href={`/garages?q=${encodeURIComponent(make)}`}
                     style={{
@@ -166,7 +167,7 @@ export default async function Home() {
                     }}
                   >
                     {make}
-                  </a>
+                  </Link>
                 )
               })}
             </div>
@@ -199,9 +200,9 @@ export default async function Home() {
                 </div>
               ))}
             </div>
-            <a href="/garages" style={{ marginTop: "auto", display: "inline-block", background: "#ffffff", color: "#111110", padding: "12px 24px", borderRadius: 100, fontWeight: 700, fontSize: "0.875rem", textDecoration: "none", alignSelf: "flex-start" }}>
+            <Link href="/garages" style={{ marginTop: "auto", display: "inline-block", background: "#ffffff", color: "#111110", padding: "12px 24px", borderRadius: 100, fontWeight: 700, fontSize: "0.875rem", textDecoration: "none", alignSelf: "flex-start" }}>
               Find a garage
-            </a>
+            </Link>
           </div>
 
           {/* Garages */}
@@ -225,9 +226,9 @@ export default async function Home() {
                 </div>
               ))}
             </div>
-            <a href="/for-garages" style={{ marginTop: "auto", display: "inline-block", background: "#111110", color: "#ffffff", padding: "12px 24px", borderRadius: 100, fontWeight: 700, fontSize: "0.875rem", textDecoration: "none", alignSelf: "flex-start" }}>
+            <Link href="/for-garages" style={{ marginTop: "auto", display: "inline-block", background: "#111110", color: "#ffffff", padding: "12px 24px", borderRadius: 100, fontWeight: 700, fontSize: "0.875rem", textDecoration: "none", alignSelf: "flex-start" }}>
               List your garage
-            </a>
+            </Link>
           </div>
 
         </div>
@@ -247,12 +248,12 @@ export default async function Home() {
             Find a garage near you, or list yours for free in minutes.
           </p>
           <div className="cta-row" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-            <a href="/garages" style={{ background: "#ffffff", color: "#111110", padding: "14px 30px", borderRadius: 100, fontWeight: 700, fontSize: "0.95rem", textDecoration: "none" }}>
+            <Link href="/garages" style={{ background: "#ffffff", color: "#111110", padding: "14px 30px", borderRadius: 100, fontWeight: 700, fontSize: "0.95rem", textDecoration: "none" }}>
               Find a garage
-            </a>
-            <a href="/for-garages" style={{ background: "transparent", color: "#ffffff", padding: "14px 30px", borderRadius: 100, fontWeight: 600, fontSize: "0.95rem", textDecoration: "none", border: "0.5px solid rgba(255,255,255,0.3)" }}>
+            </Link>
+            <Link href="/for-garages" style={{ background: "transparent", color: "#ffffff", padding: "14px 30px", borderRadius: 100, fontWeight: 600, fontSize: "0.95rem", textDecoration: "none", border: "0.5px solid rgba(255,255,255,0.3)" }}>
               List your garage
-            </a>
+            </Link>
           </div>
         </div>
       </section>
