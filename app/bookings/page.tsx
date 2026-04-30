@@ -1,3 +1,4 @@
+import Link from "next/link"
 import Navbar from "../components/Navbar"
 import AlternativeResponseButtons from "../components/AlternativeResponseButtons"
 import CancelBookingButton from "./CancelBookingButton"
@@ -46,9 +47,9 @@ export default async function Bookings() {
           <div style={{ background: "#f4f3ef", borderRadius: 14, padding: "48px", textAlign: "center" }}>
             <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.25rem", color: "#111110", marginBottom: "8px" }}>No bookings yet</h2>
             <p style={{ color: "#6b6a66", marginBottom: "24px" }}>Find a garage and book your first appointment</p>
-            <a href="/garages" style={{ background: "#111110", color: "#ffffff", padding: "12px 24px", borderRadius: 100, fontWeight: 600, textDecoration: "none", fontSize: "0.9rem" }}>
+            <Link href="/garages" style={{ background: "#111110", color: "#ffffff", padding: "12px 24px", borderRadius: 100, fontWeight: 600, textDecoration: "none", fontSize: "0.9rem" }}>
               Find a Garage
-            </a>
+            </Link>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
