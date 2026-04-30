@@ -4,6 +4,7 @@ import BookingForm from "@/app/components/BookingForm"
 import ReviewForm from "@/app/components/ReviewForm"
 import { prisma } from "@/app/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
+import { getCachedUser } from "@/app/lib/cache"
 import { notFound } from "next/navigation"
 import Image from "next/image"
 import type { Metadata } from "next"
@@ -38,7 +39,7 @@ export default async function GarageDetail({ params }: Params) {
 
   const [garage, user, reviews] = await Promise.all([
     prisma.garage.findUnique({ where: { id } }),
-    userId ? prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true } }) : null,
+    userId ? getCachedUser(userId) : null,
     prisma.review.findMany({ where: { garageId: id }, orderBy: { createdAt: "desc" } }),
   ])
 

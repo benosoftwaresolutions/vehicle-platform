@@ -2,7 +2,7 @@ import Link from "next/link"
 import Navbar from "@/app/components/Navbar"
 import DryvnFooter from "@/app/components/DryvnFooter"
 import { auth } from "@clerk/nextjs/server"
-import { prisma } from "@/app/lib/prisma"
+import { getCachedUser } from "@/app/lib/cache"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -12,9 +12,7 @@ export const metadata: Metadata = {
 
 export default async function AboutPage() {
   const { userId } = await auth()
-  const user = userId
-    ? await prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true } })
-    : null
+  const user = userId ? await getCachedUser(userId) : null
 
   return (
     <>

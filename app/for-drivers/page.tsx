@@ -3,7 +3,7 @@ import Navbar from "@/app/components/Navbar"
 import DryvnFooter from "@/app/components/DryvnFooter"
 import GarageSearchPreview from "./GarageSearchPreview"
 import { auth } from "@clerk/nextjs/server"
-import { prisma } from "@/app/lib/prisma"
+import { getCachedUser, getCachedGarages } from "@/app/lib/cache"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -35,14 +35,13 @@ const STEPS = [
 
 export default async function ForDriversPage() {
   const { userId } = await auth()
-  const [user, garages, reviewCounts] = await Promise.all([
-    userId ? prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true } }) : null,
-    prisma.garage.findMany({ orderBy: { rating: "desc" } }),
-    prisma.review.groupBy({ by: ["garageId"], _count: { id: true } }),
+  const [user, { garages, reviewCountMap }] = await Promise.all([
+    userId ? getCachedUser(userId) : null,
+    getCachedGarages(),
   ])
 
-  const reviewCountMap = Object.fromEntries(reviewCounts.map(r => [r.garageId, r._count.id]))
-  const garagesWithCounts = garages.map(g => ({ ...g, reviewCount: reviewCountMap[g.id] ?? 0 }))
+  const sortedGarages = [...garages].sort((a, b) => b.rating - a.rating)
+  const garagesWithCounts = sortedGarages.map(g => ({ ...g, reviewCount: reviewCountMap[g.id] ?? 0 }))
 
   const liveServices = [...new Set(garages.flatMap(g => g.services))].slice(0, 8)
   const liveMakes = [...new Set(garages.flatMap(g => g.specialistMakes))].slice(0, 10)

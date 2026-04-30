@@ -1,36 +1,19 @@
-import { unstable_cache } from "next/cache"
 import Navbar from "../components/Navbar"
 import DryvnFooter from "../components/DryvnFooter"
 import GaragesSearch from "./GaragesSearch"
 import { auth } from "@clerk/nextjs/server"
-import { prisma } from "../lib/prisma"
-
-const getGarageListData = unstable_cache(
-  async () => {
-    const [garages, reviewCounts] = await Promise.all([
-      prisma.garage.findMany({ where: { approved: true }, orderBy: { name: "asc" } }),
-      prisma.review.groupBy({ by: ["garageId"], _count: { id: true } }),
-    ])
-    return { garages, reviewCounts }
-  },
-  ["garages-list"],
-  { revalidate: 60, tags: ["garages"] }
-)
+import { getCachedUser, getCachedGarages } from "../lib/cache"
 
 export default async function Garages({ searchParams }: { searchParams: Promise<{ q?: string; service?: string }> }) {
   const { userId } = await auth()
   const params = await searchParams
 
-  const [{ garages, reviewCounts }, user] = await Promise.all([
-    getGarageListData(),
-    userId
-      ? prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true } })
-      : null,
+  const [{ garages, reviewCountMap }, user] = await Promise.all([
+    getCachedGarages(),
+    userId ? getCachedUser(userId) : null,
   ])
 
-  const reviewCountMap = Object.fromEntries(reviewCounts.map((r) => [r.garageId, r._count.id]))
-
-  const garagesWithCounts = garages.map((g) => ({
+  const garagesWithCounts = [...garages].sort((a, b) => a.name.localeCompare(b.name)).map((g) => ({
     ...g,
     reviewCount: reviewCountMap[g.id] ?? 0,
   }))

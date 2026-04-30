@@ -1,37 +1,23 @@
-import { unstable_cache } from "next/cache"
 import Link from "next/link"
 import Navbar from "./components/Navbar"
 import DryvnFooter from "./components/DryvnFooter"
 import GarageCard from "./components/GarageCard"
 import HomeHeroSearch from "./components/HomeHeroSearch"
 import OnboardingBanner from "./components/OnboardingBanner"
-import { prisma } from "./lib/prisma"
 import { auth } from "@clerk/nextjs/server"
+import { getCachedUser, getCachedGarages } from "./lib/cache"
 
 const PREMIUM_MAKES = new Set(["BMW", "Mercedes", "Audi", "Volkswagen", "Porsche", "Land Rover"])
 
-const getHomepageGarages = unstable_cache(
-  async () => {
-    const [garages, reviewCounts] = await Promise.all([
-      prisma.garage.findMany({ where: { approved: true }, orderBy: { rating: "desc" } }),
-      prisma.review.groupBy({ by: ["garageId"], _count: { id: true } }),
-    ])
-    return { garages, reviewCounts }
-  },
-  ["homepage-garages"],
-  { revalidate: 60, tags: ["garages"] }
-)
-
 export default async function Home() {
   const { userId } = await auth()
-  const [{ garages, reviewCounts }, user] = await Promise.all([
-    getHomepageGarages(),
-    userId ? prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true, profileComplete: true } }) : null,
+  const [{ garages, reviewCountMap }, user] = await Promise.all([
+    getCachedGarages(),
+    userId ? getCachedUser(userId) : null,
   ])
-
-  const reviewCountMap = Object.fromEntries(reviewCounts.map(r => [r.garageId, r._count.id]))
   const showBanner = !!userId && (!user || !user.profileComplete)
-  const featured = garages.slice(0, 3)
+  const byRating = [...garages].sort((a, b) => b.rating - a.rating)
+  const featured = byRating.slice(0, 3)
   const allMakes = [...new Set(garages.flatMap(g => g.specialistMakes))].sort()
 
   return (
