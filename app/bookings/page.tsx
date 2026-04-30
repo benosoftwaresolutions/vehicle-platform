@@ -16,20 +16,16 @@ const STATUS_STYLES: Record<string, { background: string; color: string; label: 
 export default async function Bookings() {
   const { userId } = await auth()
 
-  const [bookings, user] = await Promise.all([
+  const [bookings, user, allGarages] = await Promise.all([
     prisma.booking.findMany({
       where: { clerkId: userId! },
       orderBy: { createdAt: "desc" },
     }),
     userId ? prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true } }) : null,
+    prisma.garage.findMany({ select: { id: true, name: true, city: true, postcode: true } }),
   ])
 
-  const garageIds = bookings.map((b) => b.garageId)
-  const garages = await prisma.garage.findMany({
-    where: { id: { in: garageIds } }
-  })
-
-  const garageMap = Object.fromEntries(garages.map((g) => [g.id, g]))
+  const garageMap = Object.fromEntries(allGarages.map((g) => [g.id, g]))
 
   return (
     <>

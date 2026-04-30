@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
-import { revalidatePath } from "next/cache"
+import { revalidatePath, updateTag } from "next/cache"
 
 async function assertAdmin() {
   const adminId = process.env.ADMIN_USER_ID
@@ -23,9 +23,8 @@ export async function updateUserRole(userId: string, role: string) {
 export async function approveGarage(garageId: string) {
   await assertAdmin()
   await prisma.garage.update({ where: { id: garageId }, data: { approved: true } })
+  updateTag("garages")
   revalidatePath("/admin/garages")
-  revalidatePath("/garages")
-  revalidatePath("/")
 }
 
 export async function deleteGarage(garageId: string) {
@@ -43,6 +42,7 @@ export async function deleteGarage(garageId: string) {
     prisma.garage.delete({ where: { id: garageId } }),
   ])
 
+  updateTag("garages")
   revalidatePath("/admin/garages")
   revalidatePath("/admin")
 }

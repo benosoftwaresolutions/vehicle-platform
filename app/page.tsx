@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache"
 import Link from "next/link"
 import Navbar from "./components/Navbar"
 import DryvnFooter from "./components/DryvnFooter"
@@ -9,12 +10,23 @@ import { auth } from "@clerk/nextjs/server"
 
 const PREMIUM_MAKES = new Set(["BMW", "Mercedes", "Audi", "Volkswagen", "Porsche", "Land Rover"])
 
+const getHomepageGarages = unstable_cache(
+  async () => {
+    const [garages, reviewCounts] = await Promise.all([
+      prisma.garage.findMany({ where: { approved: true }, orderBy: { rating: "desc" } }),
+      prisma.review.groupBy({ by: ["garageId"], _count: { id: true } }),
+    ])
+    return { garages, reviewCounts }
+  },
+  ["homepage-garages"],
+  { revalidate: 60, tags: ["garages"] }
+)
+
 export default async function Home() {
   const { userId } = await auth()
-  const [garages, user, reviewCounts] = await Promise.all([
-    prisma.garage.findMany({ where: { approved: true }, orderBy: { rating: "desc" } }),
+  const [{ garages, reviewCounts }, user] = await Promise.all([
+    getHomepageGarages(),
     userId ? prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true, profileComplete: true } }) : null,
-    prisma.review.groupBy({ by: ["garageId"], _count: { id: true } }),
   ])
 
   const reviewCountMap = Object.fromEntries(reviewCounts.map(r => [r.garageId, r._count.id]))
