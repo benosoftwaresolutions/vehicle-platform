@@ -46,7 +46,7 @@ export default function DryvnFooter() {
               { label: "For drivers", href: "/for-drivers" },
               { label: "For garages", href: "/for-garages" },
             ].map(({ label, href }) => (
-              <Link key={label} href={href} style={{
+              <Link key={label} href={href} className="footer-link" style={{
                 color: "#6b6a66", fontSize: "0.875rem", fontWeight: 500,
                 textDecoration: "none",
               }}>
@@ -61,7 +61,7 @@ export default function DryvnFooter() {
               { label: "Contact", href: "/contact" },
               { label: "Privacy", href: "/privacy" },
             ].map(({ label, href }) => (
-              <Link key={label} href={href} style={{
+              <Link key={label} href={href} className="footer-link" style={{
                 color: "#6b6a66", fontSize: "0.875rem", fontWeight: 500,
                 textDecoration: "none",
               }}>

@@ -97,11 +97,11 @@ export default function Navbar({ role }: { role?: string }) {
         {/* Desktop: centre nav */}
         <div className="nav-desktop" style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <Link href="/" style={navLink}>Home</Link>
-            <Link href="/garages" style={navLink}>Garages</Link>
+            <Link href="/" className="nav-link" style={navLink}>Home</Link>
+            <Link href="/garages" className="nav-link" style={navLink}>Garages</Link>
             {isSignedIn && (isGarageOwner
-              ? <Link href="/garage-dashboard" style={navLink}>Dashboard</Link>
-              : <Link href="/bookings" style={navLink}>My Bookings</Link>
+              ? <Link href="/garage-dashboard" className="nav-link" style={navLink}>Dashboard</Link>
+              : <Link href="/bookings" className="nav-link" style={navLink}>My Bookings</Link>
             )}
           </div>
           <div style={{ width: "0.5px", height: 18, background: "rgba(0,0,0,0.15)" }} />
@@ -126,7 +126,7 @@ export default function Navbar({ role }: { role?: string }) {
           {!isSignedIn ? (
             <>
               <SignInButton mode="modal">
-                <button style={navLink as React.CSSProperties}>Log in</button>
+                <button className="nav-link" style={navLink as React.CSSProperties}>Log in</button>
               </SignInButton>
               <SignUpButton mode="modal">
                 <button style={{ background: "#111110", color: "#ffffff", border: "none", borderRadius: 100, padding: "9px 20px", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-dm-sans), sans-serif" }}>
@@ -162,11 +162,11 @@ export default function Navbar({ role }: { role?: string }) {
         }}>
           {/* Primary links */}
           <div style={{ padding: "8px 16px" }}>
-            <Link href="/" style={mobileLink}>Home</Link>
-            <Link href="/garages" style={mobileLink}>Garages</Link>
+            <Link href="/" className="mobile-link" style={mobileLink}>Home</Link>
+            <Link href="/garages" className="mobile-link" style={mobileLink}>Garages</Link>
             {isSignedIn && (isGarageOwner
-              ? <Link href="/garage-dashboard" style={mobileLink}>Dashboard</Link>
-              : <Link href="/bookings" style={mobileLink}>My Bookings</Link>
+              ? <Link href="/garage-dashboard" className="mobile-link" style={mobileLink}>Dashboard</Link>
+              : <Link href="/bookings" className="mobile-link" style={mobileLink}>My Bookings</Link>
             )}
           </div>
 
@@ -175,8 +175,8 @@ export default function Navbar({ role }: { role?: string }) {
           {/* For garages / drivers */}
           <div style={{ padding: "8px 16px" }}>
             <p style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#aaa9a4", padding: "0 14px", marginBottom: 4 }}>I&apos;m a...</p>
-            <Link href="/for-garages" style={{ ...mobileLink, background: onGarages ? "#f4f3ef" : "transparent" }}>For garages</Link>
-            <Link href="/for-drivers" style={{ ...mobileLink, background: onDrivers ? "#f4f3ef" : "transparent" }}>For drivers</Link>
+            <Link href="/for-garages" className="mobile-link" style={{ ...mobileLink, background: onGarages ? "#f4f3ef" : "transparent" }}>For garages</Link>
+            <Link href="/for-drivers" className="mobile-link" style={{ ...mobileLink, background: onDrivers ? "#f4f3ef" : "transparent" }}>For drivers</Link>
           </div>
 
           <div style={{ height: "0.5px", background: "rgba(0,0,0,0.08)", margin: "8px 16px" }} />
