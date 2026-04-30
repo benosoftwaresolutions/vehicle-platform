@@ -117,6 +117,36 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
 .section { padding: 72px 24px; }
 .content-max { max-width: 900px; margin: 0 auto; }
 
+/* ─── Interactive element baseline ────────────────────────────────────────── */
+
+/* Remove iOS blue tap flash on all interactive elements */
+a, button { -webkit-tap-highlight-color: transparent; }
+
+/* Desktop nav links — hover highlight */
+.nav-link { transition: background 0.15s, color 0.15s; }
+.nav-link:hover  { background: #f4f3ef !important; color: #111110 !important; }
+.nav-link:active { background: #eceae4 !important; }
+
+/* Mobile menu links — active/hover highlight */
+.mobile-link { transition: background 0.15s; }
+.mobile-link:hover,
+.mobile-link:active { background: #f4f3ef !important; }
+
+/* Footer links — colour shift */
+.footer-link { transition: color 0.15s; }
+.footer-link:hover,
+.footer-link:active { color: #111110 !important; }
+
+/* Garage card — CSS hover replaces JS onMouseEnter/Leave */
+.garage-card { transition: background 0.15s !important; }
+.garage-card:hover  { background: #eceae4 !important; }
+.garage-card:active { background: #e5e2da !important; }
+
+/* Time-slot buttons */
+.slot-btn { transition: opacity 0.12s; }
+.slot-btn:hover  { opacity: 0.75; }
+.slot-btn:active { opacity: 0.55; }
+
 /* ─── Responsive layout utilities ─────────────────────────────────────────── */
 
 /* Nav: mobile elements hidden by default, desktop shown */

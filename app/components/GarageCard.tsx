@@ -24,16 +24,12 @@ export default function GarageCard({ id, name, location, rating, reviewCount, se
   const [favourited, setFavourited] = useState(false)
 
   return (
-    <div style={{
+    <div className="garage-card" style={{
       background: "#f4f3ef",
       borderRadius: 14,
       overflow: "hidden",
-      transition: "background 0.15s",
       cursor: "pointer",
-    }}
-      onMouseEnter={e => (e.currentTarget.style.background = "#eceae4")}
-      onMouseLeave={e => (e.currentTarget.style.background = "#f4f3ef")}
-    >
+    }}>
       {/* Image / logo area */}
       <div style={{ height: 140, background: "#eceae4", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "relative" }}>
         {logoUrl

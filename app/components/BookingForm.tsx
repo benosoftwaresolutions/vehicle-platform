@@ -141,8 +141,9 @@ export default function BookingForm({ garageId, services }: { garageId: string; 
                     key={slot}
                     type="button"
                     onClick={() => setTime(slot)}
+                    className="slot-btn"
                     style={{
-                      padding: "7px 14px", borderRadius: 100,
+                      padding: "10px 16px", borderRadius: 100,
                       border: time === slot ? "none" : "0.5px solid rgba(0,0,0,0.15)",
                       background: time === slot ? "#111110" : "#ffffff",
                       color: time === slot ? "#ffffff" : "#111110",
