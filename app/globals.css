@@ -157,8 +157,8 @@ a, button { -webkit-tap-highlight-color: transparent; }
 
 /* ─── Responsive layout utilities ─────────────────────────────────────────── */
 
-/* Nav: mobile elements hidden by default, desktop shown */
-.nav-mobile { display: none; }
+/* Nav: mobile elements hidden by default — !important required to beat inline display:flex */
+.nav-mobile { display: none !important; }
 
 /* Hero italic: Fraunces italic has thin strokes that look visually grey —
    force dark color and heavier weight on all em/i inside h1 */
