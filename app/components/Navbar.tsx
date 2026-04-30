@@ -174,7 +174,6 @@ export default function Navbar({ role }: { role?: string }) {
 
           {/* For garages / drivers */}
           <div style={{ padding: "8px 16px" }}>
-            <p style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#aaa9a4", padding: "0 14px", marginBottom: 4 }}>I&apos;m a...</p>
             <Link href="/for-garages" className="mobile-link" style={{ ...mobileLink, background: onGarages ? "#f4f3ef" : "transparent" }}>For garages</Link>
             <Link href="/for-drivers" className="mobile-link" style={{ ...mobileLink, background: onDrivers ? "#f4f3ef" : "transparent" }}>For drivers</Link>
           </div>
