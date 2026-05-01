@@ -38,14 +38,24 @@ export async function POST(req: Request) {
 
   if (evt.type === "user.created") {
     const { id, email_addresses, first_name, last_name } = evt.data
-
     await prisma.user.create({
       data: {
         clerkId: id,
-        email: email_addresses[0].email_address,
-        name: `${first_name || ""} ${last_name || ""}`.trim(),
+        email: email_addresses[0]?.email_address ?? "",
+        name: `${first_name ?? ""} ${last_name ?? ""}`.trim() || null,
         role: "pending",
         onboardingStep: 0,
+      }
+    })
+  }
+
+  if (evt.type === "user.updated") {
+    const { id, email_addresses, first_name, last_name } = evt.data
+    await prisma.user.updateMany({
+      where: { clerkId: id },
+      data: {
+        email: email_addresses[0]?.email_address ?? "",
+        name: `${first_name ?? ""} ${last_name ?? ""}`.trim() || null,
       }
     })
   }
