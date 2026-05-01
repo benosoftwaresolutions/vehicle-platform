@@ -136,7 +136,11 @@ export default function Navbar({ role }: { role?: string }) {
               </SignUpButton>
             </>
           ) : isDesktop ? (
-            <UserButton />
+            <UserButton>
+              <UserButton.MenuItems>
+                <UserButton.Link label="My Profile" href="/profile" labelIcon={<ProfileIcon />} />
+              </UserButton.MenuItems>
+            </UserButton>
           ) : null}
         </div>
 
@@ -199,7 +203,11 @@ export default function Navbar({ role }: { role?: string }) {
               </div>
             ) : (
               <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "0 14px" }}>
-                <UserButton />
+                <UserButton>
+                  <UserButton.MenuItems>
+                    <UserButton.Link label="My Profile" href="/profile" labelIcon={<ProfileIcon />} />
+                  </UserButton.MenuItems>
+                </UserButton>
                 <span style={{ fontSize: "0.875rem", color: "#444441" }}>My account</span>
               </div>
             )}
@@ -207,6 +215,15 @@ export default function Navbar({ role }: { role?: string }) {
         </div>
       )}
     </>
+  )
+}
+
+function ProfileIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="8" cy="5.5" r="2.5" stroke="currentColor" strokeWidth="1.25" />
+      <path d="M2.5 13.5c0-2.485 2.462-4.5 5.5-4.5s5.5 2.015 5.5 4.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+    </svg>
   )
 }
 
