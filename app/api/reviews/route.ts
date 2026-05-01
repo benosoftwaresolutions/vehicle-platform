@@ -22,6 +22,9 @@ export async function POST(req: Request) {
     if (rating < 1 || rating > 5 || !Number.isInteger(rating)) {
       return NextResponse.json({ error: "Rating must be an integer 1–5" }, { status: 400 })
     }
+    if (comment.trim().length < 3 || comment.trim().length > 1000) {
+      return NextResponse.json({ error: "Comment must be 3–1000 characters" }, { status: 400 })
+    }
 
     // Must have a confirmed booking at this garage
     const confirmedBooking = await prisma.booking.findFirst({
