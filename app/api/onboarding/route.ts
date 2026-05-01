@@ -11,6 +11,9 @@ export async function POST(req: Request) {
     const { step, role, name, garageName, garageAddress, garageCity, garagePostcode } = body
 
     if (step === 1) {
+      if (!["customer", "garage_owner"].includes(role)) {
+        return NextResponse.json({ error: "Invalid role" }, { status: 400 })
+      }
       await prisma.user.update({
         where: { clerkId: userId },
         data: { role, onboardingStep: 1 }
@@ -18,13 +21,31 @@ export async function POST(req: Request) {
     }
 
     if (step === 2 && role === "customer") {
+      if (!name?.trim() || name.length > 100) {
+        return NextResponse.json({ error: "Invalid name" }, { status: 400 })
+      }
       await prisma.user.update({
         where: { clerkId: userId },
-        data: { name, onboardingStep: 2, profileComplete: true }
+        data: { name: name.trim(), onboardingStep: 2, profileComplete: true }
       })
     }
 
     if (step === 2 && role === "garage_owner") {
+      if (!garageName?.trim() || garageName.length > 100) {
+        return NextResponse.json({ error: "Invalid garage name" }, { status: 400 })
+      }
+      if (!garageAddress?.trim() || garageAddress.length > 200) {
+        return NextResponse.json({ error: "Invalid address" }, { status: 400 })
+      }
+      if (!garageCity?.trim() || garageCity.length > 100) {
+        return NextResponse.json({ error: "Invalid city" }, { status: 400 })
+      }
+      if (!garagePostcode?.trim() || garagePostcode.length > 10) {
+        return NextResponse.json({ error: "Invalid postcode" }, { status: 400 })
+      }
+      if (!name?.trim() || name.length > 100) {
+        return NextResponse.json({ error: "Invalid name" }, { status: 400 })
+      }
       // Create the garage
       const garage = await prisma.garage.create({
         data: {
@@ -54,7 +75,7 @@ export async function POST(req: Request) {
       await prisma.user.update({
         where: { clerkId: userId },
         data: {
-          name,
+          name: name.trim(),
           role: "garage_owner",
           garageId: garage.id,
           onboardingStep: 2,

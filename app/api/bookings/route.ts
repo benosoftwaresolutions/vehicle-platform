@@ -20,6 +20,17 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { garageId, service, date, time, registration } = body
 
+    if (!garageId || !service?.trim() || !date || !time || !registration?.trim()) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
+    if (service.length > 100 || registration.length > 20) {
+      return NextResponse.json({ error: "Invalid input" }, { status: 400 })
+    }
+    const parsedDate = new Date(date)
+    if (isNaN(parsedDate.getTime())) {
+      return NextResponse.json({ error: "Invalid date" }, { status: 400 })
+    }
+
     const booking = await prisma.booking.create({
       data: {
         clerkId: userId,
