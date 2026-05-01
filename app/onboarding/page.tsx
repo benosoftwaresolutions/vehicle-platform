@@ -6,7 +6,7 @@ import OnboardingFlow from "@/app/components/OnboardingFlow"
 
 export default async function OnboardingPage() {
   const { userId } = await auth()
-  if (!userId) redirect("/")
+  if (!userId) redirect("/sign-in")
 
   let user = await prisma.user.findUnique({
     where: { clerkId: userId }
@@ -15,7 +15,7 @@ export default async function OnboardingPage() {
   // Webhook hasn't fired yet — create the record using the real email from Clerk
   // so we don't hit the unique constraint on the email field with an empty string
   if (!user) {
-    const clerkUser = await currentUser()
+    const clerkUser = await currentUser().catch(() => null)
     const email = clerkUser?.emailAddresses[0]?.emailAddress ?? userId
     user = await prisma.user.upsert({
       where: { clerkId: userId },
