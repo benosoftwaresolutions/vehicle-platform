@@ -1,12 +1,11 @@
 import { auth, currentUser } from "@clerk/nextjs/server"
-import { redirect } from "next/navigation"
 import { prisma } from "@/app/lib/prisma"
 import Navbar from "@/app/components/Navbar"
 import Link from "next/link"
 
 export default async function ProfilePage() {
   const { userId, sessionClaims } = await auth()
-  if (!userId) redirect("/sign-in")
+  if (!userId) return <NotSignedIn />
 
   const dbUser = await prisma.user.findUnique({
     where: { clerkId: userId },
@@ -22,15 +21,7 @@ export default async function ProfilePage() {
   // currentUser() makes a Clerk API call — wrap so it never crashes the page
   const clerkUser = await currentUser().catch(() => null)
 
-  if (!dbUser) {
-    // Webhook didn't fire — create a minimal user record from Clerk data
-    const email = clerkUser?.emailAddresses?.[0]?.emailAddress ?? ""
-    const name = [clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(" ") || null
-    await prisma.user.create({
-      data: { clerkId: userId!, email, name, role: "pending", onboardingStep: 0 },
-    }).catch(() => null) // ignore if race condition creates it first
-    redirect("/onboarding")
-  }
+  if (!dbUser) return <CompleteSetup />
 
   const isGarageOwner = dbUser.role === "garage_owner"
 
@@ -230,6 +221,29 @@ export default async function ProfilePage() {
         </div>
       </main>
     </>
+  )
+}
+
+function NotSignedIn() {
+  return (
+    <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 32 }}>
+      <div style={{ textAlign: "center" }}>
+        <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontSize: "1.8rem", color: "#111110", marginBottom: 12 }}>Sign in to view your profile</h1>
+        <Link href="/" className="btn-primary" style={{ fontSize: "0.9rem" }}>Go home</Link>
+      </div>
+    </div>
+  )
+}
+
+function CompleteSetup() {
+  return (
+    <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 32 }}>
+      <div style={{ textAlign: "center", maxWidth: 400 }}>
+        <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontSize: "1.8rem", color: "#111110", marginBottom: 12 }}>Complete your setup</h1>
+        <p style={{ color: "#6b6a66", marginBottom: 24 }}>Finish setting up your account to view your profile.</p>
+        <Link href="/onboarding" className="btn-primary" style={{ fontSize: "0.9rem" }}>Complete setup</Link>
+      </div>
+    </div>
   )
 }
 
