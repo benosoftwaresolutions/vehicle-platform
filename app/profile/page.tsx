@@ -3,7 +3,6 @@ import { redirect } from "next/navigation"
 import { prisma } from "@/app/lib/prisma"
 import Navbar from "@/app/components/Navbar"
 import Link from "next/link"
-import Image from "next/image"
 
 export default async function ProfilePage() {
   const { userId } = await auth()
@@ -77,7 +76,8 @@ export default async function ProfilePage() {
             <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
               {/* Avatar */}
               {clerkUser?.imageUrl ? (
-                <Image
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
                   src={clerkUser.imageUrl}
                   alt={dbUser.name ?? "Profile photo"}
                   width={72}
