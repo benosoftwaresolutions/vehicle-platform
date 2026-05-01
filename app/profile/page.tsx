@@ -31,17 +31,17 @@ export default async function ProfilePage() {
       ? prisma.garage.findUnique({
           where: { id: dbUser.garageId },
           select: { name: true, city: true, postcode: true, address: true, rating: true, approved: true },
-        })
+        }).catch(() => null)
       : null,
     !isGarageOwner
-      ? prisma.vehicle.findMany({ where: { clerkId: userId }, orderBy: { createdAt: "desc" } })
+      ? prisma.vehicle.findMany({ where: { clerkId: userId }, orderBy: { createdAt: "desc" } }).catch(() => [])
       : [],
     isGarageOwner && dbUser.garageId
-      ? prisma.booking.count({ where: { garageId: dbUser.garageId } })
-      : prisma.booking.count({ where: { clerkId: userId } }),
+      ? prisma.booking.count({ where: { garageId: dbUser.garageId } }).catch(() => 0)
+      : prisma.booking.count({ where: { clerkId: userId } }).catch(() => 0),
     isGarageOwner && dbUser.garageId
-      ? prisma.booking.count({ where: { garageId: dbUser.garageId, status: "confirmed" } })
-      : prisma.booking.count({ where: { clerkId: userId, status: "confirmed" } }),
+      ? prisma.booking.count({ where: { garageId: dbUser.garageId, status: "confirmed" } }).catch(() => 0)
+      : prisma.booking.count({ where: { clerkId: userId, status: "confirmed" } }).catch(() => 0),
   ])
 
   const clerkName = [clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(" ")
