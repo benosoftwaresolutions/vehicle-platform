@@ -1,11 +1,11 @@
-import { auth } from "@clerk/nextjs/server"
+import { auth, currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import { prisma } from "@/app/lib/prisma"
 import Navbar from "@/app/components/Navbar"
 import Link from "next/link"
 
 export default async function ProfilePage() {
-  const { userId } = await auth()
+  const { userId, sessionClaims } = await auth()
   if (!userId) redirect("/sign-in")
 
   const dbUser = await prisma.user.findUnique({
@@ -20,6 +20,9 @@ export default async function ProfilePage() {
   })
 
   if (!dbUser) redirect("/onboarding")
+
+  // currentUser() makes a Clerk API call — wrap so it never crashes the page
+  const clerkUser = await currentUser().catch(() => null)
 
   const isGarageOwner = dbUser.role === "garage_owner"
 
@@ -41,12 +44,16 @@ export default async function ProfilePage() {
       : prisma.booking.count({ where: { clerkId: userId, status: "confirmed" } }),
   ])
 
-  const initials = (dbUser.name ?? dbUser.email)
+  const clerkName = [clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(" ")
+  const displayName = dbUser.name || clerkName || ""
+  const displayEmail = dbUser.email || clerkUser?.emailAddresses?.[0]?.emailAddress || ""
+
+  const initials = (displayName || displayEmail)
     .split(" ")
     .slice(0, 2)
     .map((w: string) => w[0])
     .join("")
-    .toUpperCase()
+    .toUpperCase() || "?"
 
   const memberSince = new Date(dbUser.createdAt).toLocaleDateString("en-GB", {
     month: "long",
@@ -85,7 +92,7 @@ export default async function ProfilePage() {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 4 }}>
                   <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.35rem", letterSpacing: "-0.02em", color: "#111110", margin: 0 }}>
-                    {dbUser.name ?? "Your Name"}
+                    {displayName || "Your Name"}
                   </h2>
                   <span style={{
                     background: isGarageOwner ? "#111110" : "#eceae4",
@@ -96,7 +103,7 @@ export default async function ProfilePage() {
                     {isGarageOwner ? "Garage Owner" : "Driver"}
                   </span>
                 </div>
-                <p style={{ color: "#6b6a66", fontSize: "0.9rem", margin: "0 0 2px" }}>{dbUser.email}</p>
+                <p style={{ color: "#6b6a66", fontSize: "0.9rem", margin: "0 0 2px" }}>{displayEmail}</p>
                 <p style={{ color: "#aaa9a4", fontSize: "0.8rem", margin: 0 }}>Member since {memberSince}</p>
               </div>
             </div>
@@ -207,7 +214,7 @@ export default async function ProfilePage() {
               Manage your email address, password, and profile photo using the account button in the top navigation bar.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <Row label="Email" value={dbUser.email} />
+              <Row label="Email" value={displayEmail} />
               <Row label="Account type" value={isGarageOwner ? "Garage Owner" : "Driver"} />
             </div>
           </div>
