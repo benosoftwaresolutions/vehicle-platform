@@ -103,6 +103,7 @@ export default function Navbar({ role }: { role?: string }) {
               ? <Link href="/garage-dashboard" className="nav-link" style={navLink}>Dashboard</Link>
               : <Link href="/bookings" className="nav-link" style={navLink}>My Bookings</Link>
             )}
+            {isSignedIn && <Link href="/profile" className="nav-link" style={navLink}>Profile</Link>}
           </div>
           <div style={{ width: "0.5px", height: 18, background: "rgba(0,0,0,0.15)" }} />
           <div style={{ background: "#f4f3ef", borderRadius: 100, padding: 3, display: "flex", gap: 2 }}>
@@ -168,6 +169,7 @@ export default function Navbar({ role }: { role?: string }) {
               ? <Link href="/garage-dashboard" className="mobile-link" style={mobileLink}>Dashboard</Link>
               : <Link href="/bookings" className="mobile-link" style={mobileLink}>My Bookings</Link>
             )}
+            {isSignedIn && <Link href="/profile" className="mobile-link" style={mobileLink}>Profile</Link>}
           </div>
 
           <div style={{ height: "0.5px", background: "rgba(0,0,0,0.08)", margin: "8px 16px" }} />
