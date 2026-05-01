@@ -9,6 +9,21 @@ export async function POST(req: Request) {
 
     const { garageId, slotDuration, capacity, schedule } = await req.json()
 
+    const user = await prisma.user.findUnique({
+      where: { clerkId: userId },
+      select: { garageId: true, role: true },
+    })
+    if (!user || user.role !== "garage_owner" || user.garageId !== garageId) {
+      return NextResponse.json({ error: "Unauthorised" }, { status: 403 })
+    }
+
+    if (!Number.isInteger(capacity) || capacity <= 0 || capacity > 100) {
+      return NextResponse.json({ error: "Invalid capacity" }, { status: 400 })
+    }
+    if (!Number.isInteger(slotDuration) || slotDuration <= 0 || slotDuration > 480) {
+      return NextResponse.json({ error: "Invalid slot duration" }, { status: 400 })
+    }
+
     const availability = await prisma.garageAvailability.upsert({
       where: { garageId },
       update: {

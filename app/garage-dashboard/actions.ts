@@ -23,6 +23,9 @@ export async function updateBookingStatus(
   if (!user || user.role !== "garage_owner" || !user.garageId) throw new Error("Unauthorised")
   if (!targetBooking || targetBooking.garageId !== user.garageId) throw new Error("Unauthorised")
 
+  const validStatuses = ["confirmed", "declined", "pending", "declined_by_customer"]
+  if (!validStatuses.includes(status)) throw new Error("Invalid status")
+
   const booking = await prisma.booking.update({
     where: { id: bookingId },
     data: {
