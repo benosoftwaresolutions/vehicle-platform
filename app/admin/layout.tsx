@@ -1,5 +1,4 @@
 import { auth } from "@clerk/nextjs/server"
-import { redirect } from "next/navigation"
 import Link from "next/link"
 
 const NAV = [
@@ -17,12 +16,18 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const adminId = process.env.ADMIN_USER_ID
   if (!adminId) throw new Error("ADMIN_USER_ID environment variable is not set")
   if (!userId || userId !== adminId) {
-    redirect("/")
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ textAlign: "center" }}>
+          <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", color: "#111110", marginBottom: 12 }}>Access denied</h1>
+          <Link href="/" style={{ color: "#6b6a66", textDecoration: "none" }}>Go home</Link>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "#f4f3ef" }}>
-      {/* Sidebar */}
       <aside style={{
         width: 216, background: "#111110", display: "flex",
         flexDirection: "column", flexShrink: 0, position: "sticky",
@@ -55,8 +60,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </Link>
         </div>
       </aside>
-
-      {/* Main content */}
       <div style={{ flex: 1, overflowY: "auto" }}>
         {children}
       </div>
