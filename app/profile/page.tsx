@@ -19,10 +19,18 @@ export default async function ProfilePage() {
     },
   })
 
-  if (!dbUser) redirect("/onboarding")
-
   // currentUser() makes a Clerk API call — wrap so it never crashes the page
   const clerkUser = await currentUser().catch(() => null)
+
+  if (!dbUser) {
+    // Webhook didn't fire — create a minimal user record from Clerk data
+    const email = clerkUser?.emailAddresses?.[0]?.emailAddress ?? ""
+    const name = [clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(" ") || null
+    await prisma.user.create({
+      data: { clerkId: userId!, email, name, role: "pending", onboardingStep: 0 },
+    }).catch(() => null) // ignore if race condition creates it first
+    redirect("/onboarding")
+  }
 
   const isGarageOwner = dbUser.role === "garage_owner"
 
