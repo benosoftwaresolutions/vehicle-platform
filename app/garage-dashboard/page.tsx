@@ -9,6 +9,12 @@ import Link from "next/link"
 export default async function GarageDashboard() {
   const { userId } = await auth()
   const ctx = await getGarageOwnerContext(userId!)
+  const garageId = ctx!.garageId!
+
+  const hasServices = ctx!.hasServices!
+  const hasAvailability = ctx!.hasAvailability!
+  const isApproved = ctx!.approved
+  const isLive = ctx!.isLive
 
   return (
     <>
@@ -21,9 +27,113 @@ export default async function GarageDashboard() {
         </div>
       </div>
       <main className="page-body" style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 32px" }}>
-        <BookingsList garageId={ctx!.garageId!} />
+        {!isLive && (
+          <GoLiveChecklist
+            hasServices={hasServices}
+            hasAvailability={hasAvailability}
+            isApproved={isApproved}
+          />
+        )}
+        <BookingsList garageId={garageId} />
       </main>
     </>
+  )
+}
+
+function CheckItem({ done, label, description, action }: {
+  done: boolean
+  label: string
+  description: string
+  action?: { href: string; label: string }
+}) {
+  return (
+    <div style={{
+      display: "flex", alignItems: "flex-start", gap: "14px",
+      padding: "16px 20px", borderRadius: 10,
+      background: done ? "#f4f3ef" : "#ffffff",
+      border: `0.5px solid ${done ? "rgba(0,0,0,0.06)" : "rgba(0,0,0,0.12)"}`,
+      opacity: done ? 0.7 : 1,
+    }}>
+      <div style={{
+        width: 22, height: 22, borderRadius: "50%", flexShrink: 0, marginTop: 1,
+        background: done ? "#111110" : "transparent",
+        border: done ? "none" : "1.5px solid #d1d0cb",
+        display: "flex", alignItems: "center", justifyContent: "center",
+      }}>
+        {done && <span style={{ color: "#ffffff", fontSize: "0.6rem", fontWeight: 700 }}>✓</span>}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontWeight: 600, fontSize: "0.9rem", color: "#111110", margin: "0 0 2px" }}>{label}</p>
+        <p style={{ fontSize: "0.82rem", color: "#6b6a66", margin: 0 }}>{description}</p>
+      </div>
+      {!done && action && (
+        <Link
+          href={action.href}
+          style={{
+            background: "#111110", color: "#ffffff",
+            padding: "7px 16px", borderRadius: 100,
+            fontWeight: 600, fontSize: "0.8rem", textDecoration: "none",
+            whiteSpace: "nowrap", flexShrink: 0,
+          }}
+        >
+          {action.label}
+        </Link>
+      )}
+    </div>
+  )
+}
+
+function GoLiveChecklist({ hasServices, hasAvailability, isApproved }: {
+  hasServices: boolean
+  hasAvailability: boolean
+  isApproved: boolean
+}) {
+  const completedCount = [hasServices, hasAvailability, isApproved].filter(Boolean).length
+
+  return (
+    <div style={{ background: "#f9f8f5", border: "0.5px solid rgba(0,0,0,0.10)", borderRadius: 14, padding: "24px", marginBottom: "32px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px", flexWrap: "wrap", gap: 8 }}>
+        <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.05rem", letterSpacing: "-0.02em", color: "#111110", margin: 0 }}>
+          Get your garage live
+        </h2>
+        <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "#6b6a66" }}>
+          {completedCount} of 3 complete
+        </span>
+      </div>
+      <p style={{ fontSize: "0.85rem", color: "#6b6a66", margin: "0 0 16px" }}>
+        Your garage won&apos;t appear in search results until all steps are done.
+      </p>
+
+      {/* Progress bar */}
+      <div style={{ height: 4, background: "#eceae4", borderRadius: 100, marginBottom: "20px", overflow: "hidden" }}>
+        <div style={{ height: "100%", width: `${(completedCount / 3) * 100}%`, background: "#111110", borderRadius: 100, transition: "width 0.3s" }} />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        <CheckItem
+          done={true}
+          label="Garage profile created"
+          description="Your basic details, name, and address are saved"
+        />
+        <CheckItem
+          done={hasServices}
+          label="Add your services"
+          description="Let customers know what work you offer and at what price"
+          action={{ href: "/garage-dashboard/settings", label: "Add services" }}
+        />
+        <CheckItem
+          done={hasAvailability}
+          label="Set your availability"
+          description="Confirm your opening hours so customers can book slots"
+          action={{ href: "/garage-dashboard/availability", label: "Set availability" }}
+        />
+        <CheckItem
+          done={isApproved}
+          label="Admin approval"
+          description="We review each garage before it goes live — usually 1–2 business days"
+        />
+      </div>
+    </div>
   )
 }
 
