@@ -1,6 +1,5 @@
 import { auth, currentUser } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
-import { cookies } from "next/headers"
 import OnboardingFlow from "@/app/components/OnboardingFlow"
 import Link from "next/link"
 
@@ -37,12 +36,8 @@ export default async function OnboardingPage() {
     }
   }
 
-  // Already onboarded — set cookie and send them to the right place
+  // Already onboarded — render link instead of redirect
   if (user.onboardingStep >= 2 && user.role !== "pending") {
-    const cookieStore = await cookies()
-    cookieStore.set("onboarding_complete", "1", {
-      httpOnly: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 365,
-    })
     return user.role === "garage_owner" ? <GoDashboard /> : <GoHome />
   }
 
