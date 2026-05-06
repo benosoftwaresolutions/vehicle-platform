@@ -1,5 +1,6 @@
 import Link from "next/link"
 import Navbar from "../components/Navbar"
+import OnboardingBanner from "../components/OnboardingBanner"
 import AlternativeResponseButtons from "../components/AlternativeResponseButtons"
 import CancelBookingButton from "./CancelBookingButton"
 import { auth } from "@clerk/nextjs/server"
@@ -27,10 +28,12 @@ export default async function Bookings() {
   ])
 
   const garageMap = Object.fromEntries(allGarages.map((g) => [g.id, g]))
+  const showBanner = !!userId && (!user || !user.profileComplete)
 
   return (
     <>
       <Navbar role={user?.role} />
+      {showBanner && <OnboardingBanner />}
       <div className="page-hd" style={{ borderBottom: "0.5px solid rgba(0,0,0,0.08)", padding: "56px 32px 40px", background: "#ffffff" }}>
         <div style={{ maxWidth: "900px", margin: "0 auto" }}>
           <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "clamp(28px,4vw,40px)", letterSpacing: "-0.03em", color: "#111110", marginBottom: "6px" }}>
