@@ -22,9 +22,20 @@ export default function AvailabilityForm({ garageId, existing }: Props) {
   const router = useRouter()
   const [slotDuration, setSlotDuration] = useState(existing?.slotDuration || 60)
   const [capacity, setCapacity] = useState(existing?.capacity || 2)
-  const [schedule, setSchedule] = useState<DaySchedule[]>(
-    existing?.schedule.length ? existing.schedule : defaultSchedule
-  )
+  const [schedule, setSchedule] = useState<DaySchedule[]>(() => {
+    if (!existing?.schedule.length) return defaultSchedule
+    // Merge saved schedule with defaults. For sat/sun: if they were saved
+    // as closed with the old default times (08:00–17:00), upgrade to the
+    // new default (open until 13:00) since that was never an explicit choice.
+    return defaultSchedule.map(def => {
+      const saved = existing.schedule.find(s => s.day === def.day)
+      if (!saved) return def
+      const isOldWeekendDefault = ["Saturday","Sunday"].includes(def.day)
+        && !saved.isOpen && saved.startTime === "08:00" && saved.endTime === "17:00"
+      if (isOldWeekendDefault) return def
+      return { day: saved.day, isOpen: saved.isOpen, startTime: saved.startTime, endTime: saved.endTime }
+    })
+  })
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
 

@@ -24,6 +24,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid slot duration" }, { status: 400 })
     }
 
+    // Strip any extra Prisma fields (id, availabilityId) before inserting
+    const cleanSchedule = (schedule as { day: string; isOpen: boolean; startTime: string; endTime: string }[])
+      .map(({ day, isOpen, startTime, endTime }) => ({ day, isOpen, startTime, endTime }))
+
     const availability = await prisma.garageAvailability.upsert({
       where: { garageId },
       update: {
@@ -31,7 +35,7 @@ export async function POST(req: Request) {
         capacity,
         schedule: {
           deleteMany: {},
-          create: schedule
+          create: cleanSchedule,
         }
       },
       create: {
@@ -39,7 +43,7 @@ export async function POST(req: Request) {
         slotDuration,
         capacity,
         schedule: {
-          create: schedule
+          create: cleanSchedule,
         }
       }
     })
