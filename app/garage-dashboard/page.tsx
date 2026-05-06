@@ -88,7 +88,10 @@ function GoLiveChecklist({ hasServices, hasAvailability, isApproved }: {
   hasAvailability: boolean
   isApproved: boolean
 }) {
-  const completedCount = [hasServices, hasAvailability, isApproved].filter(Boolean).length
+  // Only count the two steps the owner can action themselves
+  const actionableCount = [hasServices, hasAvailability].filter(Boolean).length
+  const actionsComplete = hasServices && hasAvailability
+  const awaitingApproval = actionsComplete && !isApproved
 
   return (
     <div style={{ background: "#f9f8f5", border: "0.5px solid rgba(0,0,0,0.10)", borderRadius: 14, padding: "24px", marginBottom: "32px" }}>
@@ -96,17 +99,19 @@ function GoLiveChecklist({ hasServices, hasAvailability, isApproved }: {
         <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.05rem", letterSpacing: "-0.02em", color: "#111110", margin: 0 }}>
           Get your garage live
         </h2>
-        <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "#6b6a66" }}>
-          {completedCount} of 3 complete
+        <span style={{ fontSize: "0.8rem", fontWeight: 600, color: awaitingApproval ? "#92400e" : "#6b6a66" }}>
+          {awaitingApproval ? "Awaiting admin approval" : `${actionableCount} of 2 complete`}
         </span>
       </div>
       <p style={{ fontSize: "0.85rem", color: "#6b6a66", margin: "0 0 16px" }}>
-        Your garage won&apos;t appear in search results until all steps are done.
+        {awaitingApproval
+          ? "You’ve done everything — we’ll review your listing and approve it within 1–2 business days."
+          : "Your garage won’t appear in search results until all steps are done."}
       </p>
 
       {/* Progress bar */}
       <div style={{ height: 4, background: "#eceae4", borderRadius: 100, marginBottom: "20px", overflow: "hidden" }}>
-        <div style={{ height: "100%", width: `${(completedCount / 3) * 100}%`, background: "#111110", borderRadius: 100, transition: "width 0.3s" }} />
+        <div style={{ height: "100%", width: `${(actionableCount / 2) * 100}%`, background: "#111110", borderRadius: 100, transition: "width 0.3s" }} />
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -130,7 +135,7 @@ function GoLiveChecklist({ hasServices, hasAvailability, isApproved }: {
         <CheckItem
           done={isApproved}
           label="Admin approval"
-          description="We review each garage before it goes live — usually 1–2 business days"
+          description={awaitingApproval ? "Under review — usually 1–2 business days" : "We review each garage before it goes live"}
         />
       </div>
     </div>
