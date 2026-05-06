@@ -11,15 +11,25 @@ export const getGarageOwnerContext = cache(async (userId: string) => {
     select: { role: true, garageId: true },
   })
   if (!user || user.role !== "garage_owner") return null
+  if (!user.garageId) return { garageId: null, approved: false, isLive: false }
 
-  const garage = user.garageId
-    ? await prisma.garage.findUnique({
-        where: { id: user.garageId },
-        select: { approved: true },
-      })
-    : null
+  const [garage, availability] = await Promise.all([
+    prisma.garage.findUnique({
+      where: { id: user.garageId },
+      select: { approved: true, services: true },
+    }),
+    prisma.garageAvailability.findUnique({
+      where: { garageId: user.garageId },
+      select: { id: true },
+    }),
+  ])
 
-  return { garageId: user.garageId, approved: garage?.approved ?? false }
+  const approved = garage?.approved ?? false
+  const hasServices = (garage?.services ?? []).length > 0
+  const hasAvailability = !!availability
+  const isLive = approved && hasServices && hasAvailability
+
+  return { garageId: user.garageId, approved, hasServices, hasAvailability, isLive }
 })
 
 function NotAuthorized() {
@@ -57,33 +67,22 @@ function SetupPrompt() {
   )
 }
 
-function PendingApprovalBanner() {
+function NotLiveBanner() {
   return (
     <div style={{
       background: "#fffbeb",
       borderBottom: "0.5px solid rgba(234,179,8,0.3)",
-      padding: "12px 32px",
-      display: "flex",
-      alignItems: "center",
-      gap: "12px",
+      padding: "10px 32px",
     }}>
-      <div style={{ maxWidth: "900px", margin: "0 auto", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ fontSize: "1rem" }}>⏳</span>
-          <div>
-            <p style={{ fontWeight: 600, fontSize: "0.875rem", color: "#92400e", margin: 0 }}>
-              Your garage is pending approval
-            </p>
-            <p style={{ fontSize: "0.8rem", color: "#a16207", margin: 0 }}>
-              It won&apos;t appear in search results until an admin approves your listing. This usually takes 1–2 business days.
-            </p>
-          </div>
-        </div>
+      <div style={{ maxWidth: "900px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
+        <p style={{ fontSize: "0.85rem", color: "#92400e", margin: 0 }}>
+          <strong>Your garage is not yet live</strong> — it won&apos;t appear in search results until all setup steps are complete.
+        </p>
         <Link
-          href="/garage-dashboard/settings"
+          href="/garage-dashboard"
           style={{ fontSize: "0.8rem", fontWeight: 600, color: "#92400e", textDecoration: "underline", whiteSpace: "nowrap" }}
         >
-          Review your listing →
+          See what&apos;s needed →
         </Link>
       </div>
     </div>
@@ -101,7 +100,7 @@ export default async function GarageDashboardLayout({ children }: { children: Re
   return (
     <>
       <Navbar role="garage_owner" />
-      {!ctx.approved && <PendingApprovalBanner />}
+      {!ctx.isLive && <NotLiveBanner />}
       {children}
     </>
   )
