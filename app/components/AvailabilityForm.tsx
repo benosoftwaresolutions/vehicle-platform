@@ -13,9 +13,9 @@ type Props = {
 
 const defaultSchedule: DaySchedule[] = days.map(day => ({
   day,
-  isOpen: !["Saturday","Sunday"].includes(day),
+  isOpen: true,
   startTime: "08:00",
-  endTime: "17:00",
+  endTime: ["Saturday","Sunday"].includes(day) ? "13:00" : "17:00",
 }))
 
 export default function AvailabilityForm({ garageId, existing }: Props) {
