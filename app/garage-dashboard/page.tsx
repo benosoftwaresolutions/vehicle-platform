@@ -1,36 +1,17 @@
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
-import Navbar from "@/app/components/Navbar"
+import { getGarageOwnerContext } from "./layout"
 import DryvnFooter from "@/app/components/DryvnFooter"
 import BookingActions from "@/app/components/BookingActions"
 import WalkInBookingButton from "./WalkInBookingButton"
 import Link from "next/link"
 
-function NotAuthorized() {
-  return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ textAlign: "center" }}>
-        <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", color: "#111110", marginBottom: 12 }}>Not authorised</h1>
-        <Link href="/" style={{ color: "#6b6a66", textDecoration: "none" }}>Go home</Link>
-      </div>
-    </div>
-  )
-}
-
 export default async function GarageDashboard() {
   const { userId } = await auth()
-
-  if (!userId) return <NotAuthorized />
-
-  const user = await prisma.user.findUnique({
-    where: { clerkId: userId }
-  })
-
-  if (!user || user.role !== "garage_owner") return <NotAuthorized />
+  const ctx = await getGarageOwnerContext(userId!)
 
   return (
     <>
-      <Navbar role={user.role} />
       <div className="page-hd" style={{ borderBottom: "0.5px solid rgba(0,0,0,0.08)", padding: "56px 32px 40px", background: "#ffffff" }}>
         <div style={{ maxWidth: "900px", margin: "0 auto" }}>
           <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "clamp(28px,4vw,40px)", letterSpacing: "-0.03em", color: "#111110", marginBottom: "6px" }}>
@@ -40,32 +21,9 @@ export default async function GarageDashboard() {
         </div>
       </div>
       <main className="page-body" style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 32px" }}>
-        {!user.garageId ? (
-          <GarageSetupPrompt />
-        ) : (
-          <BookingsList garageId={user.garageId} />
-        )}
+        <BookingsList garageId={ctx!.garageId!} />
       </main>
     </>
-  )
-}
-
-function GarageSetupPrompt() {
-  return (
-    <div style={{ background: "#f4f3ef", borderRadius: 14, padding: "48px", textAlign: "center", maxWidth: "480px", margin: "0 auto" }}>
-      <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.4rem", letterSpacing: "-0.02em", color: "#111110", marginBottom: "10px" }}>
-        Set up your garage
-      </h2>
-      <p style={{ color: "#6b6a66", marginBottom: "28px", lineHeight: 1.6, fontSize: "0.95rem" }}>
-        You haven&apos;t added your garage details yet. Complete the setup to start accepting bookings from customers.
-      </p>
-      <Link
-        href="/onboarding"
-        style={{ background: "#111110", color: "#ffffff", padding: "12px 28px", borderRadius: 100, fontWeight: 600, fontSize: "0.95rem", textDecoration: "none" }}
-      >
-        Complete setup
-      </Link>
-    </div>
   )
 }
 
