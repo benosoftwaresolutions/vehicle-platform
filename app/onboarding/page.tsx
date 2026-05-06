@@ -37,9 +37,17 @@ export default async function OnboardingPage() {
   }
 
   // Already onboarded — auto-redirect without an intermediate screen
-  if (user.onboardingStep >= 2 && user.role !== "pending") {
+  // Garage owners must also have a garageId; without one they still need to complete setup
+  const fullyOnboarded = user.onboardingStep >= 2 && user.role !== "pending" &&
+    (user.role !== "garage_owner" || !!user.garageId)
+  if (fullyOnboarded) {
     return <AutoRedirect to={user.role === "garage_owner" ? "/garage-dashboard" : "/"} />
   }
 
-  return <OnboardingFlow user={user} />
+  // If role is set but garage wasn't created, jump straight to step 2 of the form
+  const flowUser = (user.role === "garage_owner" && !user.garageId)
+    ? { ...user, onboardingStep: 2 }
+    : user
+
+  return <OnboardingFlow user={flowUser} />
 }
