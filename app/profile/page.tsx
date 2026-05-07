@@ -140,20 +140,29 @@ export default async function ProfilePage() {
 
           {!isGarageOwner && (
             <div style={{ background: "#f4f3ef", borderRadius: 16, padding: "24px 28px" }}>
-              <h3 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.05rem", color: "#111110", marginBottom: 20 }}>My Vehicles</h3>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
+                <h3 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.05rem", color: "#111110", margin: 0 }}>My Vehicles</h3>
+                <Link href="/vehicles" className="btn-ghost" style={{ fontSize: "0.875rem", padding: "8px 18px" }}>
+                  {vehicles.length > 0 ? `Manage (${vehicles.length})` : "Add a vehicle"}
+                </Link>
+              </div>
               {vehicles.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "16px 0 8px" }}>
-                  <p style={{ color: "#6b6a66", fontSize: "0.9rem", marginBottom: 16 }}>No vehicles saved yet. Your registration is saved when you book.</p>
-                  <Link href="/garages" className="btn-primary" style={{ fontSize: "0.875rem", padding: "10px 20px" }}>Find a Garage</Link>
-                </div>
+                <p style={{ color: "#6b6a66", fontSize: "0.9rem", margin: 0 }}>
+                  No vehicles added yet. Track MOT dates, service history and more.
+                </p>
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
-                  {vehicles.map((v) => (
-                    <div key={v.id} style={{ background: "#ffffff", borderRadius: 10, padding: "14px 18px" }}>
-                      <p style={{ fontWeight: 600, color: "#111110", margin: "0 0 2px", fontSize: "0.95rem" }}>{v.year} {v.make} {v.model}</p>
-                      <p style={{ color: "#6b6a66", fontSize: "0.8rem", margin: 0, letterSpacing: "0.05em", fontWeight: 600 }}>{v.registration}</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {vehicles.slice(0, 3).map((v) => (
+                    <div key={v.id} style={{ background: "#ffffff", borderRadius: 10, padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <p style={{ fontWeight: 600, color: "#111110", margin: "0 0 2px", fontSize: "0.9rem" }}>{v.year} {v.make} {v.model}</p>
+                        <p style={{ color: "#6b6a66", fontSize: "0.8rem", margin: 0, letterSpacing: "0.05em", fontWeight: 600 }}>{v.registration}</p>
+                      </div>
                     </div>
                   ))}
+                  {vehicles.length > 3 && (
+                    <p style={{ fontSize: "0.82rem", color: "#6b6a66", margin: "4px 0 0" }}>+{vehicles.length - 3} more</p>
+                  )}
                 </div>
               )}
             </div>
@@ -164,6 +173,7 @@ export default async function ProfilePage() {
               <h3 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.05rem", color: "#111110", marginBottom: 16 }}>Quick Links</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <QuickLink href="/bookings" label="My Bookings" description="View and manage your upcoming appointments" />
+                <QuickLink href="/vehicles" label="My Vehicles" description="Track MOT dates, service history and vehicle details" />
                 <QuickLink href="/garages" label="Find a Garage" description="Search garages near you" />
               </div>
             </div>
