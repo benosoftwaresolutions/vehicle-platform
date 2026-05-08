@@ -15,7 +15,10 @@ async function sendWithRetry(payload: Parameters<Resend["emails"]["send"]>[0], a
     const { error } = await resend.emails.send(payload)
     if (!error) return
     if (i < attempts - 1) await new Promise(r => setTimeout(r, 500 * 2 ** i))
-    else console.error("[email] Failed after", attempts, "attempts:", error, "| subject:", payload.subject)
+    else {
+      console.error("[email] Failed after", attempts, "attempts:", error, "| subject:", payload.subject)
+      throw new Error(`Email delivery failed: ${error?.message ?? "unknown error"}`)
+    }
   }
 }
 
