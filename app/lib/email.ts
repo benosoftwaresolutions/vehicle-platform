@@ -275,6 +275,124 @@ export async function sendWalkInBookingToGarage({
   })
 }
 
+export async function sendBookingRescheduledToCustomer({
+  customerEmail,
+  customerName,
+  garageName,
+  garageAddress,
+  service,
+  oldDate,
+  oldTime,
+  newDate,
+  newTime,
+  registration,
+}: {
+  customerEmail: string
+  customerName: string
+  garageName: string
+  garageAddress: string
+  service: string
+  oldDate: Date
+  oldTime: string
+  newDate: Date
+  newTime: string
+  registration: string
+}) {
+  await sendWithRetry({
+    from: FROM,
+    to: customerEmail,
+    subject: `Booking rescheduled — ${service} at ${garageName}`,
+    html: emailBase(`
+      <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Your booking has been rescheduled</h2>
+      <p style="color:#6b6a66;font-size:14px;margin:0 0 16px;">Hi ${customerName}, <strong style="color:#111110;">${garageName}</strong> has moved your booking to a new time.</p>
+      <p style="font-size:13px;color:#6b6a66;margin:0 0 4px;">Previous slot</p>
+      ${dataTable([
+        ["Service", service],
+        ["Date", formatDate(oldDate)],
+        ["Time", oldTime],
+        ["Registration", registration],
+      ])}
+      <p style="font-size:13px;color:#6b6a66;margin:16px 0 4px;">New slot</p>
+      ${dataTable([
+        ["Date", formatDate(newDate)],
+        ["Time", newTime],
+        ["Garage", garageName],
+        ["Address", garageAddress],
+      ])}
+      <p style="margin-top:24px;font-size:14px;color:#444441;">If this new time does not work for you, please contact the garage directly or cancel via the app.</p>
+    `),
+  })
+}
+
+export async function sendMessageToCustomer({
+  customerEmail,
+  customerName,
+  garageName,
+  service,
+  date,
+  time,
+  message,
+}: {
+  customerEmail: string
+  customerName: string
+  garageName: string
+  service: string
+  date: Date
+  time: string
+  message: string
+}) {
+  await sendWithRetry({
+    from: FROM,
+    to: customerEmail,
+    subject: `Message from ${garageName} about your booking`,
+    html: emailBase(`
+      <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Message from ${garageName}</h2>
+      <p style="color:#6b6a66;font-size:14px;margin:0 0 16px;">Hi ${customerName}, you have a message regarding your <strong style="color:#111110;">${service}</strong> booking on <strong style="color:#111110;">${formatDate(date)} at ${time}</strong>.</p>
+      <div style="background:#f4f3ef;border-radius:10px;padding:16px 20px;font-size:14px;color:#111110;line-height:1.6;">${message.replace(/\n/g, "<br>")}</div>
+      <p style="margin-top:20px;font-size:13px;color:#6b6a66;">This message was sent via Fyca on behalf of ${garageName}. To reply, contact the garage directly.</p>
+    `),
+  })
+}
+
+export async function sendAppointmentReminder({
+  customerEmail,
+  customerName,
+  garageName,
+  garageAddress,
+  service,
+  date,
+  time,
+  registration,
+}: {
+  customerEmail: string
+  customerName: string
+  garageName: string
+  garageAddress: string
+  service: string
+  date: Date
+  time: string
+  registration: string
+}) {
+  await sendWithRetry({
+    from: FROM,
+    to: customerEmail,
+    subject: `Reminder: ${service} at ${garageName} tomorrow`,
+    html: emailBase(`
+      <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Your appointment is tomorrow</h2>
+      <p style="color:#6b6a66;font-size:14px;margin:0 0 4px;">Hi ${customerName}, just a reminder about your upcoming booking.</p>
+      ${dataTable([
+        ["Service", service],
+        ["Date", formatDate(date)],
+        ["Time", time],
+        ["Registration", registration],
+        ["Garage", garageName],
+        ["Address", garageAddress],
+      ])}
+      <p style="margin-top:24px;font-size:14px;color:#444441;">Please arrive a few minutes early. If you need to cancel, please do so via the Fyca app as soon as possible.</p>
+    `),
+  })
+}
+
 export async function sendBookingCancelledToGarage({
   garageOwnerEmail,
   garageName,
