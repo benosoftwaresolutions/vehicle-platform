@@ -22,6 +22,7 @@ export default function BookingActions({ bookingId, currentStatus }: { bookingId
   const [rescheduleTime, setRescheduleTime] = useState("")
   const [messageText, setMessageText] = useState("")
   const [messageSent, setMessageSent] = useState(false)
+  const [messageError, setMessageError] = useState<string | null>(null)
 
   const handleAccept = async () => {
     setLoading(true)
@@ -101,15 +102,24 @@ export default function BookingActions({ bookingId, currentStatus }: { bookingId
               />
             </div>
           )}
+          {messageError && (
+            <p style={{ fontSize: "0.8rem", color: "#dc2626", marginBottom: "8px" }}>{messageError}</p>
+          )}
           <div style={{ display: "flex", gap: "8px" }}>
             {!messageSent && (
               <button
                 onClick={async () => {
                   if (!messageText.trim()) return
                   setLoading(true)
-                  await messageCustomer(bookingId, messageText)
-                  setLoading(false)
-                  setMessageSent(true)
+                  setMessageError(null)
+                  try {
+                    await messageCustomer(bookingId, messageText)
+                    setMessageSent(true)
+                  } catch {
+                    setMessageError("Failed to send — please try again.")
+                  } finally {
+                    setLoading(false)
+                  }
                 }}
                 disabled={loading || !messageText.trim()}
                 style={{ background: "#111110", color: "#ffffff", padding: "8px 16px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "none", cursor: "pointer", flex: 1, opacity: loading || !messageText.trim() ? 0.5 : 1 }}
