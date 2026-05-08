@@ -101,7 +101,10 @@ export default function Navbar({ role }: { role?: string }) {
             <Link href="/garages" className="nav-link" style={navLink}>Garages</Link>
             {isSignedIn && (isGarageOwner
               ? <Link href="/garage-dashboard" className="nav-link" style={navLink}>Dashboard</Link>
-              : <Link href="/bookings" className="nav-link" style={navLink}>My Bookings</Link>
+              : <>
+                  <Link href="/bookings" className="nav-link" style={navLink}>My Bookings</Link>
+                  <Link href="/vehicles" className="nav-link" style={navLink}>My Vehicles</Link>
+                </>
             )}
           </div>
           <div style={{ width: "0.5px", height: 18, background: "rgba(0,0,0,0.15)" }} />
@@ -170,7 +173,10 @@ export default function Navbar({ role }: { role?: string }) {
             <Link href="/garages" className="mobile-link" style={mobileLink}>Garages</Link>
             {isSignedIn && (isGarageOwner
               ? <Link href="/garage-dashboard" className="mobile-link" style={mobileLink}>Dashboard</Link>
-              : <Link href="/bookings" className="mobile-link" style={mobileLink}>My Bookings</Link>
+              : <>
+                  <Link href="/bookings" className="mobile-link" style={mobileLink}>My Bookings</Link>
+                  <Link href="/vehicles" className="mobile-link" style={mobileLink}>My Vehicles</Link>
+                </>
             )}
           </div>
 
