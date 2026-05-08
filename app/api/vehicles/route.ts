@@ -38,22 +38,26 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid mileage" }, { status: 400 })
   }
 
-  const vehicle = await prisma.vehicle.create({
-    data: {
-      clerkId: userId,
-      make: make.trim(),
-      model: model.trim(),
-      year: year.trim(),
-      registration: registration.trim().toUpperCase(),
-      colour: colour?.trim() || null,
-      fuelType: fuelType || null,
-      motExpiry: parseDate(motExpiry),
-      lastServiceDate: parseDate(lastServiceDate),
-      nextServiceDue: parseDate(nextServiceDue),
-      currentMileage: currentMileage ?? null,
-      notes: notes?.trim() || null,
-    },
-  })
-
-  return NextResponse.json(vehicle, { status: 201 })
+  try {
+    const vehicle = await prisma.vehicle.create({
+      data: {
+        clerkId: userId,
+        make: make.trim(),
+        model: model.trim(),
+        year: year.trim(),
+        registration: registration.trim().toUpperCase(),
+        colour: colour?.trim() || null,
+        fuelType: fuelType || null,
+        motExpiry: parseDate(motExpiry),
+        lastServiceDate: parseDate(lastServiceDate),
+        nextServiceDue: parseDate(nextServiceDue),
+        currentMileage: currentMileage ?? null,
+        notes: notes?.trim() || null,
+      },
+    })
+    return NextResponse.json(vehicle, { status: 201 })
+  } catch (err) {
+    console.error("Vehicle create error:", err)
+    return NextResponse.json({ error: "Failed to save vehicle" }, { status: 500 })
+  }
 }

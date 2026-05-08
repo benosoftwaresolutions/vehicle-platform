@@ -27,24 +27,28 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: "Invalid fuel type" }, { status: 400 })
   }
 
-  const updated = await prisma.vehicle.update({
-    where: { id },
-    data: {
-      make: make?.trim(),
-      model: model?.trim(),
-      year: year?.trim(),
-      registration: registration?.trim().toUpperCase(),
-      colour: colour?.trim() || null,
-      fuelType: fuelType || null,
-      motExpiry: parseDate(motExpiry),
-      lastServiceDate: parseDate(lastServiceDate),
-      nextServiceDue: parseDate(nextServiceDue),
-      currentMileage: currentMileage ?? null,
-      notes: notes?.trim() || null,
-    },
-  })
-
-  return NextResponse.json(updated)
+  try {
+    const updated = await prisma.vehicle.update({
+      where: { id },
+      data: {
+        make: make?.trim(),
+        model: model?.trim(),
+        year: year?.trim(),
+        registration: registration?.trim().toUpperCase(),
+        colour: colour?.trim() || null,
+        fuelType: fuelType || null,
+        motExpiry: parseDate(motExpiry),
+        lastServiceDate: parseDate(lastServiceDate),
+        nextServiceDue: parseDate(nextServiceDue),
+        currentMileage: currentMileage ?? null,
+        notes: notes?.trim() || null,
+      },
+    })
+    return NextResponse.json(updated)
+  } catch (err) {
+    console.error("Vehicle update error:", err)
+    return NextResponse.json({ error: "Failed to save vehicle" }, { status: 500 })
+  }
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {

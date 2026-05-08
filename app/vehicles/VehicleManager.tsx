@@ -172,28 +172,35 @@ export default function VehicleManager({ initialVehicles }: { initialVehicles: V
   const [vehicles, setVehicles] = useState(initialVehicles)
   const [mode, setMode] = useState<"list" | "add" | { edit: Vehicle }>("list")
   const [loading, setLoading] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const refresh = () => router.refresh()
 
+  const buildPayload = (form: typeof emptyForm) => ({
+    ...form,
+    currentMileage: form.currentMileage ? parseInt(form.currentMileage) : null,
+    motExpiry: form.motExpiry || null,
+    lastServiceDate: form.lastServiceDate || null,
+    nextServiceDue: form.nextServiceDue || null,
+  })
+
   const handleAdd = async (form: typeof emptyForm) => {
     setLoading(true)
+    setSaveError(null)
     const res = await fetch("/api/vehicles", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        currentMileage: form.currentMileage ? parseInt(form.currentMileage) : null,
-        motExpiry: form.motExpiry || null,
-        lastServiceDate: form.lastServiceDate || null,
-        nextServiceDue: form.nextServiceDue || null,
-      }),
+      body: JSON.stringify(buildPayload(form)),
     })
     if (res.ok) {
       const v = await res.json()
       setVehicles(prev => [v, ...prev])
       setMode("list")
       refresh()
+    } else {
+      const data = await res.json().catch(() => ({}))
+      setSaveError(data.error || "Something went wrong — please try again")
     }
     setLoading(false)
   }
@@ -201,22 +208,20 @@ export default function VehicleManager({ initialVehicles }: { initialVehicles: V
   const handleEdit = async (form: typeof emptyForm) => {
     if (typeof mode !== "object") return
     setLoading(true)
+    setSaveError(null)
     const res = await fetch(`/api/vehicles/${mode.edit.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        currentMileage: form.currentMileage ? parseInt(form.currentMileage) : null,
-        motExpiry: form.motExpiry || null,
-        lastServiceDate: form.lastServiceDate || null,
-        nextServiceDue: form.nextServiceDue || null,
-      }),
+      body: JSON.stringify(buildPayload(form)),
     })
     if (res.ok) {
       const updated = await res.json()
       setVehicles(prev => prev.map(v => v.id === updated.id ? updated : v))
       setMode("list")
       refresh()
+    } else {
+      const data = await res.json().catch(() => ({}))
+      setSaveError(data.error || "Something went wrong — please try again")
     }
     setLoading(false)
   }
@@ -236,7 +241,12 @@ export default function VehicleManager({ initialVehicles }: { initialVehicles: V
         <div style={{ marginBottom: 24 }}>
           <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.15rem", letterSpacing: "-0.02em", color: "#111110" }}>Add vehicle</h2>
         </div>
-        <VehicleForm initial={emptyForm} onSave={handleAdd} onCancel={() => setMode("list")} loading={loading} />
+        {saveError && (
+          <div style={{ background: "#fee2e2", color: "#991b1b", borderRadius: 10, padding: "12px 16px", marginBottom: 16, fontSize: "0.875rem", fontWeight: 500 }}>
+            {saveError}
+          </div>
+        )}
+        <VehicleForm initial={emptyForm} onSave={handleAdd} onCancel={() => { setMode("list"); setSaveError(null) }} loading={loading} />
       </>
     )
   }
@@ -249,7 +259,12 @@ export default function VehicleManager({ initialVehicles }: { initialVehicles: V
             {mode.edit.year} {mode.edit.make} {mode.edit.model}
           </h2>
         </div>
-        <VehicleForm initial={toFormValues(mode.edit)} onSave={handleEdit} onCancel={() => setMode("list")} loading={loading} />
+        {saveError && (
+          <div style={{ background: "#fee2e2", color: "#991b1b", borderRadius: 10, padding: "12px 16px", marginBottom: 16, fontSize: "0.875rem", fontWeight: 500 }}>
+            {saveError}
+          </div>
+        )}
+        <VehicleForm initial={toFormValues(mode.edit)} onSave={handleEdit} onCancel={() => { setMode("list"); setSaveError(null) }} loading={loading} />
       </>
     )
   }
