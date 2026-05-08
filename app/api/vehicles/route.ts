@@ -58,7 +58,6 @@ export async function POST(req: Request) {
     return NextResponse.json(vehicle, { status: 201 })
   } catch (err) {
     console.error("Vehicle create error:", err)
-    const message = err instanceof Error ? err.message : "Unknown error"
-    return NextResponse.json({ error: message }, { status: 500 })
+    return NextResponse.json({ error: "Failed to save vehicle" }, { status: 500 })
   }
 }

@@ -7,6 +7,8 @@ type SlotsResponse =
   | { open: false; reason: "no_availability" | "closed" }
   | { open: true; slots: string[] }
 
+type Vehicle = { id: string; registration: string; make: string; model: string; year: string }
+
 export default function BookingForm({ garageId, services }: { garageId: string; services: string[] }) {
   const router = useRouter()
   const [service, setService] = useState("")
@@ -19,6 +21,15 @@ export default function BookingForm({ garageId, services }: { garageId: string; 
   const [error, setError] = useState<string | null>(null)
   const [slotsData, setSlotsData] = useState<SlotsResponse | null>(null)
   const [slotsLoading, setSlotsLoading] = useState(false)
+  const [vehicles, setVehicles] = useState<Vehicle[]>([])
+  const [manualReg, setManualReg] = useState(false)
+
+  useEffect(() => {
+    fetch("/api/vehicles")
+      .then(r => r.ok ? r.json() : [])
+      .then((data: Vehicle[]) => setVehicles(data))
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (!date) { setSlotsData(null); setTime(""); return }
@@ -76,14 +87,42 @@ export default function BookingForm({ garageId, services }: { garageId: string; 
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
 
         <div>
-          <label style={lbl}>Registration</label>
-          <input
-            type="text"
-            placeholder="e.g. AB12 CDE"
-            value={registration}
-            onChange={e => setRegistration(e.target.value.toUpperCase())}
-            style={inp}
-          />
+          <label style={lbl}>Vehicle</label>
+          {vehicles.length > 0 && !manualReg ? (
+            <>
+              <select
+                value={registration}
+                onChange={e => {
+                  if (e.target.value === "__manual__") { setManualReg(true); setRegistration("") }
+                  else setRegistration(e.target.value)
+                }}
+                style={inp}
+              >
+                <option value="">Select a vehicle</option>
+                {vehicles.map(v => (
+                  <option key={v.id} value={v.registration}>
+                    {v.registration} — {v.make} {v.model} ({v.year})
+                  </option>
+                ))}
+                <option value="__manual__">Enter registration manually</option>
+              </select>
+            </>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <input
+                type="text"
+                placeholder="e.g. AB12 CDE"
+                value={registration}
+                onChange={e => setRegistration(e.target.value.toUpperCase())}
+                style={inp}
+              />
+              {vehicles.length > 0 && (
+                <button type="button" onClick={() => { setManualReg(false); setRegistration("") }} style={{ background: "none", border: "none", color: "#6b6a66", fontSize: "0.8rem", cursor: "pointer", textAlign: "left", padding: 0 }}>
+                  ← Choose from saved vehicles
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         <div>
