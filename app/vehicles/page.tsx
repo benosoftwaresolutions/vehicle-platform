@@ -20,7 +20,7 @@ export default async function VehiclesPage() {
 
   const [user, vehicles] = await Promise.all([
     prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true } }),
-    prisma.vehicle.findMany({ where: { clerkId: userId }, orderBy: { createdAt: "desc" } }),
+    prisma.vehicle.findMany({ where: { clerkId: userId }, orderBy: { createdAt: "desc" } }).catch(() => []),
   ])
 
   return (
