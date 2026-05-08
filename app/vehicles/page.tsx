@@ -35,7 +35,14 @@ export default async function VehiclesPage() {
         </div>
       </div>
       <main className="page-body" style={{ maxWidth: 760, margin: "0 auto", padding: "40px 32px" }}>
-        <VehicleManager initialVehicles={vehicles as any} />
+        <VehicleManager initialVehicles={vehicles.map(v => ({
+          ...v,
+          motExpiry: v.motExpiry?.toISOString() ?? null,
+          lastServiceDate: v.lastServiceDate?.toISOString() ?? null,
+          nextServiceDue: v.nextServiceDue?.toISOString() ?? null,
+          createdAt: v.createdAt.toISOString(),
+          updatedAt: v.updatedAt.toISOString(),
+        }))} />
       </main>
     </>
   )
