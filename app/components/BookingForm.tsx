@@ -8,8 +8,9 @@ type SlotsResponse =
   | { open: true; slots: string[] }
 
 type Vehicle = { id: string; registration: string; make: string; model: string; year: string }
+type PriceRange = { min: number | null; max: number | null }
 
-export default function BookingForm({ garageId, services }: { garageId: string; services: string[] }) {
+export default function BookingForm({ garageId, services, servicePricing = {} }: { garageId: string; services: string[]; servicePricing?: Record<string, PriceRange> }) {
   const router = useRouter()
   const [service, setService] = useState("")
   const [date, setDate] = useState("")
@@ -138,6 +139,18 @@ export default function BookingForm({ garageId, services }: { garageId: string; 
                 {services.map(s => <option key={s} value={s}>{s}</option>)}
                 <option value="__other__">Not sure — describe your issue</option>
               </select>
+              {service && service !== "__other__" && servicePricing[service] && (
+                (() => {
+                  const p = servicePricing[service]
+                  if (!p.min && !p.max) return null
+                  const label = p.min && p.max ? `£${p.min} – £${p.max}` : p.min ? `From £${p.min}` : `Up to £${p.max}`
+                  return (
+                    <p style={{ fontSize: "0.8rem", color: "#444441", fontWeight: 600, marginTop: 6 }}>
+                      Estimated cost: {label}
+                    </p>
+                  )
+                })()
+              )}
               {service === "__other__" && (
                 <textarea
                   placeholder="Describe what's wrong or what you'd like checked…"

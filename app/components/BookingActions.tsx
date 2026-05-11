@@ -23,6 +23,8 @@ export default function BookingActions({ bookingId, currentStatus }: { bookingId
   const [messageText, setMessageText] = useState("")
   const [messageSent, setMessageSent] = useState(false)
   const [messageError, setMessageError] = useState<string | null>(null)
+  const [showCompleteForm, setShowCompleteForm] = useState(false)
+  const [jobValue, setJobValue] = useState("")
 
   const handleAccept = async () => {
     setLoading(true)
@@ -135,19 +137,49 @@ export default function BookingActions({ bookingId, currentStatus }: { bookingId
       )
     }
 
+    if (showCompleteForm) {
+      return (
+        <div style={{ background: "#f4f3ef", border: "0.5px solid rgba(0,0,0,0.10)", borderRadius: 12, padding: "16px", minWidth: 220 }}>
+          <p style={{ fontWeight: 700, fontSize: "0.875rem", color: "#111110", marginBottom: "12px" }}>Mark as Completed</p>
+          <div style={{ marginBottom: "12px" }}>
+            <label style={lbl}>Job value (£)</label>
+            <input
+              type="number" min="0" step="0.01" placeholder="e.g. 150.00"
+              value={jobValue}
+              onChange={e => setJobValue(e.target.value)}
+              style={inp}
+            />
+            <p style={{ fontSize: "0.75rem", color: "#6b6a66", marginTop: 4 }}>Optional — used for revenue tracking</p>
+          </div>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              onClick={async () => {
+                setLoading(true)
+                await updateBookingStatus(bookingId, "completed", undefined, undefined, undefined, jobValue ? Number(jobValue) : undefined)
+                setLoading(false)
+                setShowCompleteForm(false)
+              }}
+              disabled={loading}
+              style={{ background: "#111110", color: "#ffffff", padding: "8px 16px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "none", cursor: "pointer", flex: 1, opacity: loading ? 0.5 : 1 }}
+            >
+              {loading ? "Saving..." : "Confirm"}
+            </button>
+            <button onClick={() => setShowCompleteForm(false)} style={{ background: "transparent", color: "#444441", padding: "8px 16px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "0.5px solid rgba(0,0,0,0.15)", cursor: "pointer" }}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )
+    }
+
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: "8px", alignItems: "flex-end" }}>
         <span style={{ background: "#111110", color: "#ffffff", padding: "6px 14px", borderRadius: 100, fontSize: "0.8rem", fontWeight: 600 }}>
           Confirmed
         </span>
         <button
-          onClick={async () => {
-            setLoading(true)
-            await updateBookingStatus(bookingId, "completed")
-            setLoading(false)
-          }}
-          disabled={loading}
-          style={{ background: "transparent", color: "#444441", padding: "5px 14px", borderRadius: 100, fontSize: "0.78rem", fontWeight: 600, border: "0.5px solid rgba(0,0,0,0.2)", cursor: "pointer", opacity: loading ? 0.5 : 1, whiteSpace: "nowrap" }}
+          onClick={() => setShowCompleteForm(true)}
+          style={{ background: "transparent", color: "#444441", padding: "5px 14px", borderRadius: 100, fontSize: "0.78rem", fontWeight: 600, border: "0.5px solid rgba(0,0,0,0.2)", cursor: "pointer", whiteSpace: "nowrap" }}
         >
           Mark completed
         </button>
