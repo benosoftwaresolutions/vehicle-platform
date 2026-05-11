@@ -13,6 +13,7 @@ export async function updateGarageSettings(formData: {
   postcode: string
   description: string
   services: string[]
+  servicePricing: Record<string, { min: number | null; max: number | null }>
   specialistMakes: string[]
 }) {
   const { userId } = await auth()
@@ -38,6 +39,7 @@ export async function updateGarageSettings(formData: {
       postcode: formData.postcode.trim().toUpperCase(),
       description: formData.description.trim() || null,
       services: formData.services,
+      servicePricing: formData.servicePricing,
       specialistMakes: formData.specialistMakes,
     },
   })

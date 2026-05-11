@@ -10,7 +10,8 @@ export async function updateBookingStatus(
   status: string,
   garageNote?: string,
   suggestedDate?: string,
-  suggestedTime?: string
+  suggestedTime?: string,
+  jobValue?: number
 ) {
   const { userId } = await auth()
   if (!userId) throw new Error("Unauthorised")
@@ -23,7 +24,7 @@ export async function updateBookingStatus(
   if (!user || user.role !== "garage_owner" || !user.garageId) throw new Error("Unauthorised")
   if (!targetBooking || targetBooking.garageId !== user.garageId) throw new Error("Unauthorised")
 
-  const validStatuses = ["confirmed", "declined", "pending", "declined_by_customer"]
+  const validStatuses = ["confirmed", "declined", "pending", "declined_by_customer", "completed"]
   if (!validStatuses.includes(status)) throw new Error("Invalid status")
 
   const booking = await prisma.booking.update({
@@ -33,6 +34,7 @@ export async function updateBookingStatus(
       garageNote: garageNote || null,
       suggestedDate: suggestedDate ? new Date(suggestedDate) : null,
       suggestedTime: suggestedTime || null,
+      ...(jobValue !== undefined && { jobValue }),
     }
   })
 

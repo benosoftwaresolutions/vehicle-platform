@@ -10,7 +10,7 @@ export default async function GarageSettingsPage() {
 
   const garage = await prisma.garage.findUnique({
     where: { id: ctx!.garageId! },
-    select: { name: true, email: true, phone: true, address: true, city: true, postcode: true, description: true, services: true, specialistMakes: true, logoUrl: true },
+    select: { name: true, email: true, phone: true, address: true, city: true, postcode: true, description: true, services: true, servicePricing: true, specialistMakes: true, logoUrl: true },
   })
 
   if (!garage) return null
@@ -31,7 +31,7 @@ export default async function GarageSettingsPage() {
         </div>
       </div>
       <main className="page-body" style={{ maxWidth: "760px", margin: "0 auto", padding: "40px 32px" }}>
-        <GarageSettingsForm garage={garage} />
+        <GarageSettingsForm garage={{ ...garage, servicePricing: (garage.servicePricing as Record<string, { min: number | null; max: number | null }> | null) ?? null }} />
       </main>
     </>
   )

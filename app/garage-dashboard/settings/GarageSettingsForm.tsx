@@ -23,6 +23,8 @@ const COMMON_MAKES = [
   "Volkswagen", "Volvo",
 ]
 
+type PriceRange = { min: number | null; max: number | null }
+
 type Garage = {
   name: string
   address: string
@@ -32,6 +34,7 @@ type Garage = {
   email: string | null
   phone: string | null
   services: string[]
+  servicePricing: Record<string, PriceRange> | null
   specialistMakes: string[]
   logoUrl: string | null
 }
@@ -158,6 +161,7 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
   const [postcode, setPostcode] = useState(garage.postcode)
   const [description, setDescription] = useState(garage.description ?? "")
   const [services, setServices] = useState<string[]>(garage.services)
+  const [servicePricing, setServicePricing] = useState<Record<string, PriceRange>>(garage.servicePricing ?? {})
   const [specialistMakes, setSpecialistMakes] = useState<string[]>(garage.specialistMakes)
   const [logoUrl, setLogoUrl] = useState<string | null>(garage.logoUrl)
   const [saving, setSaving] = useState(false)
@@ -184,7 +188,7 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
     e.preventDefault()
     setSaving(true); setSaved(false); setError("")
     try {
-      await updateGarageSettings({ name, email, phone, address, city, postcode, description, services, specialistMakes })
+      await updateGarageSettings({ name, email, phone, address, city, postcode, description, services, servicePricing, specialistMakes })
       setSaved(true)
       router.refresh()
     } catch {
@@ -302,6 +306,41 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
             customPlaceholder="Add a custom service…"
           />
         </Section>
+
+        {/* Service Pricing */}
+        {services.length > 0 && (
+          <Section title="Service Pricing" subtitle="Optional price ranges shown to customers when booking">
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {services.map(service => {
+                const pricing = servicePricing[service] ?? { min: null, max: null }
+                return (
+                  <div key={service} style={{ display: "grid", gridTemplateColumns: "1fr 100px 100px", alignItems: "center", gap: "10px" }}>
+                    <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "#111110" }}>{service}</span>
+                    <div>
+                      <label style={{ ...labelStyle, fontSize: "0.72rem", marginBottom: 3 }}>From (£)</label>
+                      <input
+                        type="number" min="0" placeholder="—"
+                        value={pricing.min ?? ""}
+                        onChange={e => setServicePricing(prev => ({ ...prev, [service]: { ...pricing, min: e.target.value ? Number(e.target.value) : null } }))}
+                        style={{ ...inputStyle, padding: "7px 10px", fontSize: "0.875rem" }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ ...labelStyle, fontSize: "0.72rem", marginBottom: 3 }}>Up to (£)</label>
+                      <input
+                        type="number" min="0" placeholder="—"
+                        value={pricing.max ?? ""}
+                        onChange={e => setServicePricing(prev => ({ ...prev, [service]: { ...pricing, max: e.target.value ? Number(e.target.value) : null } }))}
+                        style={{ ...inputStyle, padding: "7px 10px", fontSize: "0.875rem" }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            <p style={{ fontSize: "0.78rem", color: "#6b6a66", marginTop: "12px" }}>Leave blank if you prefer to quote on inspection.</p>
+          </Section>
+        )}
 
         {/* Specialist Makes */}
         <Section title="Specialist Makes" subtitle="Makes you specialise in — helps customers searching by vehicle brand">

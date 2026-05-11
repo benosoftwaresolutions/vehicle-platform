@@ -215,7 +215,7 @@ export default async function GarageDetail({ params }: Params) {
           {/* Booking sidebar */}
           <div className="md:col-span-1">
             <div style={{ ...card, position: "sticky", top: "72px" }}>
-              <BookingForm garageId={garage.id} services={garage.services} />
+              <BookingForm garageId={garage.id} services={garage.services} servicePricing={(garage.servicePricing as Record<string, { min: number | null; max: number | null }> | null) ?? {}} />
             </div>
           </div>
         </div>
