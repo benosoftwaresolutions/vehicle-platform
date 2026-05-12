@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 
 type Booking = {
   id: string
@@ -17,8 +18,9 @@ const HOURS = ["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","
   "13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00"]
 const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
 
-export default function CalendarView({ bookings, weekStart }: { bookings: Booking[]; weekStart: string }) {
+export default function CalendarView({ bookings, weekStart, weekOffset }: { bookings: Booking[]; weekStart: string; weekOffset: number }) {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
+  const router = useRouter()
 
   const ws = new Date(weekStart)
 
@@ -42,11 +44,18 @@ export default function CalendarView({ bookings, weekStart }: { bookings: Bookin
   return (
     <div>
       {/* Week nav header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px", flexWrap: "wrap", gap: "12px" }}>
         <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.05rem", color: "#111110", margin: 0 }}>
           {ws.toLocaleDateString("en-GB", { day: "numeric", month: "long" })} – {days[6].toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
         </h2>
-        <span style={{ fontSize: "0.85rem", color: "#6b6a66" }}>{bookings.length} booking{bookings.length !== 1 ? "s" : ""} this week</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ fontSize: "0.85rem", color: "#6b6a66", marginRight: 8 }}>{bookings.length} booking{bookings.length !== 1 ? "s" : ""}</span>
+          <button onClick={() => router.push(`/garage-dashboard/calendar?week=${weekOffset - 1}`)} style={navBtn}>← Prev</button>
+          {weekOffset !== 0 && (
+            <button onClick={() => router.push("/garage-dashboard/calendar")} style={navBtn}>Today</button>
+          )}
+          <button onClick={() => router.push(`/garage-dashboard/calendar?week=${weekOffset + 1}`)} style={navBtn}>Next →</button>
+        </div>
       </div>
 
       {/* Grid */}
@@ -131,6 +140,11 @@ export default function CalendarView({ bookings, weekStart }: { bookings: Bookin
       )}
     </div>
   )
+}
+
+const navBtn: React.CSSProperties = {
+  background: "transparent", border: "0.5px solid rgba(0,0,0,0.2)", borderRadius: 100,
+  padding: "6px 14px", fontSize: "0.8rem", fontWeight: 600, color: "#111110", cursor: "pointer",
 }
 
 function Row({ label, value }: { label: string; value: string }) {
