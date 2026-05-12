@@ -36,6 +36,8 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
     createdAt: b.createdAt.toISOString(),
     updatedAt: b.updatedAt.toISOString(),
     jobValue: b.jobValue ?? null,
+    vehicleMake: b.vehicleMake ?? null,
+    vehicleModel: b.vehicleModel ?? null,
   }))
 
   return (

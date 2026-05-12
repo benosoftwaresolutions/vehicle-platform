@@ -15,21 +15,20 @@ export default function BookingForm({ garageId, services, servicePricing = {} }:
   const [service, setService] = useState("")
   const [date, setDate] = useState("")
   const [time, setTime] = useState("")
-  const [registration, setRegistration] = useState("")
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
   const [customService, setCustomService] = useState("")
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [slotsData, setSlotsData] = useState<SlotsResponse | null>(null)
   const [slotsLoading, setSlotsLoading] = useState(false)
-  const [vehicles, setVehicles] = useState<Vehicle[]>([])
-  const [manualReg, setManualReg] = useState(false)
+  const [vehicles, setVehicles] = useState<Vehicle[] | null>(null)
 
   useEffect(() => {
     fetch("/api/vehicles")
       .then(r => r.ok ? r.json() : [])
       .then((data: Vehicle[]) => setVehicles(data))
-      .catch(() => {})
+      .catch(() => setVehicles([]))
   }, [])
 
   useEffect(() => {
@@ -45,14 +44,22 @@ export default function BookingForm({ garageId, services, servicePricing = {} }:
 
   const handleBooking = async () => {
     const resolvedService = service === "__other__" ? customService.trim() : service
-    if (!resolvedService || !date || !time || !registration || services.length === 0) return
+    if (!resolvedService || !date || !time || !selectedVehicle || services.length === 0) return
     setLoading(true)
     setError(null)
     try {
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ garageId, service: resolvedService, date, time, registration }),
+        body: JSON.stringify({
+          garageId,
+          service: resolvedService,
+          date,
+          time,
+          registration: selectedVehicle.registration,
+          vehicleMake: selectedVehicle.make,
+          vehicleModel: selectedVehicle.model,
+        }),
       })
       if (res.ok) {
         setSuccess(true)
@@ -79,7 +86,7 @@ export default function BookingForm({ garageId, services, servicePricing = {} }:
 
   const today = new Date().toISOString().split("T")[0]
   const serviceReady = service === "__other__" ? customService.trim().length > 0 : !!service
-  const canBook = !loading && serviceReady && !!date && !!time && !!registration && services.length > 0
+  const canBook = !loading && serviceReady && !!date && !!time && !!selectedVehicle && services.length > 0
 
   return (
     <div>
@@ -90,40 +97,30 @@ export default function BookingForm({ garageId, services, servicePricing = {} }:
 
         <div>
           <label style={lbl}>Vehicle</label>
-          {vehicles.length > 0 && !manualReg ? (
-            <>
-              <select
-                value={registration}
-                onChange={e => {
-                  if (e.target.value === "__manual__") { setManualReg(true); setRegistration("") }
-                  else setRegistration(e.target.value)
-                }}
-                style={inp}
-              >
-                <option value="">Select a vehicle</option>
-                {vehicles.map(v => (
-                  <option key={v.id} value={v.registration}>
-                    {v.registration} — {v.make} {v.model} ({v.year})
-                  </option>
-                ))}
-                <option value="__manual__">Enter registration manually</option>
-              </select>
-            </>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <input
-                type="text"
-                placeholder="e.g. AB12 CDE"
-                value={registration}
-                onChange={e => setRegistration(e.target.value.toUpperCase())}
-                style={inp}
-              />
-              {vehicles.length > 0 && (
-                <button type="button" onClick={() => { setManualReg(false); setRegistration("") }} style={{ background: "none", border: "none", color: "#6b6a66", fontSize: "0.8rem", cursor: "pointer", textAlign: "left", padding: 0 }}>
-                  ← Choose from saved vehicles
-                </button>
-              )}
+          {vehicles === null ? (
+            <p style={{ fontSize: "0.875rem", color: "#6b6a66" }}>Loading your vehicles…</p>
+          ) : vehicles.length === 0 ? (
+            <div style={{ background: "#f4f3ef", borderRadius: 10, padding: "12px 16px" }}>
+              <p style={{ fontSize: "0.875rem", color: "#111110", fontWeight: 600, margin: "0 0 4px" }}>No vehicles on your profile</p>
+              <p style={{ fontSize: "0.82rem", color: "#6b6a66", margin: "0 0 10px" }}>Add your vehicle first so the garage knows what to expect.</p>
+              <a href="/vehicles" style={{ fontSize: "0.82rem", fontWeight: 600, color: "#111110", textDecoration: "underline" }}>Add a vehicle →</a>
             </div>
+          ) : (
+            <select
+              value={selectedVehicle?.id ?? ""}
+              onChange={e => {
+                const v = vehicles.find(v => v.id === e.target.value) ?? null
+                setSelectedVehicle(v)
+              }}
+              style={inp}
+            >
+              <option value="">Select a vehicle</option>
+              {vehicles.map(v => (
+                <option key={v.id} value={v.id}>
+                  {v.registration} — {v.make} {v.model} ({v.year})
+                </option>
+              ))}
+            </select>
           )}
         </div>
 

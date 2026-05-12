@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json()
-    const { garageId, service, date, time, registration } = body
+    const { garageId, service, date, time, registration, vehicleMake, vehicleModel } = body
 
     if (!garageId || !service?.trim() || !date || !time || !registration?.trim()) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
@@ -39,6 +39,8 @@ export async function POST(req: Request) {
         date: new Date(date),
         time,
         registration,
+        vehicleMake: vehicleMake?.trim() || null,
+        vehicleModel: vehicleModel?.trim() || null,
         status: "pending"
       }
     })
