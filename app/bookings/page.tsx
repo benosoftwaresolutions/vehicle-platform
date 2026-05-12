@@ -8,7 +8,7 @@ import { prisma } from "../lib/prisma"
 import { getCachedUser } from "../lib/cache"
 
 const STATUS_STYLES: Record<string, { background: string; color: string; label: string; textDecoration?: string }> = {
-  pending:              { background: "#f4f3ef", color: "#444441",  label: "Pending" },
+  pending:              { background: "#f4f3ef", color: "#444441",  label: "Awaiting confirmation" },
   confirmed:            { background: "#111110", color: "#ffffff",  label: "Confirmed" },
   declined:             { background: "#eceae4", color: "#111110",  label: "Alternative offered", textDecoration: "line-through" },
   declined_by_customer: { background: "#f4f3ef", color: "#6b6a66",  label: "Cancelled" },

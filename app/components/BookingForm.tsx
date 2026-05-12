@@ -70,8 +70,9 @@ export default function BookingForm({ garageId, services, servicePricing = {} }:
 
   if (success) {
     return (
-      <div style={{ background: "#f4f3ef", borderRadius: 12, padding: 16, color: "#111110", fontWeight: 600, fontSize: "0.9rem" }}>
-        Booking confirmed — view it in My Bookings.
+      <div style={{ background: "#f4f3ef", borderRadius: 12, padding: 16 }}>
+        <p style={{ fontWeight: 700, fontSize: "0.9rem", color: "#111110", margin: "0 0 4px" }}>Booking request sent</p>
+        <p style={{ fontSize: "0.85rem", color: "#6b6a66", margin: 0 }}>The garage will confirm your appointment shortly. You can track it in <a href="/bookings" style={{ color: "#111110", fontWeight: 600 }}>My Bookings</a>.</p>
       </div>
     )
   }
