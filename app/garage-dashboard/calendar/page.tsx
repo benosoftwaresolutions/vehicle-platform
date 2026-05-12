@@ -4,14 +4,17 @@ import { getGarageOwnerContext } from "../layout"
 import Link from "next/link"
 import CalendarView from "./CalendarView"
 
-export default async function CalendarPage() {
+export default async function CalendarPage({ searchParams }: { searchParams: Promise<{ week?: string }> }) {
   const { userId } = await auth()
   const ctx = await getGarageOwnerContext(userId!)
   const garageId = ctx!.garageId!
 
+  const { week } = await searchParams
+  const weekOffset = parseInt(week ?? "0", 10) || 0
+
   const now = new Date()
   const weekStart = new Date(now)
-  weekStart.setDate(now.getDate() - now.getDay() + 1) // Monday
+  weekStart.setDate(now.getDate() - now.getDay() + 1 + weekOffset * 7) // Monday ± n weeks
   weekStart.setHours(0, 0, 0, 0)
   const weekEnd = new Date(weekStart)
   weekEnd.setDate(weekStart.getDate() + 6)
@@ -51,7 +54,7 @@ export default async function CalendarPage() {
         </div>
       </div>
       <main className="page-body" style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px 32px" }}>
-        <CalendarView bookings={serialized} weekStart={weekStart.toISOString()} />
+        <CalendarView bookings={serialized} weekStart={weekStart.toISOString()} weekOffset={weekOffset} />
       </main>
     </>
   )

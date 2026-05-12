@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
 import { revalidatePath } from "next/cache"
-import { sendBookingConfirmedToCustomer, sendBookingDeclinedToCustomer, sendWalkInBookingToGarage, sendBookingRescheduledToCustomer, sendMessageToCustomer } from "@/app/lib/email"
+import { sendBookingConfirmedToCustomer, sendBookingDeclinedToCustomer, sendWalkInBookingToGarage, sendBookingRescheduledToCustomer, sendMessageToCustomer, sendJobCompletedToCustomer } from "@/app/lib/email"
 
 export async function updateBookingStatus(
   bookingId: string,
@@ -58,6 +58,16 @@ export async function updateBookingStatus(
         time: booking.time,
         registration: booking.registration,
       }).catch((err) => console.error("Failed to send confirmation email:", err))
+    } else if (status === "completed") {
+      await sendJobCompletedToCustomer({
+        customerEmail: customer.email,
+        customerName: customer.name ?? customer.email,
+        garageName: garage.name,
+        service: booking.service,
+        date: booking.date,
+        registration: booking.registration,
+        jobValue: booking.jobValue,
+      }).catch(err => console.error("Failed to send completion email:", err))
     } else if (status === "declined") {
       await sendBookingDeclinedToCustomer({
         customerEmail: customer.email,

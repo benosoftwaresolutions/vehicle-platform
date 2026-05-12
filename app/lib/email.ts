@@ -357,6 +357,41 @@ export async function sendMessageToCustomer({
   })
 }
 
+export async function sendJobCompletedToCustomer({
+  customerEmail,
+  customerName,
+  garageName,
+  service,
+  date,
+  registration,
+  jobValue,
+}: {
+  customerEmail: string
+  customerName: string
+  garageName: string
+  service: string
+  date: Date
+  registration: string
+  jobValue?: number | null
+}) {
+  await sendWithRetry({
+    from: FROM,
+    to: customerEmail,
+    subject: `Your car is ready — ${service} at ${garageName}`,
+    html: emailBase(`
+      <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Your car is ready</h2>
+      <p style="color:#6b6a66;font-size:14px;margin:0 0 4px;">Hi ${customerName}, your <strong style="color:#111110;">${service}</strong> at <strong style="color:#111110;">${garageName}</strong> has been completed.</p>
+      ${dataTable([
+        ["Service", service],
+        ["Date", formatDate(date)],
+        ["Registration", registration],
+        ...(jobValue ? [["Job total", `£${jobValue.toFixed(2)}`] as [string, string]] : []),
+      ])}
+      <p style="margin-top:24px;font-size:14px;color:#444441;">If you were happy with the service, we'd love a review — it helps other drivers find great garages.</p>
+    `),
+  })
+}
+
 export async function sendAppointmentReminder({
   customerEmail,
   customerName,
