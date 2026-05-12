@@ -9,6 +9,8 @@ type Booking = {
   date: string
   time: string
   registration: string
+  vehicleMake: string | null
+  vehicleModel: string | null
   status: string
   customerName: string | null
   isWalkIn: boolean
@@ -99,7 +101,7 @@ export default function CalendarView({ bookings, weekStart, weekOffset }: { book
                           width: "100%",
                         }}
                       >
-                        {b.registration} · {b.service}
+                        {b.service}
                       </button>
                     ))}
                   </div>
@@ -122,6 +124,9 @@ export default function CalendarView({ bookings, weekStart, weekOffset }: { book
             </h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "0.875rem" }}>
               <Row label="Registration" value={selectedBooking.registration} />
+              {(selectedBooking.vehicleMake || selectedBooking.vehicleModel) && (
+                <Row label="Vehicle" value={`${selectedBooking.vehicleMake ?? ""} ${selectedBooking.vehicleModel ?? ""}`.trim()} />
+              )}
               <Row label="Date" value={new Date(selectedBooking.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} />
               <Row label="Time" value={selectedBooking.time} />
               <Row label="Status" value={selectedBooking.status} />

@@ -93,7 +93,9 @@ export default async function ArchivePage() {
                       {booking.isWalkIn && booking.customerPhone && (
                         <p style={{ color: "#6b6a66", marginBottom: "2px", fontSize: "0.875rem" }}>{booking.customerPhone}</p>
                       )}
-                      <p style={{ color: "#444441", marginBottom: "2px", fontSize: "0.875rem" }}>{booking.registration}</p>
+                      <p style={{ color: "#444441", marginBottom: "2px", fontSize: "0.875rem" }}>
+                        {booking.registration}{booking.vehicleMake ? ` — ${booking.vehicleMake} ${booking.vehicleModel ?? ""}`.trimEnd() : ""}
+                      </p>
                       <p style={{ color: "#6b6a66", fontSize: "0.875rem" }}>
                         {new Date(booking.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })} at {booking.time}
                       </p>

@@ -72,6 +72,8 @@ model Booking {
   customerName    String?
   customerPhone   String?
   customerEmail   String?
+  vehicleMake     String?
+  vehicleModel    String?
   garageNote      String?
   suggestedDate   DateTime?
   suggestedTime   String?
