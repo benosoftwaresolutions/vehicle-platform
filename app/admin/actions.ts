@@ -28,6 +28,12 @@ export async function approveGarage(garageId: string) {
   revalidatePath("/admin/garages")
 }
 
+export async function saveAdminNotes(garageId: string, notes: string) {
+  await assertAdmin()
+  await prisma.garage.update({ where: { id: garageId }, data: { adminNotes: notes.trim() || null } })
+  revalidatePath(`/admin/garages/${garageId}`)
+}
+
 export async function deleteGarage(garageId: string) {
   await assertAdmin()
 

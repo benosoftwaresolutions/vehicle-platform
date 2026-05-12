@@ -1,4 +1,5 @@
 import { prisma } from "@/app/lib/prisma"
+import Link from "next/link"
 
 function StatCard({ label, value, sub }: { label: string; value: number | string; sub?: string }) {
   return (
@@ -16,25 +17,33 @@ export default async function AdminOverview() {
 
   const [
     totalGarages,
+    liveGarages,
+    pendingApprovals,
     totalUsers,
     totalBookings,
     totalReviews,
     bookingsThisMonth,
     newUsersThisMonth,
+    platformRevenue,
     recentBookings,
     recentUsers,
     recentReviews,
   ] = await Promise.all([
     prisma.garage.count(),
+    prisma.garage.count({ where: { approved: true } }),
+    prisma.user.count({ where: { role: "pending", garageId: { not: null } } }),
     prisma.user.count(),
     prisma.booking.count(),
     prisma.review.count(),
     prisma.booking.count({ where: { createdAt: { gte: startOfMonth } } }),
     prisma.user.count({ where: { createdAt: { gte: startOfMonth } } }),
+    prisma.booking.aggregate({ where: { status: "completed", jobValue: { not: null } }, _sum: { jobValue: true } }),
     prisma.booking.findMany({ take: 8, orderBy: { createdAt: "desc" }, select: { id: true, service: true, createdAt: true, garageId: true, registration: true } }),
     prisma.user.findMany({ take: 8, orderBy: { createdAt: "desc" }, select: { id: true, email: true, role: true, createdAt: true } }),
     prisma.review.findMany({ take: 8, orderBy: { createdAt: "desc" }, select: { id: true, customerName: true, rating: true, createdAt: true, garageId: true } }),
   ])
+
+  const totalRevenue = platformRevenue._sum.jobValue ?? 0
 
   // Resolve garage names for activity feed
   const garageIds = [...new Set([...recentBookings.map((b) => b.garageId), ...recentReviews.map((r) => r.garageId)])]
@@ -56,20 +65,34 @@ export default async function AdminOverview() {
 
   return (
     <div style={{ padding: "40px" }}>
-      <div style={{ marginBottom: "32px" }}>
+      <div style={{ marginBottom: "28px" }}>
         <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.6rem", letterSpacing: "-0.03em", color: "#111110", marginBottom: "4px" }}>
           Overview
         </h1>
         <p style={{ color: "#6b6a66", fontSize: "0.9rem" }}>Platform-wide stats</p>
       </div>
 
+      {pendingApprovals > 0 && (
+        <Link href="/admin/pending" style={{ textDecoration: "none", display: "block", marginBottom: "20px" }}>
+          <div style={{ background: "#fef3c7", border: "0.5px solid #f59e0b", borderRadius: 12, padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span style={{ fontSize: "1rem" }}>⚠️</span>
+              <span style={{ fontWeight: 700, color: "#92400e", fontSize: "0.9rem" }}>
+                {pendingApprovals} garage{pendingApprovals !== 1 ? "s" : ""} awaiting approval
+              </span>
+            </div>
+            <span style={{ fontWeight: 600, color: "#92400e", fontSize: "0.85rem" }}>Review →</span>
+          </div>
+        </Link>
+      )}
+
       <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px", marginBottom: "14px" }}>
-        <StatCard label="Total Garages"  value={totalGarages} />
+        <StatCard label="Live Garages"   value={liveGarages} sub={`${totalGarages} total registered`} />
         <StatCard label="Total Users"    value={totalUsers} />
         <StatCard label="Total Bookings" value={totalBookings} />
       </div>
       <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px", marginBottom: "32px" }}>
-        <StatCard label="Total Reviews"        value={totalReviews} />
+        <StatCard label="Platform Revenue" value={totalRevenue > 0 ? `£${totalRevenue.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "—"} sub="from logged jobs" />
         <StatCard label="Bookings This Month"  value={bookingsThisMonth} sub={now.toLocaleString("default", { month: "long", year: "numeric" })} />
         <StatCard label="New Users This Month" value={newUsersThisMonth} sub={now.toLocaleString("default", { month: "long", year: "numeric" })} />
       </div>
