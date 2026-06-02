@@ -4,8 +4,11 @@ import { getGarageOwnerContext } from "./layout"
 import DryvnFooter from "@/app/components/DryvnFooter"
 import BookingActions from "@/app/components/BookingActions"
 import BookingHistory from "./BookingHistory"
+import CustomerNoteEditor from "./CustomerNoteEditor"
 import WalkInBookingButton from "./WalkInBookingButton"
+import ShareProfileCard from "./ShareProfileCard"
 import Link from "next/link"
+import DashPill from "@/app/components/DashPill"
 
 export default async function GarageDashboard() {
   const { userId } = await auth()
@@ -35,6 +38,8 @@ export default async function GarageDashboard() {
             isApproved={isApproved}
           />
         )}
+        <ShareProfileCard garageId={garageId} />
+        <InventoryWidget garageId={garageId} />
         <BookingsList garageId={garageId} />
         <ReviewsSummary garageId={garageId} />
       </main>
@@ -144,6 +149,51 @@ function GoLiveChecklist({ hasServices, hasAvailability, isApproved }: {
   )
 }
 
+async function InventoryWidget({ garageId }: { garageId: string }) {
+  const parts = await prisma.part.findMany({ where: { garageId } })
+  if (parts.length === 0) return null
+
+  const lowStock = parts.filter(p => p.quantity <= p.reorderLevel)
+  const outOfStock = parts.filter(p => p.quantity <= 0)
+
+  return (
+    <div style={{ background: "#f4f3ef", borderRadius: 14, padding: "20px 22px", marginBottom: "28px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+        <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1rem", letterSpacing: "-0.02em", color: "#111110" }}>
+          Parts Inventory
+        </h2>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Link href="/garage-dashboard/insights" style={{ fontSize: "0.8rem", fontWeight: 600, textDecoration: "none", background: "#111110", color: "#ffffff", padding: "6px 14px", borderRadius: 100 }}>
+            AI Insights
+          </Link>
+          <Link href="/garage-dashboard/inventory" style={{ fontSize: "0.8rem", fontWeight: 600, color: "#111110", textDecoration: "none", background: "transparent", border: "0.5px solid rgba(0,0,0,0.2)", padding: "6px 14px", borderRadius: 100 }}>
+            View all
+          </Link>
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+        <div style={{ background: "#ffffff", borderRadius: 10, padding: "14px 16px" }}>
+          <p style={{ fontSize: "0.72rem", fontWeight: 700, color: "#6b6a66", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Total parts</p>
+          <p style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.6rem", color: "#111110", letterSpacing: "-0.03em" }}>{parts.length}</p>
+        </div>
+        <div style={{ background: outOfStock.length > 0 ? "#fee2e2" : "#ffffff", borderRadius: 10, padding: "14px 16px" }}>
+          <p style={{ fontSize: "0.72rem", fontWeight: 700, color: outOfStock.length > 0 ? "#991b1b" : "#6b6a66", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Out of stock</p>
+          <p style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.6rem", color: outOfStock.length > 0 ? "#991b1b" : "#111110", letterSpacing: "-0.03em" }}>{outOfStock.length}</p>
+        </div>
+        <div style={{ background: lowStock.length > 0 ? "#fffbeb" : "#ffffff", borderRadius: 10, padding: "14px 16px" }}>
+          <p style={{ fontSize: "0.72rem", fontWeight: 700, color: lowStock.length > 0 ? "#92400e" : "#6b6a66", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Low stock</p>
+          <p style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.6rem", color: lowStock.length > 0 ? "#92400e" : "#111110", letterSpacing: "-0.03em" }}>{lowStock.length}</p>
+        </div>
+      </div>
+      {lowStock.length > 0 && (
+        <p style={{ fontSize: "0.8rem", color: "#92400e", marginTop: 12, fontWeight: 500 }}>
+          {lowStock.map(p => p.name).slice(0, 3).join(", ")}{lowStock.length > 3 ? ` +${lowStock.length - 3} more` : ""} need{lowStock.length === 1 ? "s" : ""} attention
+        </p>
+      )}
+    </div>
+  )
+}
+
 async function ReviewsSummary({ garageId }: { garageId: string }) {
   const reviews = await prisma.review.findMany({
     where: { garageId },
@@ -212,6 +262,12 @@ async function BookingsList({ garageId }: { garageId: string }) {
       where: { garageId, status: "completed", date: { gte: monthStart, lte: monthEnd } },
     }),
   ])
+
+  const registrations = [...new Set(bookings.map(b => b.registration))]
+  const customerNotes = registrations.length > 0
+    ? await prisma.customerNote.findMany({ where: { garageId, registration: { in: registrations } } })
+    : []
+  const notesByReg = Object.fromEntries(customerNotes.map(n => [n.registration, n.note]))
   const garageServices = garage?.services ?? []
   const revenue = monthlyRevenue._sum.jobValue ?? 0
   const monthName = now.toLocaleString("en-GB", { month: "long" })
@@ -240,18 +296,11 @@ async function BookingsList({ garageId }: { garageId: string }) {
         </h2>
         <div className="dash-actions" style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
           <WalkInBookingButton garageId={garageId} services={garageServices} />
-          <Link href="/garage-dashboard/settings" style={{ background: "transparent", color: "#111110", border: "0.5px solid rgba(0,0,0,0.2)", padding: "9px 18px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", textDecoration: "none" }}>
-            Settings
-          </Link>
-          <Link href="/garage-dashboard/calendar" style={{ background: "transparent", color: "#111110", border: "0.5px solid rgba(0,0,0,0.2)", padding: "9px 18px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", textDecoration: "none" }}>
-            Calendar
-          </Link>
-          <Link href="/garage-dashboard/archive" style={{ background: "transparent", color: "#111110", border: "0.5px solid rgba(0,0,0,0.2)", padding: "9px 18px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", textDecoration: "none" }}>
-            Archive
-          </Link>
-          <Link href="/garage-dashboard/availability" style={{ background: "#111110", color: "#ffffff", padding: "9px 18px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", textDecoration: "none" }}>
-            Availability
-          </Link>
+          <DashPill href="/garage-dashboard/settings">Settings</DashPill>
+          <DashPill href="/garage-dashboard/inventory">Inventory</DashPill>
+          <DashPill href="/garage-dashboard/calendar">Calendar</DashPill>
+          <DashPill href="/garage-dashboard/archive">Archive</DashPill>
+          <DashPill href="/garage-dashboard/availability">Availability</DashPill>
         </div>
       </div>
       {bookings.length === 0 ? (
@@ -287,6 +336,11 @@ async function BookingsList({ garageId }: { garageId: string }) {
                   {new Date(booking.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })} at {booking.time}
                 </p>
                 <BookingHistory garageId={garageId} registration={booking.registration} />
+                <CustomerNoteEditor
+                  garageId={garageId}
+                  registration={booking.registration}
+                  initialNote={notesByReg[booking.registration] ?? null}
+                />
                 {booking.garageNote && (
                   <p style={{ color: "#444441", fontSize: "0.85rem", marginTop: "10px", background: "#eceae4", padding: "8px 12px", borderRadius: 8 }}>
                     Note: {booking.garageNote}

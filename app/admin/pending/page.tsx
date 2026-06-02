@@ -1,6 +1,7 @@
 import { prisma } from "@/app/lib/prisma"
 import Link from "next/link"
 import ApproveButton from "./ApproveButton"
+import DeclineButton from "./DeclineButton"
 
 export default async function AdminPending() {
   const pendingOwners = await prisma.user.findMany({
@@ -90,6 +91,7 @@ export default async function AdminPending() {
                       View public page
                     </Link>
                     <ApproveButton userId={owner.id} garageName={garage.name} />
+                    <DeclineButton userId={owner.id} garageId={garage.id} garageName={garage.name} />
                   </div>
                 </div>
               </div>

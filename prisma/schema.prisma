@@ -8,17 +8,22 @@ datasource db {
 }
 
 model User {
-  id              String    @id @default(cuid())
-  clerkId         String    @unique
-  email           String    @unique
-  name            String?
-  role            String    @default("pending")
-  garageId        String?
-  onboardingStep  Int       @default(0)
-  profileComplete Boolean   @default(false)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  vehicles        Vehicle[]
+  id                   String    @id @default(cuid())
+  clerkId              String    @unique
+  email                String    @unique
+  name                 String?
+  role                 String    @default("pending")
+  garageId             String?
+  onboardingStep       Int       @default(0)
+  profileComplete      Boolean   @default(false)
+  plan                 String    @default("driver_free")
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  subscriptionStatus   String?
+  subscriptionEnd      DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  vehicles             Vehicle[]
 }
 
 model Vehicle {
@@ -41,23 +46,28 @@ model Vehicle {
 }
 
 model Garage {
-  id          String   @id @default(cuid())
-  name        String
-  address     String
-  city        String
-  postcode    String
-  description String?
-  email       String?
-  phone       String?
-  rating      Float    @default(0)
-  services         String[]
-  servicePricing   Json?
-  specialistMakes  String[]
-  logoUrl          String?
-  approved         Boolean  @default(false)
-  adminNotes       String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id                   String    @id @default(cuid())
+  name                 String
+  address              String
+  city                 String
+  postcode             String
+  description          String?
+  email                String?
+  phone                String?
+  rating               Float     @default(0)
+  services             String[]
+  servicePricing       Json?
+  specialistMakes      String[]
+  logoUrl              String?
+  approved             Boolean   @default(false)
+  adminNotes           String?
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  subscriptionStatus   String    @default("trialing")
+  trialEndsAt          DateTime?
+  subscriptionEnd      DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 }
 
 model Booking {
@@ -115,6 +125,21 @@ model Review {
   @@unique([garageId, clerkId])
 }
 
+model Part {
+  id            String   @id @default(cuid())
+  garageId      String
+  name          String
+  category      String?
+  quantity      Float    @default(0)
+  reorderLevel  Float    @default(0)
+  unit          String   @default("units")
+  supplier      String?
+  supplierEmail String?
+  costPrice     Float?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
 model ServiceType {
   id          String   @id @default(cuid())
   garageId    String
@@ -125,4 +150,15 @@ model ServiceType {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model CustomerNote {
+  id           String   @id @default(cuid())
+  garageId     String
+  registration String
+  note         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([garageId, registration])
 }

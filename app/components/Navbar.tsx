@@ -109,18 +109,28 @@ export default function Navbar({ role }: { role?: string }) {
           </div>
           <div style={{ width: "0.5px", height: 18, background: "rgba(0,0,0,0.15)" }} />
           <div style={{ background: "#f4f3ef", borderRadius: 100, padding: 3, display: "flex", gap: 2 }}>
-            <Link href="/for-garages" style={{
+            {(!isSignedIn || isGarageOwner) && (
+              <Link href="/for-garages" style={{
+                padding: "5px 14px", borderRadius: 100, fontSize: "0.82rem", fontWeight: 600,
+                textDecoration: "none",
+                background: onGarages ? "#111110" : "transparent",
+                color: onGarages ? "#ffffff" : "#444441",
+              }}>For garages</Link>
+            )}
+            {(!isSignedIn || !isGarageOwner) && (
+              <Link href="/for-drivers" style={{
+                padding: "5px 14px", borderRadius: 100, fontSize: "0.82rem", fontWeight: 600,
+                textDecoration: "none",
+                background: onDrivers ? "#111110" : "transparent",
+                color: onDrivers ? "#ffffff" : "#444441",
+              }}>For drivers</Link>
+            )}
+            <Link href="/pricing" style={{
               padding: "5px 14px", borderRadius: 100, fontSize: "0.82rem", fontWeight: 600,
               textDecoration: "none",
-              background: onGarages ? "#111110" : "transparent",
-              color: onGarages ? "#ffffff" : "#444441",
-            }}>For garages</Link>
-            <Link href="/for-drivers" style={{
-              padding: "5px 14px", borderRadius: 100, fontSize: "0.82rem", fontWeight: 600,
-              textDecoration: "none",
-              background: onDrivers ? "#111110" : "transparent",
-              color: onDrivers ? "#ffffff" : "#444441",
-            }}>For drivers</Link>
+              background: pathname === "/pricing" ? "#111110" : "transparent",
+              color: pathname === "/pricing" ? "#ffffff" : "#444441",
+            }}>Pricing</Link>
           </div>
         </div>
 
@@ -184,8 +194,12 @@ export default function Navbar({ role }: { role?: string }) {
 
           {/* For garages / drivers */}
           <div style={{ padding: "8px 16px" }}>
-            <Link href="/for-garages" className="mobile-link" style={{ ...mobileLink, background: onGarages ? "#f4f3ef" : "transparent" }}>For garages</Link>
-            <Link href="/for-drivers" className="mobile-link" style={{ ...mobileLink, background: onDrivers ? "#f4f3ef" : "transparent" }}>For drivers</Link>
+            {(!isSignedIn || isGarageOwner) && (
+              <Link href="/for-garages" className="mobile-link" style={{ ...mobileLink, background: onGarages ? "#f4f3ef" : "transparent" }}>For garages</Link>
+            )}
+            {(!isSignedIn || !isGarageOwner) && (
+              <Link href="/for-drivers" className="mobile-link" style={{ ...mobileLink, background: onDrivers ? "#f4f3ef" : "transparent" }}>For drivers</Link>
+            )}
           </div>
 
           <div style={{ height: "0.5px", background: "rgba(0,0,0,0.08)", margin: "8px 16px" }} />

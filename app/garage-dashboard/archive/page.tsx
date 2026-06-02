@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
 import { getGarageOwnerContext } from "../layout"
 import Link from "next/link"
+import WalkInBookingButton from "../WalkInBookingButton"
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   completed:            { label: "Completed",   color: "#111110" },
@@ -15,20 +16,28 @@ export default async function ArchivePage() {
   const { userId } = await auth()
   const ctx = await getGarageOwnerContext(userId!)
 
-  const bookings = await prisma.booking.findMany({
-    where: {
-      garageId: ctx!.garageId!,
-      OR: [
-        { date: { lt: new Date(new Date().setHours(0, 0, 0, 0)) } },
-        { status: "completed" },
-      ],
-    },
-    orderBy: { date: "desc" },
-  })
+  const garageId = ctx!.garageId!
+
+  const [bookings, garage] = await Promise.all([
+    prisma.booking.findMany({
+      where: {
+        garageId,
+        OR: [
+          { date: { lt: new Date(new Date().setHours(0, 0, 0, 0)) } },
+          { status: "completed" },
+        ],
+      },
+      orderBy: { date: "desc" },
+    }),
+    prisma.garage.findUnique({ where: { id: garageId }, select: { services: true } }),
+  ])
+
+  const garageServices = garage?.services ?? []
 
   const totalRevenue = bookings
     .filter(b => b.status === "completed" && b.jobValue)
     .reduce((sum, b) => sum + (b.jobValue ?? 0), 0)
+
 
   const completedCount = bookings.filter(b => b.status === "completed").length
 
@@ -113,6 +122,20 @@ export default async function ArchivePage() {
                         <span style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1rem", color: "#111110" }}>
                           £{booking.jobValue.toFixed(2)}
                         </span>
+                      )}
+                      {booking.status === "completed" && (
+                        <WalkInBookingButton
+                          garageId={garageId}
+                          services={garageServices}
+                          label="Rebook"
+                          initialData={{
+                            customerName: booking.customerName ?? "",
+                            customerPhone: booking.customerPhone ?? "",
+                            customerEmail: booking.customerEmail ?? "",
+                            registration: booking.registration,
+                            service: booking.service,
+                          }}
+                        />
                       )}
                     </div>
                   </div>

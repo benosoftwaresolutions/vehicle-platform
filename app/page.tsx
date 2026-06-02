@@ -6,19 +6,36 @@ import HomeHeroSearch from "./components/HomeHeroSearch"
 import OnboardingBanner from "./components/OnboardingBanner"
 import { auth } from "@clerk/nextjs/server"
 import { getCachedUser, getCachedGarages } from "./lib/cache"
+import { prisma } from "./lib/prisma"
 
 const PREMIUM_MAKES = new Set(["BMW", "Mercedes", "Audi", "Volkswagen", "Porsche", "Land Rover"])
 
 export default async function Home() {
   const { userId } = await auth()
-  const [{ garages, reviewCountMap }, user] = await Promise.all([
+  const [{ garages, reviewCountMap }, user, totalBookings, topReviews] = await Promise.all([
     getCachedGarages(),
     userId ? getCachedUser(userId) : null,
+    prisma.booking.count({ where: { status: "completed" } }),
+    prisma.review.findMany({
+      where: { rating: { gte: 4 }, comment: { not: "" } },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+      select: { id: true, customerName: true, rating: true, comment: true, garageId: true },
+    }),
   ])
   const showBanner = !!userId && (!user || !user.profileComplete)
   const byRating = [...garages].sort((a, b) => b.rating - a.rating)
   const featured = byRating.slice(0, 3)
   const allMakes = [...new Set(garages.flatMap(g => g.specialistMakes))].sort()
+
+  // Pick 3 reviews with varied garages
+  const seenGarages = new Set<string>()
+  const featuredReviews = topReviews.filter(r => {
+    if (seenGarages.has(r.garageId)) return false
+    seenGarages.add(r.garageId)
+    return true
+  }).slice(0, 3)
+  const garageNameMap = Object.fromEntries(garages.map(g => [g.id, g.name]))
 
   return (
     <>
@@ -62,7 +79,25 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 3 — How it works */}
+      {/* 3 — Platform stats */}
+      {(garages.length > 0 || totalBookings > 0) && (
+        <section className="stats-strip" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", background: "#ffffff", borderBottom: "0.5px solid rgba(0,0,0,0.06)" }}>
+          {[
+            { value: garages.length, label: "Vetted garages" },
+            { value: totalBookings, label: "Bookings completed" },
+            { value: Object.values(reviewCountMap).reduce((a, b) => a + b, 0), label: "Customer reviews" },
+          ].map(({ value, label }, i) => (
+            <div key={label} style={{ padding: "28px 32px", borderRight: i < 2 ? "0.5px solid rgba(0,0,0,0.08)" : "none", textAlign: "center" }}>
+              <p style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 700, fontSize: "clamp(28px,3vw,40px)", color: "#111110", letterSpacing: "-0.03em", lineHeight: 1, marginBottom: 6 }}>
+                {value.toLocaleString("en-GB")}
+              </p>
+              <p style={{ fontSize: "0.82rem", fontWeight: 500, color: "#6b6a66" }}>{label}</p>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {/* 4 — How it works */}
       <section className="sect" style={{ padding: "80px 32px", background: "#ffffff" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <p style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#444441", marginBottom: 14 }}>How it works</p>
@@ -98,7 +133,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 4 — Featured garages */}
+      {/* 5 — Featured garages */}
       {featured.length > 0 && (
         <section className="sect" style={{ padding: "72px 32px", background: "#f4f3ef" }}>
           <div style={{ maxWidth: 900, margin: "0 auto" }}>
@@ -173,7 +208,43 @@ export default async function Home() {
         </section>
       )}
 
-      {/* 6 — Split pitch */}
+      {/* 6 — Customer reviews */}
+      {featuredReviews.length > 0 && (
+        <section className="sect" style={{ padding: "72px 32px", background: "#ffffff" }}>
+          <div style={{ maxWidth: 900, margin: "0 auto" }}>
+            <p style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#444441", marginBottom: 14 }}>What drivers say</p>
+            <h2 style={{
+              fontFamily: "var(--font-fraunces),'Fraunces',serif",
+              fontWeight: 600, fontSize: "clamp(24px,3vw,34px)",
+              letterSpacing: "-0.025em", color: "#111110", marginBottom: 36,
+            }}>
+              Real reviews from real customers
+            </h2>
+            <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+              {featuredReviews.map(review => (
+                <div key={review.id} style={{ background: "#f4f3ef", borderRadius: 16, padding: "24px 22px", display: "flex", flexDirection: "column", gap: 14 }}>
+                  <div style={{ display: "flex", gap: 2 }}>
+                    {[1,2,3,4,5].map(s => (
+                      <span key={s} style={{ color: s <= review.rating ? "#111110" : "#d1d0cb", fontSize: "0.85rem" }}>★</span>
+                    ))}
+                  </div>
+                  <p style={{ fontSize: "0.9rem", color: "#444441", lineHeight: 1.65, flex: 1, fontStyle: "italic" }}>
+                    &ldquo;{review.comment}&rdquo;
+                  </p>
+                  <div>
+                    <p style={{ fontWeight: 700, fontSize: "0.85rem", color: "#111110" }}>{review.customerName}</p>
+                    {garageNameMap[review.garageId] && (
+                      <p style={{ fontSize: "0.78rem", color: "#6b6a66", marginTop: 2 }}>at {garageNameMap[review.garageId]}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 7 — Split pitch */}
       <section className="sect" style={{ padding: "72px 32px", background: "#f4f3ef" }}>
         <div className="grid-2" style={{ maxWidth: 900, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, alignItems: "stretch" }}>
 
@@ -232,7 +303,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 7 — CTA band */}
+      {/* 8 — CTA band */}
       <section className="sect" style={{ padding: "80px 32px", background: "#111110" }}>
         <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
           <h2 style={{

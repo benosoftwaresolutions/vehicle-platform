@@ -3,6 +3,7 @@ import Navbar from "../components/Navbar"
 import OnboardingBanner from "../components/OnboardingBanner"
 import AlternativeResponseButtons from "../components/AlternativeResponseButtons"
 import CancelBookingButton from "./CancelBookingButton"
+import GarageCard from "../components/GarageCard"
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "../lib/prisma"
 import { getCachedUser } from "../lib/cache"
@@ -24,10 +25,28 @@ export default async function Bookings() {
       orderBy: { createdAt: "desc" },
     }),
     userId ? getCachedUser(userId) : null,
-    prisma.garage.findMany({ select: { id: true, name: true, city: true, postcode: true } }),
+    prisma.garage.findMany({ where: { approved: true }, select: { id: true, name: true, city: true, postcode: true, rating: true, services: true, logoUrl: true } }),
   ])
 
   const garageMap = Object.fromEntries(allGarages.map((g) => [g.id, g]))
+
+  // Find garages in the same city as the user's most recently booked garage
+  const bookedGarageIds = new Set(bookings.map(b => b.garageId))
+  const mostRecentGarageId = bookings[0]?.garageId
+  const mostRecentGarage = mostRecentGarageId ? garageMap[mostRecentGarageId] : null
+  const nearbyCity = mostRecentGarage?.city ?? null
+
+  const reviewCounts = await prisma.review.groupBy({
+    by: ["garageId"],
+    where: { garageId: { in: allGarages.map(g => g.id) } },
+    _count: { id: true },
+  })
+  const reviewCountMap = Object.fromEntries(reviewCounts.map(r => [r.garageId, r._count.id]))
+
+  const nearbyGarages = allGarages
+    .filter(g => !bookedGarageIds.has(g.id) && (nearbyCity ? g.city.toLowerCase() === nearbyCity.toLowerCase() : true))
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, 3)
   const showBanner = !!userId && (!user || !user.profileComplete)
 
   return (
@@ -98,6 +117,35 @@ export default async function Bookings() {
                 </div>
               )
             })}
+          </div>
+        )}
+        {nearbyGarages.length > 0 && (
+          <div style={{ marginTop: "48px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "20px" }}>
+              <div>
+                <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.2rem", letterSpacing: "-0.02em", color: "#111110", marginBottom: 4 }}>
+                  {nearbyCity ? `More garages in ${nearbyCity}` : "Garages near you"}
+                </h2>
+                <p style={{ fontSize: "0.85rem", color: "#6b6a66" }}>Top-rated garages you haven&apos;t tried yet</p>
+              </div>
+              <Link href="/garages" style={{ fontSize: "0.85rem", fontWeight: 600, color: "#111110", textDecoration: "none", borderBottom: "0.5px solid rgba(0,0,0,0.3)", paddingBottom: 1, whiteSpace: "nowrap" }}>
+                View all →
+              </Link>
+            </div>
+            <div className="grid-auto" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14 }}>
+              {nearbyGarages.map(g => (
+                <GarageCard
+                  key={g.id}
+                  id={g.id}
+                  name={g.name}
+                  location={`${g.city}, ${g.postcode}`}
+                  rating={g.rating.toString()}
+                  reviewCount={reviewCountMap[g.id] ?? 0}
+                  services={g.services.join(", ")}
+                  logoUrl={g.logoUrl}
+                />
+              ))}
+            </div>
           </div>
         )}
       </main>

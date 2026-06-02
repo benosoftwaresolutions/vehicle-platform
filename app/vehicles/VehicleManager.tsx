@@ -167,7 +167,11 @@ function VehicleForm({ initial, onSave, onCancel, loading }: {
   )
 }
 
-export default function VehicleManager({ initialVehicles }: { initialVehicles: Vehicle[] }) {
+export default function VehicleManager({ initialVehicles, vehicleLimit, isPro }: {
+  initialVehicles: Vehicle[]
+  vehicleLimit: number | null
+  isPro: boolean
+}) {
   const router = useRouter()
   const [vehicles, setVehicles] = useState(initialVehicles)
   const [mode, setMode] = useState<"list" | "add" | { edit: Vehicle }>("list")
@@ -185,6 +189,8 @@ export default function VehicleManager({ initialVehicles }: { initialVehicles: V
     nextServiceDue: form.nextServiceDue || null,
   })
 
+  const atLimit = vehicleLimit !== null && vehicles.length >= vehicleLimit
+
   const handleAdd = async (form: typeof emptyForm) => {
     setLoading(true)
     setSaveError(null)
@@ -200,7 +206,12 @@ export default function VehicleManager({ initialVehicles }: { initialVehicles: V
       refresh()
     } else {
       const data = await res.json().catch(() => ({}))
-      setSaveError(data.error || "Something went wrong — please try again")
+      if (data.error === "PLAN_LIMIT") {
+        setMode("list")
+        setSaveError(null)
+      } else {
+        setSaveError(data.error || "Something went wrong — please try again")
+      }
     }
     setLoading(false)
   }
@@ -275,13 +286,17 @@ export default function VehicleManager({ initialVehicles }: { initialVehicles: V
         <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.15rem", letterSpacing: "-0.02em", color: "#111110" }}>
           My vehicles
         </h2>
-        <button
-          onClick={() => setMode("add")}
-          style={{ background: "#111110", color: "#ffffff", padding: "9px 20px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "none", cursor: "pointer" }}
-        >
-          + Add vehicle
-        </button>
+        {!atLimit && (
+          <button
+            onClick={() => setMode("add")}
+            style={{ background: "#111110", color: "#ffffff", padding: "9px 20px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "none", cursor: "pointer" }}
+          >
+            + Add vehicle
+          </button>
+        )}
       </div>
+
+      {atLimit && !isPro && <UpgradeDriverBanner />}
 
       {vehicles.length === 0 ? (
         <div style={{ background: "#f4f3ef", borderRadius: 14, padding: "48px", textAlign: "center" }}>
@@ -376,6 +391,44 @@ function InfoRow({ label, value }: { label: string; value: string | null }) {
     <div>
       <p style={{ fontSize: "0.72rem", fontWeight: 600, color: "#aaa9a4", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 2px" }}>{label}</p>
       <p style={{ fontSize: "0.875rem", color: "#111110", margin: 0, fontWeight: 500 }}>{value}</p>
+    </div>
+  )
+}
+
+function UpgradeDriverBanner() {
+  const [loading, setLoading] = useState(false)
+
+  const handleUpgrade = async () => {
+    setLoading(true)
+    const res = await fetch("/api/subscriptions/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ plan: "driver_pro" }),
+    })
+    const data = await res.json()
+    if (data.url) window.location.href = data.url
+    else setLoading(false)
+  }
+
+  return (
+    <div style={{ background: "#f4f3ef", borderRadius: 14, padding: "28px 28px", marginBottom: 24, border: "0.5px solid rgba(0,0,0,0.08)" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 20, flexWrap: "wrap" }}>
+        <div style={{ flex: 1, minWidth: 200 }}>
+          <p style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.05rem", color: "#111110", margin: "0 0 6px" }}>
+            Upgrade to Pro Vehicle Owner
+          </p>
+          <p style={{ fontSize: "0.875rem", color: "#6b6a66", margin: "0 0 4px", lineHeight: 1.5 }}>
+            Free accounts include one vehicle. Pro Vehicle Owner gives you unlimited vehicles, MOT reminders, and service history tracking for just £7/month.
+          </p>
+        </div>
+        <button
+          onClick={handleUpgrade}
+          disabled={loading}
+          style={{ background: "#111110", color: "#ffffff", padding: "11px 22px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "none", cursor: loading ? "not-allowed" : "pointer", flexShrink: 0, opacity: loading ? 0.7 : 1 }}
+        >
+          {loading ? "Loading…" : "Upgrade — £7/month"}
+        </button>
+      </div>
     </div>
   )
 }

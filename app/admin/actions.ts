@@ -44,6 +44,8 @@ export async function deleteGarage(garageId: string) {
     prisma.booking.deleteMany({ where: { garageId } }),
     prisma.review.deleteMany({ where: { garageId } }),
     prisma.serviceType.deleteMany({ where: { garageId } }),
+    prisma.part.deleteMany({ where: { garageId } }),
+    prisma.customerNote.deleteMany({ where: { garageId } }),
     prisma.garageAvailability.deleteMany({ where: { garageId } }),
     prisma.user.updateMany({ where: { garageId }, data: { garageId: null } }),
     prisma.garage.delete({ where: { id: garageId } }),
@@ -51,5 +53,26 @@ export async function deleteGarage(garageId: string) {
 
   updateTag("garages")
   revalidatePath("/admin/garages")
+  revalidatePath("/admin")
+}
+
+export async function declinePendingGarage(userId: string, garageId: string) {
+  await assertAdmin()
+
+  const availability = await prisma.garageAvailability.findUnique({ where: { garageId }, select: { id: true } })
+  await prisma.$transaction([
+    ...(availability ? [prisma.daySchedule.deleteMany({ where: { availabilityId: availability.id } })] : []),
+    prisma.booking.deleteMany({ where: { garageId } }),
+    prisma.review.deleteMany({ where: { garageId } }),
+    prisma.serviceType.deleteMany({ where: { garageId } }),
+    prisma.part.deleteMany({ where: { garageId } }),
+    prisma.customerNote.deleteMany({ where: { garageId } }),
+    prisma.garageAvailability.deleteMany({ where: { garageId } }),
+    prisma.user.update({ where: { id: userId }, data: { garageId: null, role: "driver" } }),
+    prisma.garage.delete({ where: { id: garageId } }),
+  ])
+
+  updateTag("garages")
+  revalidatePath("/admin/pending")
   revalidatePath("/admin")
 }

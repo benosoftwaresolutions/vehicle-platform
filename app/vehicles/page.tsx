@@ -3,6 +3,7 @@ import { prisma } from "@/app/lib/prisma"
 import Navbar from "@/app/components/Navbar"
 import Link from "next/link"
 import VehicleManager from "./VehicleManager"
+import { isDriverPro, DRIVER_FREE_VEHICLE_LIMIT } from "@/app/lib/subscription"
 
 export default async function VehiclesPage() {
   const { userId } = await auth()
@@ -19,9 +20,12 @@ export default async function VehiclesPage() {
   }
 
   const [user, vehicles] = await Promise.all([
-    prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true } }),
+    prisma.user.findUnique({ where: { clerkId: userId }, select: { role: true, plan: true, subscriptionStatus: true, subscriptionEnd: true } }),
     prisma.vehicle.findMany({ where: { clerkId: userId }, orderBy: { createdAt: "desc" } }).catch(() => []),
   ])
+
+  const driverPro = isDriverPro({ plan: user?.plan ?? "driver_free", subscriptionStatus: user?.subscriptionStatus ?? null, subscriptionEnd: user?.subscriptionEnd ?? null })
+  const vehicleLimit = driverPro ? null : DRIVER_FREE_VEHICLE_LIMIT
 
   return (
     <>
@@ -35,14 +39,18 @@ export default async function VehiclesPage() {
         </div>
       </div>
       <main className="page-body" style={{ maxWidth: 760, margin: "0 auto", padding: "40px 32px" }}>
-        <VehicleManager initialVehicles={vehicles.map(v => ({
-          ...v,
-          motExpiry: v.motExpiry?.toISOString() ?? null,
-          lastServiceDate: v.lastServiceDate?.toISOString() ?? null,
-          nextServiceDue: v.nextServiceDue?.toISOString() ?? null,
-          createdAt: v.createdAt.toISOString(),
-          updatedAt: v.updatedAt.toISOString(),
-        }))} />
+        <VehicleManager
+          initialVehicles={vehicles.map(v => ({
+            ...v,
+            motExpiry: v.motExpiry?.toISOString() ?? null,
+            lastServiceDate: v.lastServiceDate?.toISOString() ?? null,
+            nextServiceDue: v.nextServiceDue?.toISOString() ?? null,
+            createdAt: v.createdAt.toISOString(),
+            updatedAt: v.updatedAt.toISOString(),
+          }))}
+          vehicleLimit={vehicleLimit}
+          isPro={driverPro}
+        />
       </main>
     </>
   )

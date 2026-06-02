@@ -28,6 +28,9 @@ export default async function AdminOverview() {
     recentBookings,
     recentUsers,
     recentReviews,
+    activeGaragesSubs,
+    trialingGarages,
+    activeDriverPro,
   ] = await Promise.all([
     prisma.garage.count(),
     prisma.garage.count({ where: { approved: true } }),
@@ -41,9 +44,13 @@ export default async function AdminOverview() {
     prisma.booking.findMany({ take: 8, orderBy: { createdAt: "desc" }, select: { id: true, service: true, createdAt: true, garageId: true, registration: true } }),
     prisma.user.findMany({ take: 8, orderBy: { createdAt: "desc" }, select: { id: true, email: true, role: true, createdAt: true } }),
     prisma.review.findMany({ take: 8, orderBy: { createdAt: "desc" }, select: { id: true, customerName: true, rating: true, createdAt: true, garageId: true } }),
+    prisma.garage.count({ where: { subscriptionStatus: "active" } }),
+    prisma.garage.count({ where: { subscriptionStatus: "trialing" } }),
+    prisma.user.count({ where: { plan: "driver_pro", subscriptionStatus: "active" } }),
   ])
 
   const totalRevenue = platformRevenue._sum.jobValue ?? 0
+  const estimatedMrr = (activeGaragesSubs * 99.99) + (activeDriverPro * 7)
 
   // Resolve garage names for activity feed
   const garageIds = [...new Set([...recentBookings.map((b) => b.garageId), ...recentReviews.map((r) => r.garageId)])]
@@ -91,10 +98,35 @@ export default async function AdminOverview() {
         <StatCard label="Total Users"    value={totalUsers} />
         <StatCard label="Total Bookings" value={totalBookings} />
       </div>
-      <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px", marginBottom: "32px" }}>
+      <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px", marginBottom: "14px" }}>
         <StatCard label="Platform Revenue" value={totalRevenue > 0 ? `£${totalRevenue.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "—"} sub="from logged jobs" />
         <StatCard label="Bookings This Month"  value={bookingsThisMonth} sub={now.toLocaleString("default", { month: "long", year: "numeric" })} />
         <StatCard label="New Users This Month" value={newUsersThisMonth} sub={now.toLocaleString("default", { month: "long", year: "numeric" })} />
+      </div>
+
+      {/* Subscription stats */}
+      <div style={{ background: "#ffffff", border: "0.5px solid rgba(0,0,0,0.08)", borderRadius: 14, padding: "22px 24px", marginBottom: "32px" }}>
+        <p style={{ fontSize: "0.72rem", fontWeight: 700, color: "#6b6a66", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "16px" }}>Subscription revenue</p>
+        <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
+          <div>
+            <p style={{ fontSize: "1.6rem", fontWeight: 700, fontFamily: "var(--font-fraunces),'Fraunces',serif", color: "#111110", letterSpacing: "-0.03em", lineHeight: 1 }}>
+              {estimatedMrr > 0 ? `£${estimatedMrr.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "—"}
+            </p>
+            <p style={{ fontSize: "0.78rem", color: "#6b6a66", marginTop: 6 }}>Estimated MRR</p>
+          </div>
+          <div>
+            <p style={{ fontSize: "1.6rem", fontWeight: 700, fontFamily: "var(--font-fraunces),'Fraunces',serif", color: "#111110", letterSpacing: "-0.03em", lineHeight: 1 }}>{activeGaragesSubs}</p>
+            <p style={{ fontSize: "0.78rem", color: "#6b6a66", marginTop: 6 }}>Garage Pro active</p>
+          </div>
+          <div>
+            <p style={{ fontSize: "1.6rem", fontWeight: 700, fontFamily: "var(--font-fraunces),'Fraunces',serif", color: "#6b6a66", letterSpacing: "-0.03em", lineHeight: 1 }}>{trialingGarages}</p>
+            <p style={{ fontSize: "0.78rem", color: "#6b6a66", marginTop: 6 }}>Garages trialing</p>
+          </div>
+          <div>
+            <p style={{ fontSize: "1.6rem", fontWeight: 700, fontFamily: "var(--font-fraunces),'Fraunces',serif", color: "#111110", letterSpacing: "-0.03em", lineHeight: 1 }}>{activeDriverPro}</p>
+            <p style={{ fontSize: "0.78rem", color: "#6b6a66", marginTop: 6 }}>Pro drivers</p>
+          </div>
+        </div>
       </div>
 
       {/* Activity feed */}

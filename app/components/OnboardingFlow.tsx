@@ -29,6 +29,13 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
   )
   const [createdGarageId, setCreatedGarageId] = useState<string | null>(null)
 
+  // Driver vehicle step
+  const [vehicleMake, setVehicleMake] = useState("")
+  const [vehicleModel, setVehicleModel] = useState("")
+  const [vehicleYear, setVehicleYear] = useState("")
+  const [vehicleReg, setVehicleReg] = useState("")
+  const [vehicleSaving, setVehicleSaving] = useState(false)
+
   const chooseRole = async (role: string) => {
     setLoading(true)
     await fetch("/api/onboarding", {
@@ -49,6 +56,17 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
       body: JSON.stringify({ step: 2, name, role: "customer" })
     })
     setLoading(false)
+    setStep(3)
+  }
+
+  const addFirstVehicle = async () => {
+    setVehicleSaving(true)
+    await fetch("/api/vehicles", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ make: vehicleMake, model: vehicleModel, year: vehicleYear, registration: vehicleReg }),
+    })
+    setVehicleSaving(false)
     router.push("/")
   }
 
@@ -208,6 +226,63 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
           <p style={{ textAlign: "center", color: "#6b6a66", fontSize: "0.8rem", marginTop: "12px" }}>
             You can add services, photos and more after setup
           </p>
+        </div>
+      </div>
+    )
+  }
+
+  // Step 3 — Driver: add first vehicle
+  if (step === 3 && selectedRole === "customer") {
+    const canAddVehicle = vehicleMake && vehicleModel && vehicleYear && vehicleReg
+    return (
+      <div style={{ minHeight: "100vh", background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px" }}>
+        <div style={{ maxWidth: "480px", width: "100%" }}>
+          <DryvnMark />
+          <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.75rem", letterSpacing: "-0.03em", color: "#111110", marginBottom: "8px", marginTop: "28px" }}>
+            Add your first vehicle
+          </h1>
+          <p style={{ color: "#6b6a66", marginBottom: "28px", lineHeight: 1.6 }}>
+            Track MOT dates, service history, and get reminded before things are due. Skip and add later if you prefer.
+          </p>
+
+          <div style={{ background: "#f4f3ef", borderRadius: 14, padding: "22px", display: "flex", flexDirection: "column", gap: 14, marginBottom: 24 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div>
+                <label style={lbl}>Make</label>
+                <input type="text" value={vehicleMake} onChange={e => setVehicleMake(e.target.value)} placeholder="e.g. Ford" style={inp} />
+              </div>
+              <div>
+                <label style={lbl}>Model</label>
+                <input type="text" value={vehicleModel} onChange={e => setVehicleModel(e.target.value)} placeholder="e.g. Focus" style={inp} />
+              </div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div>
+                <label style={lbl}>Year</label>
+                <input type="text" value={vehicleYear} onChange={e => setVehicleYear(e.target.value)} placeholder="e.g. 2019" style={inp} />
+              </div>
+              <div>
+                <label style={lbl}>Registration</label>
+                <input type="text" value={vehicleReg} onChange={e => setVehicleReg(e.target.value.toUpperCase())} placeholder="e.g. AB19 XYZ" style={inp} />
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <button
+              onClick={addFirstVehicle}
+              disabled={!canAddVehicle || vehicleSaving}
+              style={{ background: canAddVehicle && !vehicleSaving ? "#111110" : "#eceae4", color: canAddVehicle && !vehicleSaving ? "#ffffff" : "#6b6a66", padding: "14px", borderRadius: 100, fontWeight: 600, fontSize: "1rem", border: "none", cursor: canAddVehicle && !vehicleSaving ? "pointer" : "not-allowed", width: "100%" }}
+            >
+              {vehicleSaving ? "Saving…" : "Add vehicle & continue"}
+            </button>
+            <button
+              onClick={() => router.push("/")}
+              style={{ background: "none", color: "#6b6a66", padding: "10px", border: "none", cursor: "pointer", fontSize: "0.875rem" }}
+            >
+              Skip for now
+            </button>
+          </div>
         </div>
       </div>
     )

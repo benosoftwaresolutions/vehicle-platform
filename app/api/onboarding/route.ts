@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
+import { trialEndsAtFromNow } from "@/app/lib/subscription"
 
 export async function POST(req: Request) {
   try {
@@ -46,7 +47,7 @@ export async function POST(req: Request) {
       if (!name?.trim() || name.length > 100) {
         return NextResponse.json({ error: "Invalid name" }, { status: 400 })
       }
-      // Create the garage
+      // Create the garage with 30-day trial
       const garage = await prisma.garage.create({
         data: {
           name: garageName,
@@ -55,6 +56,8 @@ export async function POST(req: Request) {
           postcode: garagePostcode,
           rating: 0,
           services: [],
+          subscriptionStatus: "trialing",
+          trialEndsAt: trialEndsAtFromNow(),
         }
       })
 

@@ -2,6 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
 import Navbar from "@/app/components/Navbar"
 import Link from "next/link"
+import ProfileNameEditor from "./ProfileNameEditor"
 
 export default async function ProfilePage() {
   const { userId } = await auth()
@@ -81,9 +82,7 @@ export default async function ProfilePage() {
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 4 }}>
-                  <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.35rem", letterSpacing: "-0.02em", color: "#111110", margin: 0 }}>
-                    {displayName || "Your Name"}
-                  </h2>
+                  <ProfileNameEditor initialName={displayName} />
                   <span style={{
                     background: isGarageOwner ? "#111110" : "#eceae4",
                     color: isGarageOwner ? "#ffffff" : "#444441",
