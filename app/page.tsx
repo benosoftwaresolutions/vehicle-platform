@@ -11,17 +11,42 @@ import { prisma } from "./lib/prisma"
 const PREMIUM_MAKES = new Set(["BMW", "Mercedes", "Audi", "Volkswagen", "Porsche", "Land Rover"])
 
 export default async function Home() {
-  const { userId } = await auth()
-  const [{ garages, reviewCountMap }, user] = await Promise.all([
-    getCachedGarages(),
-    userId ? getCachedUser(userId) : null,
-  ])
+  try {
+    console.log("[Home] rendering start")
+    const { userId } = await auth()
+    console.log("[Home] auth ok, userId:", userId ?? "null")
 
+    const [cacheResult, user] = await Promise.all([
+      getCachedGarages().catch((e: unknown) => { console.error("[Home] getCachedGarages failed:", e); throw e }),
+      userId ? getCachedUser(userId).catch((e: unknown) => { console.error("[Home] getCachedUser failed:", e); throw e }) : null,
+    ])
+    const { garages, reviewCountMap } = cacheResult
+    console.log("[Home] data ok — garages:", garages.length, "user:", user ? "found" : "null")
+
+    return <HomeInner userId={userId} garages={garages} reviewCountMap={reviewCountMap} user={user} />
+  } catch (err) {
+    console.error("[Home] unhandled error:", err)
+    throw err
+  }
+}
+
+async function HomeInner({
+  userId,
+  garages,
+  reviewCountMap,
+  user,
+}: {
+  userId: string | null
+  garages: Awaited<ReturnType<typeof getCachedGarages>>["garages"]
+  reviewCountMap: Record<string, number>
+  user: Awaited<ReturnType<typeof getCachedUser>> | null
+}) {
   const showBanner = !!userId && (!user || !user.profileComplete)
 
   // ─── Logged-in view ────────────────────────────────────────────────────────
   if (userId && user?.profileComplete) {
     // Find their most recent booking to determine local city
+    console.log("[Home] logged-in path, fetching recent booking")
     const recentBooking = await prisma.booking.findFirst({
       where: { clerkId: userId },
       orderBy: { createdAt: "desc" },
@@ -126,14 +151,15 @@ export default async function Home() {
   }
 
   // ─── Marketing page (logged out) ───────────────────────────────────────────
+  console.log("[Home] logged-out/incomplete path, fetching marketing data")
   const [totalBookings, topReviews] = await Promise.all([
-    prisma.booking.count({ where: { status: "completed" } }),
+    prisma.booking.count({ where: { status: "completed" } }).catch((e: unknown) => { console.error("[Home] booking.count failed:", e); throw e }),
     prisma.review.findMany({
       where: { rating: { gte: 4 }, comment: { not: "" } },
       orderBy: { createdAt: "desc" },
       take: 20,
       select: { id: true, customerName: true, rating: true, comment: true, garageId: true },
-    }),
+    }).catch((e: unknown) => { console.error("[Home] review.findMany failed:", e); throw e }),
   ])
 
   const allMakes = [...new Set(garages.flatMap(g => g.specialistMakes ?? []))].sort()
