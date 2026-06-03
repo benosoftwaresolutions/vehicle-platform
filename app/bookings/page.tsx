@@ -141,7 +141,7 @@ export default async function Bookings() {
                   location={`${g.city}, ${g.postcode}`}
                   rating={g.rating.toString()}
                   reviewCount={reviewCountMap[g.id] ?? 0}
-                  services={g.services.join(", ")}
+                  services={(g.services ?? []).join(", ")}
                   logoUrl={g.logoUrl}
                 />
               ))}

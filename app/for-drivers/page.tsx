@@ -43,8 +43,8 @@ export default async function ForDriversPage() {
   const sortedGarages = [...garages].sort((a, b) => b.rating - a.rating)
   const garagesWithCounts = sortedGarages.map(g => ({ ...g, reviewCount: reviewCountMap[g.id] ?? 0 }))
 
-  const liveServices = [...new Set(garages.flatMap(g => g.services))].slice(0, 8)
-  const liveMakes = [...new Set(garages.flatMap(g => g.specialistMakes))].slice(0, 10)
+  const liveServices = [...new Set(garages.flatMap(g => g.services ?? []))].slice(0, 8)
+  const liveMakes = [...new Set(garages.flatMap(g => g.specialistMakes ?? []))].slice(0, 10)
   const liveCities = [...new Set(garages.map(g => g.city).filter(Boolean))].slice(0, 6)
 
   return (

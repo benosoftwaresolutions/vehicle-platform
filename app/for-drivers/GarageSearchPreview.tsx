@@ -25,8 +25,8 @@ export default function GarageSearchPreview({ garages }: { garages: Garage[] }) 
       g.name.toLowerCase().includes(q) ||
       g.city.toLowerCase().includes(q) ||
       g.postcode.toLowerCase().includes(q) ||
-      g.services.some(s => s.toLowerCase().includes(q)) ||
-      g.specialistMakes.some(m => m.toLowerCase().includes(q))
+      (g.services ?? []).some(s => s.toLowerCase().includes(q)) ||
+      (g.specialistMakes ?? []).some(m => m.toLowerCase().includes(q))
     ).slice(0, 5)
   }, [query, garages])
 
@@ -78,7 +78,7 @@ export default function GarageSearchPreview({ garages }: { garages: Garage[] }) 
       ) : (
         results.map((g, i) => {
           const initials = g.name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()
-          const meta = [...g.services.slice(0, 3), ...g.specialistMakes.slice(0, 1)].join(" · ")
+          const meta = [...(g.services ?? []).slice(0, 3), ...(g.specialistMakes ?? []).slice(0, 1)].join(" · ")
           return (
             <Link key={g.id} href={`/garages/${g.id}`} style={{
               padding: "16px 20px",
