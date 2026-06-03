@@ -104,7 +104,7 @@ export default async function Home() {
                   location={`${garage.city}, ${garage.postcode}`}
                   rating={garage.rating.toString()}
                   reviewCount={reviewCountMap[garage.id] ?? 0}
-                  services={garage.services.join(", ")}
+                  services={(garage.services ?? []).join(", ")}
                   logoUrl={garage.logoUrl}
                 />
               ))}
@@ -136,7 +136,7 @@ export default async function Home() {
     }),
   ])
 
-  const allMakes = [...new Set(garages.flatMap(g => g.specialistMakes))].sort()
+  const allMakes = [...new Set(garages.flatMap(g => g.specialistMakes ?? []))].sort()
   const totalReviews = Object.values(reviewCountMap).reduce((a, b) => a + b, 0)
 
   const seenGarages = new Set<string>()
