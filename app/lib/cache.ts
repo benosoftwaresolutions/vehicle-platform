@@ -7,7 +7,7 @@ export function getCachedUser(clerkId: string) {
   return unstable_cache(
     () => prisma.user.findUnique({
       where: { clerkId },
-      select: { role: true, profileComplete: true },
+      select: { role: true, profileComplete: true, name: true, garageId: true },
     }),
     [`user-${clerkId}`],
     { revalidate: 300, tags: [`user-${clerkId}`] }
