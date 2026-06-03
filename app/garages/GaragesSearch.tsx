@@ -128,7 +128,7 @@ export default function GaragesSearch({
               location={`${garage.city}, ${garage.postcode}`}
               rating={garage.rating.toFixed(1)}
               reviewCount={garage.reviewCount}
-              services={garage.services.join(", ")}
+              services={(garage.services ?? []).join(", ")}
               logoUrl={garage.logoUrl}
             />
           ))}
