@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { createWalkInBooking } from "./actions"
 
@@ -8,15 +8,37 @@ type SlotsResponse =
   | { open: false; reason: "no_availability" | "closed" }
   | { open: true; slots: string[] }
 
-export default function WalkInBookingButton({ garageId, services }: { garageId: string; services: string[] }) {
+type PreviousCustomer = {
+  customerName: string | null
+  customerPhone: string | null
+  customerEmail: string | null
+  registration: string
+  vehicleMake: string | null
+  vehicleModel: string | null
+}
+
+type InitialData = {
+  customerName?: string
+  customerPhone?: string
+  customerEmail?: string
+  registration?: string
+  service?: string
+}
+
+export default function WalkInBookingButton({ garageId, services, initialData, label }: {
+  garageId: string
+  services: string[]
+  initialData?: InitialData
+  label?: string
+}) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
 
-  const [customerName, setCustomerName] = useState("")
-  const [customerPhone, setCustomerPhone] = useState("")
-  const [customerEmail, setCustomerEmail] = useState("")
-  const [registration, setRegistration] = useState("")
-  const [service, setService] = useState("")
+  const [customerName, setCustomerName] = useState(initialData?.customerName ?? "")
+  const [customerPhone, setCustomerPhone] = useState(initialData?.customerPhone ?? "")
+  const [customerEmail, setCustomerEmail] = useState(initialData?.customerEmail ?? "")
+  const [registration, setRegistration] = useState(initialData?.registration ?? "")
+  const [service, setService] = useState(initialData?.service ?? "")
   const [customService, setCustomService] = useState("")
   const [date, setDate] = useState("")
   const [time, setTime] = useState("")
@@ -26,6 +48,43 @@ export default function WalkInBookingButton({ garageId, services }: { garageId: 
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+
+  // Customer search
+  const [search, setSearch] = useState("")
+  const [suggestions, setSuggestions] = useState<PreviousCustomer[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const searchRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (search.length < 2) { setSuggestions([]); return }
+    const timer = setTimeout(() => {
+      fetch(`/api/garages/${garageId}/customers?q=${encodeURIComponent(search)}`)
+        .then(r => r.json())
+        .then(data => { setSuggestions(data); setShowSuggestions(true) })
+        .catch(() => {})
+    }, 250)
+    return () => clearTimeout(timer)
+  }, [search, garageId])
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener("mousedown", handler)
+    return () => document.removeEventListener("mousedown", handler)
+  }, [])
+
+  const selectCustomer = (c: PreviousCustomer) => {
+    setCustomerName(c.customerName ?? "")
+    setCustomerPhone(c.customerPhone ?? "")
+    setCustomerEmail(c.customerEmail ?? "")
+    setRegistration(c.registration)
+    setSearch("")
+    setSuggestions([])
+    setShowSuggestions(false)
+  }
 
   useEffect(() => {
     if (!date) { setSlotsData(null); setTime(""); return }
@@ -39,9 +98,13 @@ export default function WalkInBookingButton({ garageId, services }: { garageId: 
   }, [date, garageId])
 
   const resetForm = () => {
-    setCustomerName(""); setCustomerPhone(""); setCustomerEmail(""); setRegistration("")
-    setService(""); setCustomService(""); setDate(""); setTime("")
-    setSlotsData(null); setError("")
+    setCustomerName(initialData?.customerName ?? "")
+    setCustomerPhone(initialData?.customerPhone ?? "")
+    setCustomerEmail(initialData?.customerEmail ?? "")
+    setRegistration(initialData?.registration ?? "")
+    setService(initialData?.service ?? "")
+    setCustomService(""); setDate(""); setTime("")
+    setSlotsData(null); setError(""); setSearch(""); setSuggestions([])
   }
 
   const handleClose = () => { setOpen(false); resetForm() }
@@ -72,13 +135,11 @@ export default function WalkInBookingButton({ garageId, services }: { garageId: 
     <>
       <button
         onClick={() => setOpen(true)}
-        style={{
-          background: "#111110", color: "#ffffff", padding: "9px 18px",
-          borderRadius: 100, fontWeight: 600, fontSize: "0.875rem",
-          border: "none", cursor: "pointer",
-        }}
+        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "#111110"; (e.currentTarget as HTMLButtonElement).style.color = "#ffffff" }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "#f4f3ef"; (e.currentTarget as HTMLButtonElement).style.color = "#111110" }}
+        style={{ background: "#f4f3ef", color: "#111110", padding: "9px 18px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "none", cursor: "pointer", whiteSpace: "nowrap" }}
       >
-        + Walk-in
+        {label ?? "+ Walk-in"}
       </button>
 
       {open && (
@@ -111,6 +172,47 @@ export default function WalkInBookingButton({ garageId, services }: { garageId: 
             </div>
 
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+
+              {/* Previous customer search */}
+              <div ref={searchRef} style={{ position: "relative" }}>
+                <label style={lbl}>Search previous customer</label>
+                <input
+                  type="text"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                  placeholder="Name, phone, or registration…"
+                  style={inp}
+                />
+                {showSuggestions && suggestions.length > 0 && (
+                  <div style={{
+                    position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10,
+                    background: "#ffffff", borderRadius: 10, marginTop: 4,
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.12)", border: "0.5px solid rgba(0,0,0,0.1)",
+                    overflow: "hidden",
+                  }}>
+                    {suggestions.map((c, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => selectCustomer(c)}
+                        style={{
+                          width: "100%", textAlign: "left", background: "none", border: "none",
+                          padding: "10px 14px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 2,
+                          borderBottom: i < suggestions.length - 1 ? "0.5px solid rgba(0,0,0,0.06)" : "none",
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.background = "#f4f3ef")}
+                        onMouseLeave={e => (e.currentTarget.style.background = "none")}
+                      >
+                        <span style={{ fontWeight: 600, fontSize: "0.875rem", color: "#111110" }}>{c.customerName}</span>
+                        <span style={{ fontSize: "0.78rem", color: "#6b6a66" }}>
+                          {c.registration}{c.vehicleMake ? ` · ${c.vehicleMake} ${c.vehicleModel ?? ""}`.trimEnd() : ""}{c.customerPhone ? ` · ${c.customerPhone}` : ""}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Customer details */}
               <div style={section}>

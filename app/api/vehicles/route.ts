@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
+import { isDriverPro, DRIVER_FREE_VEHICLE_LIMIT } from "@/app/lib/subscription"
 
 const FUEL_TYPES = ["petrol", "diesel", "electric", "hybrid", "phev"]
 
@@ -30,6 +31,15 @@ export async function POST(req: Request) {
 
   if (!make?.trim() || !model?.trim() || !year?.trim() || !registration?.trim()) {
     return NextResponse.json({ error: "Make, model, year and registration are required" }, { status: 400 })
+  }
+
+  // Enforce vehicle limit for free plan
+  const user = await prisma.user.findUnique({ where: { clerkId: userId }, select: { plan: true, subscriptionStatus: true, subscriptionEnd: true } })
+  if (user && !isDriverPro(user as Parameters<typeof isDriverPro>[0])) {
+    const count = await prisma.vehicle.count({ where: { clerkId: userId } })
+    if (count >= DRIVER_FREE_VEHICLE_LIMIT) {
+      return NextResponse.json({ error: "PLAN_LIMIT", message: "Upgrade to Driver Pro to add more vehicles" }, { status: 403 })
+    }
   }
   if (fuelType && !FUEL_TYPES.includes(fuelType)) {
     return NextResponse.json({ error: "Invalid fuel type" }, { status: 400 })

@@ -3,6 +3,7 @@ import { prisma } from "@/app/lib/prisma"
 import { cache } from "react"
 import Navbar from "@/app/components/Navbar"
 import Link from "next/link"
+import { isGarageAccessAllowed, garageTrialDaysLeft } from "@/app/lib/subscription"
 
 // Deduplicates across layout + page in the same request
 export const getGarageOwnerContext = cache(async (userId: string) => {
@@ -16,7 +17,7 @@ export const getGarageOwnerContext = cache(async (userId: string) => {
   const [garage, availability] = await Promise.all([
     prisma.garage.findUnique({
       where: { id: user.garageId },
-      select: { approved: true, services: true },
+      select: { approved: true, services: true, subscriptionStatus: true, trialEndsAt: true, subscriptionEnd: true },
     }),
     prisma.garageAvailability.findUnique({
       where: { garageId: user.garageId },
@@ -29,7 +30,13 @@ export const getGarageOwnerContext = cache(async (userId: string) => {
   const hasAvailability = !!availability
   const isLive = approved && hasServices && hasAvailability
 
-  return { garageId: user.garageId, approved, hasServices, hasAvailability, isLive }
+  const subscriptionStatus = garage?.subscriptionStatus ?? "trialing"
+  const trialEndsAt = garage?.trialEndsAt ?? null
+  const subscriptionEnd = garage?.subscriptionEnd ?? null
+  const subscriptionActive = isGarageAccessAllowed({ subscriptionStatus, trialEndsAt, subscriptionEnd })
+  const trialDaysLeft = subscriptionStatus === "trialing" ? garageTrialDaysLeft(trialEndsAt) : null
+
+  return { garageId: user.garageId, approved, hasServices, hasAvailability, isLive, subscriptionActive, subscriptionStatus, trialDaysLeft }
 })
 
 function NotAuthorized() {
@@ -89,6 +96,55 @@ function NotLiveBanner() {
   )
 }
 
+function TrialBanner({ daysLeft }: { daysLeft: number }) {
+  const urgent = daysLeft <= 7
+  return (
+    <div style={{
+      background: urgent ? "#fef2f2" : "#fffbeb",
+      borderBottom: `0.5px solid ${urgent ? "rgba(239,68,68,0.3)" : "rgba(234,179,8,0.3)"}`,
+      padding: "10px 32px",
+    }}>
+      <div style={{ maxWidth: "900px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
+        <p style={{ fontSize: "0.85rem", color: urgent ? "#991b1b" : "#92400e", margin: 0 }}>
+          <strong>{daysLeft === 0 ? "Your free trial has ended" : `${daysLeft} day${daysLeft !== 1 ? "s" : ""} left on your free trial`}</strong>
+          {daysLeft > 0 && " — subscribe to keep your dashboard after the trial."}
+        </p>
+        <Link
+          href="/pricing"
+          style={{ fontSize: "0.8rem", fontWeight: 600, color: urgent ? "#991b1b" : "#92400e", textDecoration: "underline", whiteSpace: "nowrap" }}
+        >
+          View plans →
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+function SubscriptionWall() {
+  return (
+    <>
+      <Navbar role="garage_owner" />
+      <main style={{ maxWidth: "900px", margin: "0 auto", padding: "80px 32px" }}>
+        <div style={{ background: "#f4f3ef", borderRadius: 14, padding: "48px", textAlign: "center", maxWidth: "520px", margin: "0 auto" }}>
+          <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.4rem", letterSpacing: "-0.02em", color: "#111110", marginBottom: "10px" }}>
+            Your free trial has ended
+          </h2>
+          <p style={{ color: "#6b6a66", marginBottom: "12px", lineHeight: 1.6, fontSize: "0.95rem" }}>
+            Subscribe to Garage Pro to continue managing bookings, availability, and settings.
+          </p>
+          <p style={{ color: "#111110", fontWeight: 700, fontSize: "1.1rem", marginBottom: "28px" }}>£100/month</p>
+          <Link
+            href="/pricing"
+            style={{ background: "#111110", color: "#ffffff", padding: "12px 28px", borderRadius: 100, fontWeight: 600, fontSize: "0.95rem", textDecoration: "none" }}
+          >
+            Subscribe now
+          </Link>
+        </div>
+      </main>
+    </>
+  )
+}
+
 export default async function GarageDashboardLayout({ children }: { children: React.ReactNode }) {
   const { userId } = await auth()
   if (!userId) return <NotAuthorized />
@@ -97,9 +153,12 @@ export default async function GarageDashboardLayout({ children }: { children: Re
   if (!ctx) return <NotAuthorized />
   if (!ctx.garageId) return <SetupPrompt />
 
+  if (!ctx.subscriptionActive) return <SubscriptionWall />
+
   return (
     <>
       <Navbar role="garage_owner" />
+      {ctx.trialDaysLeft !== null && ctx.trialDaysLeft <= 14 && <TrialBanner daysLeft={ctx.trialDaysLeft} />}
       {!ctx.isLive && <NotLiveBanner />}
       {children}
     </>

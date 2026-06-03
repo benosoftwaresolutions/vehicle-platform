@@ -467,6 +467,83 @@ export async function sendBookingCancelledToGarage({
   })
 }
 
+export async function sendMotReminder({
+  customerEmail,
+  customerName,
+  registration,
+  make,
+  model,
+  motExpiry,
+  daysUntilExpiry,
+}: {
+  customerEmail: string
+  customerName: string
+  registration: string
+  make: string
+  model: string
+  motExpiry: Date
+  daysUntilExpiry: number
+}) {
+  const urgency = daysUntilExpiry <= 7 ? "urgent" : daysUntilExpiry <= 14 ? "soon" : "upcoming"
+  const urgencyLabel = urgency === "urgent" ? "⚠️ Urgent — " : ""
+
+  await sendWithRetry({
+    from: FROM,
+    to: customerEmail,
+    subject: `${urgencyLabel}MOT due in ${daysUntilExpiry} day${daysUntilExpiry === 1 ? "" : "s"} — ${registration}`,
+    html: emailBase(`
+      <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Your MOT is due soon</h2>
+      <p style="color:#6b6a66;font-size:14px;margin:0 0 16px;">Hi ${customerName}, your MOT expires in <strong style="color:${daysUntilExpiry <= 7 ? "#dc2626" : "#111110"};">${daysUntilExpiry} day${daysUntilExpiry === 1 ? "" : "s"}</strong>. Driving without a valid MOT is illegal — book your test now.</p>
+      ${dataTable([
+        ["Vehicle", `${make} ${model}`],
+        ["Registration", registration],
+        ["MOT expires", formatDate(motExpiry)],
+      ])}
+      <p style="margin-top:24px;">
+        <a href="https://www.gov.uk/get-mot-reminder" style="display:inline-block;background:#111110;color:#ffffff;padding:12px 24px;border-radius:100px;font-size:14px;font-weight:600;text-decoration:none;">Find a garage on Fyca</a>
+      </p>
+      <p style="margin-top:16px;font-size:13px;color:#6b6a66;">You can manage your vehicle reminders in <a href="https://fyca.co.uk/vehicles" style="color:#111110;">My Vehicles</a> on Fyca.</p>
+    `),
+  })
+}
+
+export async function sendServiceReminder({
+  customerEmail,
+  customerName,
+  registration,
+  make,
+  model,
+  nextServiceDue,
+  daysUntilService,
+}: {
+  customerEmail: string
+  customerName: string
+  registration: string
+  make: string
+  model: string
+  nextServiceDue: Date
+  daysUntilService: number
+}) {
+  await sendWithRetry({
+    from: FROM,
+    to: customerEmail,
+    subject: `Service due in ${daysUntilService} day${daysUntilService === 1 ? "" : "s"} — ${registration}`,
+    html: emailBase(`
+      <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Your service is due soon</h2>
+      <p style="color:#6b6a66;font-size:14px;margin:0 0 16px;">Hi ${customerName}, your next service is due in <strong style="color:#111110;">${daysUntilService} day${daysUntilService === 1 ? "" : "s"}</strong>. Regular servicing keeps your car running safely and protects its value.</p>
+      ${dataTable([
+        ["Vehicle", `${make} ${model}`],
+        ["Registration", registration],
+        ["Service due", formatDate(nextServiceDue)],
+      ])}
+      <p style="margin-top:24px;">
+        <a href="https://fyca.co.uk/garages" style="display:inline-block;background:#111110;color:#ffffff;padding:12px 24px;border-radius:100px;font-size:14px;font-weight:600;text-decoration:none;">Book a service on Fyca</a>
+      </p>
+      <p style="margin-top:16px;font-size:13px;color:#6b6a66;">You can manage your vehicle reminders in <a href="https://fyca.co.uk/vehicles" style="color:#111110;">My Vehicles</a> on Fyca.</p>
+    `),
+  })
+}
+
 export async function sendBookingDeclinedToCustomer({
   customerEmail,
   customerName,
