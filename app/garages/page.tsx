@@ -20,7 +20,7 @@ export default async function Garages({ searchParams }: { searchParams: Promise<
   }))
 
   const allServices = Array.from(
-    new Set(garages.flatMap((g) => g.services))
+    new Set(garages.flatMap((g) => g.services ?? []))
   ).sort()
 
   const showBanner = !!userId && (!user || !user.profileComplete)

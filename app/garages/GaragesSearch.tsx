@@ -39,7 +39,7 @@ export default function GaragesSearch({
         g.postcode.toLowerCase().includes(q)
 
       const matchesService =
-        !serviceFilter || g.services.includes(serviceFilter)
+        !serviceFilter || (g.services ?? []).includes(serviceFilter)
 
       return matchesSearch && matchesService
     })

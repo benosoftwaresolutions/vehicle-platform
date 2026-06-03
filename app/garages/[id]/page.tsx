@@ -104,11 +104,11 @@ export default async function GarageDetail({ params }: Params) {
             {/* Services */}
             <div style={card}>
               <h2 style={h2}>Services Offered</h2>
-              {garage.services.length === 0 ? (
+              {(garage.services ?? []).length === 0 ? (
                 <p style={{ color: "#6b6a66", fontSize: "0.875rem" }}>This garage hasn&apos;t configured their services yet.</p>
               ) : (
                 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                  {garage.services.map((service) => (
+                  {(garage.services ?? []).map((service) => (
                     <span key={service} style={{ background: "#eceae4", color: "#111110", padding: "5px 14px", borderRadius: 100, fontSize: "0.8rem", fontWeight: 600 }}>
                       {service}
                     </span>
@@ -118,11 +118,11 @@ export default async function GarageDetail({ params }: Params) {
             </div>
 
             {/* Specialist makes */}
-            {garage.specialistMakes.length > 0 && (
+            {(garage.specialistMakes ?? []).length > 0 && (
               <div style={card}>
                 <h2 style={h2}>Specialist Makes</h2>
                 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                  {garage.specialistMakes.map((make) => (
+                  {(garage.specialistMakes ?? []).map((make) => (
                     <span key={make} style={{ background: "#eceae4", color: "#111110", padding: "5px 14px", borderRadius: 100, fontSize: "0.8rem", fontWeight: 600 }}>
                       {make}
                     </span>
@@ -215,7 +215,7 @@ export default async function GarageDetail({ params }: Params) {
           {/* Booking sidebar */}
           <div className="md:col-span-1">
             <div style={{ ...card, position: "sticky", top: "72px" }}>
-              <BookingForm garageId={garage.id} services={garage.services} servicePricing={(garage.servicePricing as Record<string, { min: number | null; max: number | null }> | null) ?? {}} />
+              <BookingForm garageId={garage.id} services={garage.services ?? []} servicePricing={(garage.servicePricing as Record<string, { min: number | null; max: number | null }> | null) ?? {}} />
             </div>
           </div>
         </div>
