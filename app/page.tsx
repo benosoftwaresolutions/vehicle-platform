@@ -152,7 +152,7 @@ async function HomeInner({
 
   // ─── Marketing page (logged out) ───────────────────────────────────────────
   console.log("[Home] logged-out/incomplete path, fetching marketing data")
-  const [totalBookings, topReviews] = await Promise.all([
+  const [, topReviews] = await Promise.all([
     prisma.booking.count({ where: { status: "completed" } }).catch((e: unknown) => { console.error("[Home] booking.count failed:", e); throw e }),
     prisma.review.findMany({
       where: { rating: { gte: 4 }, comment: { not: "" } },
@@ -163,7 +163,6 @@ async function HomeInner({
   ])
 
   const allMakes = [...new Set(garages.flatMap(g => g.specialistMakes ?? []))].sort()
-  const totalReviews = Object.values(reviewCountMap).reduce((a, b) => a + b, 0)
 
   const seenGarages = new Set<string>()
   const featuredReviews = topReviews.filter(r => {
@@ -215,23 +214,6 @@ async function HomeInner({
         </div>
       </section>
 
-      {/* Live stats */}
-      {(garages.length > 0 || totalBookings > 0) && (
-        <section className="stats-strip" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", background: "#ffffff", borderBottom: "0.5px solid rgba(0,0,0,0.06)" }}>
-          {[
-            { value: garages.length, label: "Vetted garages" },
-            { value: totalBookings, label: "Bookings completed" },
-            { value: totalReviews, label: "Customer reviews" },
-          ].map(({ value, label }, i) => (
-            <div key={label} style={{ padding: "28px 32px", borderRight: i < 2 ? "0.5px solid rgba(0,0,0,0.08)" : "none", textAlign: "center" }}>
-              <p style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 700, fontSize: "clamp(28px,3vw,40px)", color: "#111110", letterSpacing: "-0.03em", lineHeight: 1, marginBottom: 6 }}>
-                {value.toLocaleString("en-GB")}
-              </p>
-              <p style={{ fontSize: "0.82rem", fontWeight: 500, color: "#6b6a66" }}>{label}</p>
-            </div>
-          ))}
-        </section>
-      )}
 
       {/* How it works */}
       <section className="sect" style={{ padding: "80px 32px", background: "#ffffff" }}>
