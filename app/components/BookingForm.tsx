@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useAuth, SignUpButton, SignInButton } from "@clerk/nextjs"
 
 type SlotsResponse =
   | { open: false; reason: "no_availability" | "closed" }
@@ -12,6 +13,7 @@ type PriceRange = { min: number | null; max: number | null }
 
 export default function BookingForm({ garageId, services, servicePricing = {} }: { garageId: string; services: string[]; servicePricing?: Record<string, PriceRange> }) {
   const router = useRouter()
+  const { isLoaded, isSignedIn } = useAuth()
   const [service, setService] = useState("")
   const [date, setDate] = useState("")
   const [time, setTime] = useState("")
@@ -25,11 +27,13 @@ export default function BookingForm({ garageId, services, servicePricing = {} }:
   const [vehicles, setVehicles] = useState<Vehicle[] | null>(null)
 
   useEffect(() => {
+    if (!isLoaded) return
+    if (!isSignedIn) { setVehicles([]); return }
     fetch("/api/vehicles")
       .then(r => r.ok ? r.json() : [])
       .then((data: Vehicle[]) => setVehicles(data))
       .catch(() => setVehicles([]))
-  }, [])
+  }, [isLoaded, isSignedIn])
 
   useEffect(() => {
     if (!date) { setSlotsData(null); setTime(""); return }
@@ -80,6 +84,32 @@ export default function BookingForm({ garageId, services, servicePricing = {} }:
       <div style={{ background: "#f4f3ef", borderRadius: 12, padding: 16 }}>
         <p style={{ fontWeight: 700, fontSize: "0.9rem", color: "#111110", margin: "0 0 4px" }}>Booking request sent</p>
         <p style={{ fontSize: "0.85rem", color: "#6b6a66", margin: 0 }}>The garage will confirm your appointment shortly. You can track it in <a href="/bookings" style={{ color: "#111110", fontWeight: 600 }}>My Bookings</a>.</p>
+      </div>
+    )
+  }
+
+  if (isLoaded && !isSignedIn) {
+    return (
+      <div>
+        <h3 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: 18, color: "#111110", marginBottom: 12, letterSpacing: "-0.02em" }}>
+          Book an appointment
+        </h3>
+        <div style={{ background: "#f4f3ef", borderRadius: 10, padding: "16px" }}>
+          <p style={{ fontSize: "0.875rem", color: "#111110", fontWeight: 600, margin: "0 0 4px" }}>Sign up to book</p>
+          <p style={{ fontSize: "0.82rem", color: "#6b6a66", margin: "0 0 14px" }}>Create a free account to pick a time and request your appointment.</p>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <SignUpButton mode="modal">
+              <button style={{ background: "#111110", color: "#ffffff", border: "none", borderRadius: 100, padding: "10px 18px", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer", fontFamily: "var(--font-dm-sans), sans-serif" }}>
+                Sign up to book
+              </button>
+            </SignUpButton>
+            <SignInButton mode="modal">
+              <button style={{ background: "transparent", color: "#111110", border: "0.5px solid rgba(0,0,0,0.2)", borderRadius: 100, padding: "10px 18px", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer", fontFamily: "var(--font-dm-sans), sans-serif" }}>
+                Log in
+              </button>
+            </SignInButton>
+          </div>
+        </div>
       </div>
     )
   }

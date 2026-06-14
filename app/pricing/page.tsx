@@ -3,8 +3,14 @@ import { prisma } from "@/app/lib/prisma"
 import Navbar from "@/app/components/Navbar"
 import CheckoutButton from "./CheckoutButton"
 import ManageButton from "./ManageButton"
+import type { Metadata } from "next"
 
 export const dynamic = "force-dynamic"
+
+export const metadata: Metadata = {
+  title: "Pricing — Fyca",
+  description: "Simple, transparent pricing for drivers and garages. Start free, upgrade when you need more.",
+}
 
 export default async function PricingPage() {
   const { userId } = await auth()

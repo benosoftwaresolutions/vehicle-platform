@@ -235,49 +235,6 @@ export default async function ForGaragesPage() {
         </div>
       </section>
 
-      {/* ─── Testimonial ───────────────────────────────────────────────────── */}
-      <section style={{ padding: "72px 24px", background: "#ffffff" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
-          <div style={{
-            background: "#111110", borderRadius: 20, padding: "48px 52px",
-            display: "flex", flexDirection: "column", gap: 28,
-          }}>
-            <svg width="32" height="24" viewBox="0 0 32 24" fill="none">
-              <path d="M0 24V14C0 6.268 4.477 1.928 13.43 1L14.5 3.8C10.5 4.8 8.167 7.133 7.5 10.5H13V24H0zm18 0V14c0-7.732 4.477-12.072 13.43-13L32.5 3.8C28.5 4.8 26.167 7.133 25.5 10.5H31V24H18z" fill="rgba(255,255,255,0.15)"/>
-            </svg>
-
-            <p style={{
-              fontFamily: "var(--font-fraunces),'Fraunces',serif",
-              fontWeight: 500, fontSize: "clamp(18px, 2.5vw, 24px)",
-              color: "#ffffff", lineHeight: 1.45, letterSpacing: "-0.02em",
-              fontStyle: "italic", maxWidth: 640, margin: 0,
-            }}>
-              "We used to lose bookings every weekend. Now customers book at 11pm and it's waiting for us Monday morning."
-            </p>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <div style={{
-                width: 42, height: 42, borderRadius: "50%",
-                background: "rgba(255,255,255,0.12)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                flexShrink: 0,
-              }}>
-                <span style={{
-                  fontFamily: "var(--font-fraunces),'Fraunces',serif",
-                  fontWeight: 600, fontSize: "0.9rem", color: "#ffffff",
-                  letterSpacing: "0.01em",
-                }}>MT</span>
-              </div>
-              <div>
-                <p style={{ color: "#ffffff", fontWeight: 600, fontSize: "0.9rem", margin: 0 }}>Mike T.</p>
-                <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.82rem", margin: 0 }}>Owner — Thornton Auto, Manchester</p>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
       {/* ─── CTA ───────────────────────────────────────────────────────────── */}
       <section style={{ padding: "72px 24px", background: "#f4f3ef" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
