@@ -3,6 +3,7 @@ import { prisma } from "@/app/lib/prisma"
 import Navbar from "@/app/components/Navbar"
 import CheckoutButton from "./CheckoutButton"
 import ManageButton from "./ManageButton"
+import { garageTrialDaysLeft } from "@/app/lib/subscription"
 import type { Metadata } from "next"
 
 export const dynamic = "force-dynamic"
@@ -18,6 +19,9 @@ export default async function PricingPage() {
   let role: string | undefined
   let isDriverPro = false
   let isGarageActive = false
+  let isGarageTrialing = false
+  let garageHasCard = false
+  let trialDaysLeft = 0
 
   if (userId) {
     const user = await prisma.user.findUnique({
@@ -30,9 +34,12 @@ export default async function PricingPage() {
     if (user?.garageId) {
       const garage = await prisma.garage.findUnique({
         where: { id: user.garageId },
-        select: { subscriptionStatus: true },
+        select: { subscriptionStatus: true, trialEndsAt: true, stripeSubscriptionId: true },
       })
       isGarageActive = garage?.subscriptionStatus === "active"
+      isGarageTrialing = garage?.subscriptionStatus === "trialing"
+      garageHasCard = !!garage?.stripeSubscriptionId
+      trialDaysLeft = garageTrialDaysLeft(garage?.trialEndsAt ?? null)
     }
   }
 
@@ -56,28 +63,41 @@ export default async function PricingPage() {
         {/* Garage owner — only show Garage Pro */}
         {isGarageOwner && (
           <div style={{ maxWidth: 380, margin: "0 auto" }}>
-            <PlanCard
-              name="Garage Pro"
-              price="£99.99/month"
-              description="The complete platform for independent garages."
-              features={[
-                "1 month free trial",
-                "Online booking management",
-                "Calendar & availability",
-                "Customer reviews",
-                "Revenue tracking",
-                "Walk-in bookings",
-                "AI parts predictions",
-                "Inventory management",
-              ]}
-              cta={
-                isGarageActive
-                  ? <ManageButton entity="garage" label="Manage billing" />
-                  : <CheckoutButton plan="garage_pro" label="Start free trial" />
-              }
-              highlight={true}
-              badge={isGarageActive ? "Active" : undefined}
-            />
+            {isGarageTrialing && (
+              <div style={{ background: "#f4f3ef", borderRadius: 14, padding: "24px 26px", marginBottom: 16 }}>
+                <p style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.2rem", letterSpacing: "-0.02em", color: "#111110", margin: "0 0 6px" }}>
+                  Thank you for starting your free trial
+                </p>
+                <p style={{ fontSize: "0.875rem", color: "#6b6a66", margin: "0 0 16px", lineHeight: 1.5 }}>
+                  {trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} remaining. You&apos;ll be billed automatically when the trial ends — no action needed.
+                </p>
+                <ManageButton entity="garage" label="Manage subscription" />
+              </div>
+            )}
+            {!isGarageTrialing && (
+              <PlanCard
+                name="Garage Pro"
+                price="£99.99/month"
+                description="The complete platform for independent garages."
+                features={[
+                  "1 month free trial",
+                  "Online booking management",
+                  "Calendar & availability",
+                  "Customer reviews",
+                  "Revenue tracking",
+                  "Walk-in bookings",
+                  "AI parts predictions",
+                  "Inventory management",
+                ]}
+                cta={
+                  isGarageActive
+                    ? <ManageButton entity="garage" label="Manage billing" />
+                    : <CheckoutButton plan="garage_pro" label="Start free trial" />
+                }
+                highlight={true}
+                badge={isGarageActive ? "Active" : undefined}
+              />
+            )}
           </div>
         )}
 
