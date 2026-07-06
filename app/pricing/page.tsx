@@ -64,43 +64,43 @@ export default async function PricingPage() {
         {isGarageOwner && (
           <div style={{ maxWidth: 380, margin: "0 auto" }}>
             {isGarageTrialing && (
-              <div style={{ background: "#fffbeb", border: "0.5px solid rgba(234,179,8,0.3)", borderRadius: 12, padding: "14px 18px", marginBottom: 16 }}>
-                <p style={{ fontWeight: 700, fontSize: "0.9rem", color: "#92400e", margin: "0 0 2px" }}>
-                  {garageHasCard
-                    ? `Free trial active — ${trialDaysLeft} day${trialDaysLeft !== 1 ? "s" : ""} remaining`
-                    : `Free trial active — ${trialDaysLeft} day${trialDaysLeft !== 1 ? "s" : ""} remaining`}
+              <div style={{ background: "#f4f3ef", borderRadius: 14, padding: "24px 26px", marginBottom: 16 }}>
+                <p style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.2rem", letterSpacing: "-0.02em", color: "#111110", margin: "0 0 6px" }}>
+                  Thank you for starting your free trial
                 </p>
-                <p style={{ fontSize: "0.82rem", color: "#92400e", margin: 0 }}>
+                <p style={{ fontSize: "0.875rem", color: "#6b6a66", margin: "0 0 16px", lineHeight: 1.5 }}>
+                  {trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} remaining.{" "}
                   {garageHasCard
-                    ? "Your card is on file. You'll be billed automatically when the trial ends."
+                    ? "Your card is on file — you'll be billed automatically when the trial ends."
                     : "Add a payment method before your trial ends to keep your dashboard live."}
                 </p>
+                <ManageButton entity="garage" label="Manage subscription" />
               </div>
             )}
-            <PlanCard
-              name="Garage Pro"
-              price="£99.99/month"
-              description="The complete platform for independent garages."
-              features={[
-                "1 month free trial",
-                "Online booking management",
-                "Calendar & availability",
-                "Customer reviews",
-                "Revenue tracking",
-                "Walk-in bookings",
-                "AI parts predictions",
-                "Inventory management",
-              ]}
-              cta={
-                isGarageActive || (isGarageTrialing && garageHasCard)
-                  ? <ManageButton entity="garage" label="Manage billing" />
-                  : isGarageTrialing
-                  ? <CheckoutButton plan="garage_pro" label="Add payment method" />
-                  : <CheckoutButton plan="garage_pro" label="Start free trial" />
-              }
-              highlight={true}
-              badge={isGarageActive ? "Active" : isGarageTrialing ? "Trial" : undefined}
-            />
+            {!isGarageTrialing && (
+              <PlanCard
+                name="Garage Pro"
+                price="£99.99/month"
+                description="The complete platform for independent garages."
+                features={[
+                  "1 month free trial",
+                  "Online booking management",
+                  "Calendar & availability",
+                  "Customer reviews",
+                  "Revenue tracking",
+                  "Walk-in bookings",
+                  "AI parts predictions",
+                  "Inventory management",
+                ]}
+                cta={
+                  isGarageActive
+                    ? <ManageButton entity="garage" label="Manage billing" />
+                    : <CheckoutButton plan="garage_pro" label="Start free trial" />
+                }
+                highlight={true}
+                badge={isGarageActive ? "Active" : undefined}
+              />
+            )}
           </div>
         )}
 
