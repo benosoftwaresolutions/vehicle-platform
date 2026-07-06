@@ -3,6 +3,7 @@ import { prisma } from "@/app/lib/prisma"
 import Navbar from "@/app/components/Navbar"
 import CheckoutButton from "./CheckoutButton"
 import ManageButton from "./ManageButton"
+import { garageTrialDaysLeft } from "@/app/lib/subscription"
 import type { Metadata } from "next"
 
 export const dynamic = "force-dynamic"
@@ -18,6 +19,9 @@ export default async function PricingPage() {
   let role: string | undefined
   let isDriverPro = false
   let isGarageActive = false
+  let isGarageTrialing = false
+  let garageHasCard = false
+  let trialDaysLeft = 0
 
   if (userId) {
     const user = await prisma.user.findUnique({
@@ -30,9 +34,12 @@ export default async function PricingPage() {
     if (user?.garageId) {
       const garage = await prisma.garage.findUnique({
         where: { id: user.garageId },
-        select: { subscriptionStatus: true },
+        select: { subscriptionStatus: true, trialEndsAt: true, stripeSubscriptionId: true },
       })
       isGarageActive = garage?.subscriptionStatus === "active"
+      isGarageTrialing = garage?.subscriptionStatus === "trialing"
+      garageHasCard = !!garage?.stripeSubscriptionId
+      trialDaysLeft = garageTrialDaysLeft(garage?.trialEndsAt ?? null)
     }
   }
 
@@ -56,6 +63,20 @@ export default async function PricingPage() {
         {/* Garage owner — only show Garage Pro */}
         {isGarageOwner && (
           <div style={{ maxWidth: 380, margin: "0 auto" }}>
+            {isGarageTrialing && (
+              <div style={{ background: "#fffbeb", border: "0.5px solid rgba(234,179,8,0.3)", borderRadius: 12, padding: "14px 18px", marginBottom: 16 }}>
+                <p style={{ fontWeight: 700, fontSize: "0.9rem", color: "#92400e", margin: "0 0 2px" }}>
+                  {garageHasCard
+                    ? `Free trial active — ${trialDaysLeft} day${trialDaysLeft !== 1 ? "s" : ""} remaining`
+                    : `Free trial active — ${trialDaysLeft} day${trialDaysLeft !== 1 ? "s" : ""} remaining`}
+                </p>
+                <p style={{ fontSize: "0.82rem", color: "#92400e", margin: 0 }}>
+                  {garageHasCard
+                    ? "Your card is on file. You'll be billed automatically when the trial ends."
+                    : "Add a payment method before your trial ends to keep your dashboard live."}
+                </p>
+              </div>
+            )}
             <PlanCard
               name="Garage Pro"
               price="£99.99/month"
@@ -71,12 +92,14 @@ export default async function PricingPage() {
                 "Inventory management",
               ]}
               cta={
-                isGarageActive
+                isGarageActive || (isGarageTrialing && garageHasCard)
                   ? <ManageButton entity="garage" label="Manage billing" />
+                  : isGarageTrialing
+                  ? <CheckoutButton plan="garage_pro" label="Add payment method" />
                   : <CheckoutButton plan="garage_pro" label="Start free trial" />
               }
               highlight={true}
-              badge={isGarageActive ? "Active" : undefined}
+              badge={isGarageActive ? "Active" : isGarageTrialing ? "Trial" : undefined}
             />
           </div>
         )}
