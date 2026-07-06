@@ -69,10 +69,7 @@ export default async function PricingPage() {
                   Thank you for starting your free trial
                 </p>
                 <p style={{ fontSize: "0.875rem", color: "#6b6a66", margin: "0 0 16px", lineHeight: 1.5 }}>
-                  {trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} remaining.{" "}
-                  {garageHasCard
-                    ? "Your card is on file — you'll be billed automatically when the trial ends."
-                    : "Add a payment method before your trial ends to keep your dashboard live."}
+                  {trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} remaining. You&apos;ll be billed automatically when the trial ends — no action needed.
                 </p>
                 <ManageButton entity="garage" label="Manage subscription" />
               </div>
