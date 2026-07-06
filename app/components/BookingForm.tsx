@@ -98,12 +98,12 @@ export default function BookingForm({ garageId, services, servicePricing = {} }:
           <p style={{ fontSize: "0.875rem", color: "#111110", fontWeight: 600, margin: "0 0 4px" }}>Sign up to book</p>
           <p style={{ fontSize: "0.82rem", color: "#6b6a66", margin: "0 0 14px" }}>Create a free account to pick a time and request your appointment.</p>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <SignUpButton mode="modal">
+            <SignUpButton mode="modal" forceRedirectUrl={`/onboarding?returnTo=${encodeURIComponent(`/garages/${garageId}`)}`}>
               <button style={{ background: "#111110", color: "#ffffff", border: "none", borderRadius: 100, padding: "10px 18px", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer", fontFamily: "var(--font-dm-sans), sans-serif" }}>
                 Sign up to book
               </button>
             </SignUpButton>
-            <SignInButton mode="modal">
+            <SignInButton mode="modal" forceRedirectUrl={`/garages/${garageId}`}>
               <button style={{ background: "transparent", color: "#111110", border: "0.5px solid rgba(0,0,0,0.2)", borderRadius: 100, padding: "10px 18px", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer", fontFamily: "var(--font-dm-sans), sans-serif" }}>
                 Log in
               </button>

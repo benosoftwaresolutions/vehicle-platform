@@ -3,9 +3,23 @@ import { prisma } from "@/app/lib/prisma"
 import OnboardingFlow from "@/app/components/OnboardingFlow"
 import AutoRedirect from "./AutoRedirect"
 
-export default async function OnboardingPage() {
+type Props = {
+  searchParams: Promise<{ returnTo?: string }>
+}
+
+function safeReturnTo(value: string | undefined): string | undefined {
+  if (!value) return undefined
+  // Only allow relative paths starting with / to prevent open redirect
+  if (!value.startsWith("/")) return undefined
+  return value
+}
+
+export default async function OnboardingPage({ searchParams }: Props) {
   const { userId } = await auth()
   if (!userId) return <AutoRedirect to="/" />
+
+  const { returnTo: rawReturnTo } = await searchParams
+  const returnTo = safeReturnTo(rawReturnTo)
 
   let user = await prisma.user.findUnique({ where: { clerkId: userId } })
 
@@ -41,7 +55,8 @@ export default async function OnboardingPage() {
   const fullyOnboarded = user.onboardingStep >= 2 && user.role !== "pending" &&
     (user.role !== "garage_owner" || !!user.garageId)
   if (fullyOnboarded) {
-    return <AutoRedirect to={user.role === "garage_owner" ? "/garage-dashboard" : "/"} />
+    const defaultDest = user.role === "garage_owner" ? "/garage-dashboard" : "/"
+    return <AutoRedirect to={returnTo ?? defaultDest} />
   }
 
   // If role is set but garage wasn't created, jump straight to step 2 of the form
@@ -49,5 +64,5 @@ export default async function OnboardingPage() {
     ? { ...user, onboardingStep: 2 }
     : user
 
-  return <OnboardingFlow user={flowUser} />
+  return <OnboardingFlow user={flowUser} returnTo={returnTo} />
 }

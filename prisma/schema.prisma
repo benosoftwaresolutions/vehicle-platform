@@ -66,6 +66,7 @@ model Garage {
   subscriptionStatus   String    @default("trialing")
   trialEndsAt          DateTime?
   subscriptionEnd      DateTime?
+  pastDueAt            DateTime?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 }

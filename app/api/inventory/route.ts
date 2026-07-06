@@ -9,7 +9,7 @@ async function getGarageId(userId: string): Promise<string | null> {
 
   const garage = await prisma.garage.findUnique({
     where: { id: user.garageId },
-    select: { id: true, subscriptionStatus: true, trialEndsAt: true, subscriptionEnd: true },
+    select: { id: true, subscriptionStatus: true, trialEndsAt: true, subscriptionEnd: true, pastDueAt: true },
   })
   if (!garage) return null
   if (!isGarageAccessAllowed(garage)) return null
