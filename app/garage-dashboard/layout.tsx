@@ -3,7 +3,7 @@ import { prisma } from "@/app/lib/prisma"
 import { cache } from "react"
 import Navbar from "@/app/components/Navbar"
 import Link from "next/link"
-import { isGarageAccessAllowed, garageTrialDaysLeft } from "@/app/lib/subscription"
+import { isGarageAccessAllowed, garageTrialDaysLeft, garageGraceDaysLeft } from "@/app/lib/subscription"
 
 // Deduplicates across layout + page in the same request
 export const getGarageOwnerContext = cache(async (userId: string) => {
@@ -17,7 +17,7 @@ export const getGarageOwnerContext = cache(async (userId: string) => {
   const [garage, availability] = await Promise.all([
     prisma.garage.findUnique({
       where: { id: user.garageId },
-      select: { approved: true, services: true, subscriptionStatus: true, trialEndsAt: true, subscriptionEnd: true },
+      select: { approved: true, services: true, subscriptionStatus: true, trialEndsAt: true, subscriptionEnd: true, pastDueAt: true, stripeSubscriptionId: true },
     }),
     prisma.garageAvailability.findUnique({
       where: { garageId: user.garageId },
@@ -33,10 +33,13 @@ export const getGarageOwnerContext = cache(async (userId: string) => {
   const subscriptionStatus = garage?.subscriptionStatus ?? "trialing"
   const trialEndsAt = garage?.trialEndsAt ?? null
   const subscriptionEnd = garage?.subscriptionEnd ?? null
-  const subscriptionActive = isGarageAccessAllowed({ subscriptionStatus, trialEndsAt, subscriptionEnd })
+  const pastDueAt = garage?.pastDueAt ?? null
+  const hasStripeSubscription = !!garage?.stripeSubscriptionId
+  const subscriptionActive = isGarageAccessAllowed({ subscriptionStatus, trialEndsAt, subscriptionEnd, pastDueAt })
   const trialDaysLeft = subscriptionStatus === "trialing" ? garageTrialDaysLeft(trialEndsAt) : null
+  const graceDaysLeft = subscriptionStatus === "past_due" ? garageGraceDaysLeft(pastDueAt) : null
 
-  return { garageId: user.garageId, approved, hasServices, hasAvailability, isLive, subscriptionActive, subscriptionStatus, trialDaysLeft }
+  return { garageId: user.garageId, approved, hasServices, hasAvailability, isLive, subscriptionActive, subscriptionStatus, trialDaysLeft, graceDaysLeft, hasStripeSubscription }
 })
 
 function NotAuthorized() {
@@ -96,6 +99,30 @@ function NotLiveBanner() {
   )
 }
 
+function CardRequiredBanner({ daysLeft }: { daysLeft: number }) {
+  const urgent = daysLeft <= 7
+  return (
+    <div style={{
+      background: urgent ? "#fef2f2" : "#fffbeb",
+      borderBottom: `0.5px solid ${urgent ? "rgba(239,68,68,0.3)" : "rgba(234,179,8,0.3)"}`,
+      padding: "10px 32px",
+    }}>
+      <div style={{ maxWidth: "900px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
+        <p style={{ fontSize: "0.85rem", color: urgent ? "#991b1b" : "#92400e", margin: 0 }}>
+          <strong>{daysLeft} day{daysLeft !== 1 ? "s" : ""} left on your free trial</strong>
+          {" — add a payment method now so your dashboard stays live automatically."}
+        </p>
+        <Link
+          href="/pricing"
+          style={{ fontSize: "0.8rem", fontWeight: 600, color: urgent ? "#991b1b" : "#92400e", textDecoration: "underline", whiteSpace: "nowrap" }}
+        >
+          Add card →
+        </Link>
+      </div>
+    </div>
+  )
+}
+
 function TrialBanner({ daysLeft }: { daysLeft: number }) {
   const urgent = daysLeft <= 7
   return (
@@ -106,14 +133,39 @@ function TrialBanner({ daysLeft }: { daysLeft: number }) {
     }}>
       <div style={{ maxWidth: "900px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
         <p style={{ fontSize: "0.85rem", color: urgent ? "#991b1b" : "#92400e", margin: 0 }}>
-          <strong>{daysLeft === 0 ? "Your free trial has ended" : `${daysLeft} day${daysLeft !== 1 ? "s" : ""} left on your free trial`}</strong>
-          {daysLeft > 0 && " — subscribe to keep your dashboard after the trial."}
+          <strong>{daysLeft} day{daysLeft !== 1 ? "s" : ""} left on your free trial</strong>
+          {" — you'll be billed automatically when it ends."}
         </p>
         <Link
           href="/pricing"
           style={{ fontSize: "0.8rem", fontWeight: 600, color: urgent ? "#991b1b" : "#92400e", textDecoration: "underline", whiteSpace: "nowrap" }}
         >
-          View plans →
+          View plan →
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+function PastDueBanner({ daysLeft }: { daysLeft: number }) {
+  return (
+    <div style={{
+      background: "#fef2f2",
+      borderBottom: "0.5px solid rgba(239,68,68,0.3)",
+      padding: "10px 32px",
+    }}>
+      <div style={{ maxWidth: "900px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
+        <p style={{ fontSize: "0.85rem", color: "#991b1b", margin: 0 }}>
+          <strong>Payment failed</strong>
+          {daysLeft > 0
+            ? ` — update your payment method within ${daysLeft} day${daysLeft !== 1 ? "s" : ""} to avoid losing access.`
+            : " — your access will be suspended until payment is resolved."}
+        </p>
+        <Link
+          href="/pricing"
+          style={{ fontSize: "0.8rem", fontWeight: 600, color: "#991b1b", textDecoration: "underline", whiteSpace: "nowrap" }}
+        >
+          Update payment →
         </Link>
       </div>
     </div>
@@ -158,7 +210,14 @@ export default async function GarageDashboardLayout({ children }: { children: Re
   return (
     <>
       <Navbar role="garage_owner" />
-      {ctx.trialDaysLeft !== null && ctx.trialDaysLeft <= 14 && <TrialBanner daysLeft={ctx.trialDaysLeft} />}
+      {ctx.subscriptionStatus === "past_due" && ctx.graceDaysLeft !== null && (
+        <PastDueBanner daysLeft={ctx.graceDaysLeft} />
+      )}
+      {ctx.subscriptionStatus === "trialing" && ctx.trialDaysLeft !== null && ctx.trialDaysLeft <= 14 && (
+        ctx.hasStripeSubscription
+          ? <TrialBanner daysLeft={ctx.trialDaysLeft} />
+          : <CardRequiredBanner daysLeft={ctx.trialDaysLeft} />
+      )}
       {!ctx.isLive && <NotLiveBanner />}
       {children}
     </>

@@ -13,9 +13,10 @@ type User = {
 
 type OnboardingFlowProps = {
   user: User
+  returnTo?: string
 }
 
-export default function OnboardingFlow({ user }: OnboardingFlowProps) {
+export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) {
   const router = useRouter()
   const [step, setStep] = useState(user.onboardingStep)
   const [loading, setLoading] = useState(false)
@@ -28,6 +29,7 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
     user.role !== "pending" ? user.role : null
   )
   const [createdGarageId, setCreatedGarageId] = useState<string | null>(null)
+  const [billingLoading, setBillingLoading] = useState(false)
 
   // Driver vehicle step
   const [vehicleMake, setVehicleMake] = useState("")
@@ -67,7 +69,7 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
       body: JSON.stringify({ make: vehicleMake, model: vehicleModel, year: vehicleYear, registration: vehicleReg }),
     })
     setVehicleSaving(false)
-    router.push("/")
+    router.push(returnTo ?? "/")
   }
 
   const completeGarageDetails = async () => {
@@ -277,7 +279,7 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
               {vehicleSaving ? "Saving…" : "Add vehicle & continue"}
             </button>
             <button
-              onClick={() => router.push("/")}
+              onClick={() => router.push(returnTo ?? "/")}
               style={{ background: "none", color: "#6b6a66", padding: "10px", border: "none", cursor: "pointer", fontSize: "0.875rem" }}
             >
               Skip for now
@@ -288,8 +290,23 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
     )
   }
 
-  // Step 3 — Logo upload
+  // Step 3 — Logo upload + billing setup
   if (step === 3 && selectedRole === "garage_owner") {
+    const startBilling = async () => {
+      setBillingLoading(true)
+      try {
+        const res = await fetch("/api/subscriptions/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ plan: "garage_pro" }),
+        })
+        const data = await res.json()
+        if (data.url) window.location.href = data.url
+      } finally {
+        setBillingLoading(false)
+      }
+    }
+
     return (
       <div style={{ minHeight: "100vh", background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px" }}>
         <div style={{ maxWidth: "440px", width: "100%" }}>
@@ -298,21 +315,25 @@ export default function OnboardingFlow({ user }: OnboardingFlowProps) {
             Garage created!
           </h1>
           <p style={{ color: "#6b6a66", marginBottom: "28px", lineHeight: 1.6 }}>
-            Add a logo to help customers recognise your garage. You can always do this later in Settings.
+            Add a logo to help customers recognise your garage. You can always update this in Settings.
           </p>
           <LogoUploader currentLogoUrl={null} />
           <div style={{ marginTop: "28px", display: "flex", flexDirection: "column", gap: "10px" }}>
             <button
-              onClick={() => router.push("/garage-dashboard")}
-              style={{ background: "#111110", color: "#ffffff", padding: "14px", borderRadius: 100, fontWeight: 600, fontSize: "1rem", border: "none", cursor: "pointer", width: "100%" }}
+              onClick={startBilling}
+              disabled={billingLoading}
+              style={{ background: billingLoading ? "#eceae4" : "#111110", color: billingLoading ? "#6b6a66" : "#ffffff", padding: "14px", borderRadius: 100, fontWeight: 600, fontSize: "1rem", border: "none", cursor: billingLoading ? "not-allowed" : "pointer", width: "100%" }}
             >
-              Go to Dashboard
+              {billingLoading ? "Redirecting…" : "Set up billing →"}
             </button>
+            <p style={{ textAlign: "center", fontSize: "0.78rem", color: "#6b6a66", margin: 0 }}>
+              No charge during your 30-day trial. Card required to continue after.
+            </p>
             <button
               onClick={() => router.push("/garage-dashboard")}
               style={{ background: "none", color: "#6b6a66", padding: "10px", border: "none", cursor: "pointer", fontSize: "0.875rem" }}
             >
-              Skip for now
+              I&apos;ll set up billing later
             </button>
           </div>
         </div>

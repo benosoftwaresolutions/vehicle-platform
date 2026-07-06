@@ -85,8 +85,7 @@ async function handleSubscriptionUpdated(sub: Stripe.Subscription) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const periodEnd = (sub as any).current_period_end as number | undefined
   const subscriptionEnd = periodEnd ? new Date(periodEnd * 1000) : null
-
-  const status = sub.status === "active" || sub.status === "trialing" ? sub.status : sub.status
+  const status = sub.status
 
   const user = await prisma.user.findFirst({ where: { stripeSubscriptionId: sub.id } })
   if (user) {
@@ -101,11 +100,16 @@ async function handleSubscriptionUpdated(sub: Stripe.Subscription) {
     return
   }
 
-  const garage = await prisma.garage.findFirst({ where: { stripeSubscriptionId: sub.id } })
+  const garage = await prisma.garage.findFirst({ where: { stripeSubscriptionId: sub.id }, select: { id: true, pastDueAt: true } })
   if (garage) {
+    // Track when payment first goes past_due; clear it if payment recovers
+    const pastDueAt = status === "past_due"
+      ? (garage.pastDueAt ?? new Date())
+      : null
+
     await prisma.garage.update({
       where: { id: garage.id },
-      data: { subscriptionStatus: status, subscriptionEnd },
+      data: { subscriptionStatus: status, subscriptionEnd, pastDueAt },
     })
   }
 }
@@ -120,11 +124,11 @@ async function handleSubscriptionDeleted(sub: Stripe.Subscription) {
     return
   }
 
-  const garage = await prisma.garage.findFirst({ where: { stripeSubscriptionId: sub.id } })
+  const garage = await prisma.garage.findFirst({ where: { stripeSubscriptionId: sub.id }, select: { id: true } })
   if (garage) {
     await prisma.garage.update({
       where: { id: garage.id },
-      data: { subscriptionStatus: "canceled", stripeSubscriptionId: null },
+      data: { subscriptionStatus: "canceled", stripeSubscriptionId: null, pastDueAt: null },
     })
   }
 }
