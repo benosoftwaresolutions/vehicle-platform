@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { updateGarageSettings } from "./actions"
 import LogoUploader from "@/app/components/LogoUploader"
@@ -167,6 +167,13 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState("")
+
+  // Auto-dismiss the saved toast
+  useEffect(() => {
+    if (!saved) return
+    const t = setTimeout(() => setSaved(false), 3500)
+    return () => clearTimeout(t)
+  }, [saved])
 
   // ── Profile completion ────────────────────────────────────────────────────
   const completionItems = useMemo(() => [
@@ -361,23 +368,54 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
         padding: "14px 32px",
         display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "16px",
       }}>
-        {saved && <span style={{ color: "#111110", fontWeight: 600, fontSize: "0.875rem" }}>Changes saved</span>}
         {error && <span style={{ color: "#dc2626", fontWeight: 600, fontSize: "0.875rem" }}>{error}</span>}
         <button
           type="submit"
           disabled={saving}
           style={{
-            background: saving ? "#eceae4" : "#111110",
+            background: saving ? "#eceae4" : saved ? "#16a34a" : "#111110",
             color: saving ? "#6b6a66" : "#ffffff",
             padding: "12px 32px", borderRadius: 100,
             fontWeight: 600, fontSize: "0.95rem", border: "none",
             cursor: saving ? "not-allowed" : "pointer",
             minWidth: 140,
+            transition: "background 0.2s ease",
           }}
         >
-          {saving ? "Saving…" : "Save changes"}
+          {saving ? "Saving…" : saved ? "✓ Saved" : "Save changes"}
         </button>
       </div>
+
+      {/* ── Saved toast ────────────────────────────────────────────────────── */}
+      {saved && (
+        <div
+          role="status"
+          style={{
+            position: "fixed", bottom: 88, left: "50%", zIndex: 30,
+            background: "#111110", color: "#ffffff",
+            padding: "13px 24px", borderRadius: 100,
+            display: "flex", alignItems: "center", gap: 10,
+            fontWeight: 600, fontSize: "0.9rem",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.22)",
+            animation: "fycaToastIn 0.25s ease",
+            transform: "translateX(-50%)",
+            whiteSpace: "nowrap",
+          }}
+        >
+          <span style={{
+            background: "#16a34a", borderRadius: "50%", width: 20, height: 20,
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            fontSize: "0.7rem", fontWeight: 800, flexShrink: 0,
+          }}>✓</span>
+          Changes saved — your public listing is up to date
+        </div>
+      )}
+      <style>{`
+        @keyframes fycaToastIn {
+          from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+      `}</style>
     </form>
   )
 }
