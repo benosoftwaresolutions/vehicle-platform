@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 
 const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
@@ -38,26 +38,69 @@ export default function AvailabilityForm({ garageId, existing }: Props) {
   })
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [error, setError] = useState("")
+
+  // Auto-dismiss the saved toast
+  useEffect(() => {
+    if (!success) return
+    const t = setTimeout(() => setSuccess(false), 3500)
+    return () => clearTimeout(t)
+  }, [success])
 
   const updateDay = (day: string, field: keyof DaySchedule, value: string | boolean) =>
     setSchedule(prev => prev.map(d => d.day === day ? { ...d, [field]: value } : d))
 
   const handleSave = async () => {
-    setLoading(true)
-    const res = await fetch("/api/availability", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ garageId, slotDuration, capacity, schedule }),
-    })
-    if (res.ok) { setSuccess(true); router.refresh() }
-    setLoading(false)
+    setLoading(true); setSuccess(false); setError("")
+    try {
+      const res = await fetch("/api/availability", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ garageId, slotDuration, capacity, schedule }),
+      })
+      if (res.ok) { setSuccess(true); router.refresh() }
+      else setError("Something went wrong. Please try again.")
+    } catch {
+      setError("Something went wrong. Please try again.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       {success && (
-        <div style={{ background: "#f4f3ef", borderRadius: 10, padding: "14px 16px", color: "#111110", fontWeight: 600 }}>
-          Availability saved.
+        <div
+          role="status"
+          style={{
+            position: "fixed", bottom: 32, left: "50%", zIndex: 30,
+            background: "#111110", color: "#ffffff",
+            padding: "13px 24px", borderRadius: 100,
+            display: "flex", alignItems: "center", gap: 10,
+            fontWeight: 600, fontSize: "0.9rem",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.22)",
+            animation: "fycaToastIn 0.25s ease",
+            transform: "translateX(-50%)",
+            whiteSpace: "nowrap",
+          }}
+        >
+          <span style={{
+            background: "#16a34a", borderRadius: "50%", width: 20, height: 20,
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            fontSize: "0.7rem", fontWeight: 800, flexShrink: 0,
+          }}>✓</span>
+          Availability saved — your bookable slots are updated
+        </div>
+      )}
+      <style>{`
+        @keyframes fycaToastIn {
+          from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+      `}</style>
+      {error && (
+        <div style={{ background: "#fef2f2", borderRadius: 10, padding: "14px 16px", color: "#dc2626", fontWeight: 600 }}>
+          {error}
         </div>
       )}
 
@@ -124,14 +167,15 @@ export default function AvailabilityForm({ garageId, existing }: Props) {
         onClick={handleSave}
         disabled={loading}
         style={{
-          background: loading ? "#eceae4" : "#111110",
+          background: loading ? "#eceae4" : success ? "#16a34a" : "#111110",
           color: loading ? "#6b6a66" : "#ffffff",
           padding: "13px 32px", borderRadius: 100,
           fontWeight: 600, fontSize: "0.95rem",
           border: "none", cursor: loading ? "not-allowed" : "pointer",
+          transition: "background 0.2s ease",
         }}
       >
-        {loading ? "Saving…" : "Save availability"}
+        {loading ? "Saving…" : success ? "✓ Saved" : "Save availability"}
       </button>
     </div>
   )
