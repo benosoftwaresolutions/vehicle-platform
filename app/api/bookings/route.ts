@@ -3,6 +3,8 @@ import { prisma } from "@/app/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
 import { sendNewBookingToGarage } from "@/app/lib/email"
 import { rateLimit } from "@/app/lib/rateLimit"
+import { isGarageAccessAllowed } from "@/app/lib/subscription"
+import { getAvailableSlots } from "@/app/lib/slots"
 import { headers } from "next/headers"
 
 export async function POST(req: Request) {
@@ -29,6 +31,29 @@ export async function POST(req: Request) {
     const parsedDate = new Date(date)
     if (isNaN(parsedDate.getTime())) {
       return NextResponse.json({ error: "Invalid date" }, { status: 400 })
+    }
+
+    // No bookings in the past (compare UTC dates, matching how bookings are stored)
+    const todayUtc = new Date(new Date().toISOString().slice(0, 10))
+    if (parsedDate < todayUtc) {
+      return NextResponse.json({ error: "Booking date cannot be in the past" }, { status: 400 })
+    }
+
+    // Garage must exist, be approved, and have an active trial/subscription
+    const garageAccess = await prisma.garage.findUnique({
+      where: { id: garageId },
+      select: { approved: true, subscriptionStatus: true, trialEndsAt: true, subscriptionEnd: true, pastDueAt: true },
+    })
+    if (!garageAccess || !garageAccess.approved || !isGarageAccessAllowed(garageAccess)) {
+      return NextResponse.json({ error: "This garage is not currently taking bookings" }, { status: 400 })
+    }
+
+    // Slot must be open with capacity remaining (re-checked server-side to
+    // prevent double-booking and requests the UI wouldn't offer)
+    const dateStr = parsedDate.toISOString().slice(0, 10)
+    const slotResult = await getAvailableSlots(garageId, dateStr)
+    if (!slotResult.open || !slotResult.slots.includes(time)) {
+      return NextResponse.json({ error: "That time slot is no longer available" }, { status: 409 })
     }
 
     const booking = await prisma.booking.create({

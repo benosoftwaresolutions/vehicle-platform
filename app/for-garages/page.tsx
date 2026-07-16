@@ -140,7 +140,7 @@ export default async function ForGaragesPage() {
               padding: "14px 28px", borderRadius: 100,
               fontWeight: 600, fontSize: "0.95rem", textDecoration: "none",
             }}>
-              List your garage free
+              Start your free month
             </Link>
             <a href="#features" style={{
               background: "transparent", color: "#111110",
@@ -250,7 +250,7 @@ export default async function ForGaragesPage() {
               Ready to get started?
             </h2>
             <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "1rem", margin: 0 }}>
-              Takes three minutes to set up your profile. No commitment.
+              Three minutes to set up. Free for your first month, then £99.99/month — cancel anytime.
             </p>
             <GarageSignupForm />
           </div>

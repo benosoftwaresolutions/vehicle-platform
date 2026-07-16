@@ -45,6 +45,13 @@ export async function POST(req: Request) {
   return NextResponse.json({ received: true })
 }
 
+// In Stripe API v2025+ (basil), current_period_end lives on the subscription
+// items rather than the subscription itself.
+function getSubscriptionPeriodEnd(sub: Stripe.Subscription | null): Date | null {
+  const periodEnd = sub?.items.data[0]?.current_period_end
+  return periodEnd ? new Date(periodEnd * 1000) : null
+}
+
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const { entity, entityId, plan } = session.metadata ?? {}
   if (!entity || !entityId || !plan) return
@@ -53,9 +60,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     ? await getStripe().subscriptions.retrieve(session.subscription as string)
     : null
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const periodEnd = (sub as any)?.current_period_end as number | undefined
-  const subscriptionEnd = periodEnd ? new Date(periodEnd * 1000) : null
+  const subscriptionEnd = getSubscriptionPeriodEnd(sub)
+  // A garage checking out mid-trial gets a Stripe subscription in "trialing"
+  // status — mirror Stripe rather than assuming "active"
+  const status = sub?.status ?? "active"
 
   if (entity === "user") {
     await prisma.user.update({
@@ -64,7 +72,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         plan: "driver_pro",
         stripeCustomerId: session.customer as string,
         stripeSubscriptionId: sub?.id ?? null,
-        subscriptionStatus: "active",
+        subscriptionStatus: status,
         subscriptionEnd,
       },
     })
@@ -74,17 +82,16 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       data: {
         stripeCustomerId: session.customer as string,
         stripeSubscriptionId: sub?.id ?? null,
-        subscriptionStatus: "active",
+        subscriptionStatus: status,
         subscriptionEnd,
+        pastDueAt: null,
       },
     })
   }
 }
 
 async function handleSubscriptionUpdated(sub: Stripe.Subscription) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const periodEnd = (sub as any).current_period_end as number | undefined
-  const subscriptionEnd = periodEnd ? new Date(periodEnd * 1000) : null
+  const subscriptionEnd = getSubscriptionPeriodEnd(sub)
   const status = sub.status
 
   const user = await prisma.user.findFirst({ where: { stripeSubscriptionId: sub.id } })

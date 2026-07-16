@@ -184,7 +184,7 @@ function SubscriptionWall() {
           <p style={{ color: "#6b6a66", marginBottom: "12px", lineHeight: 1.6, fontSize: "0.95rem" }}>
             Subscribe to Garage Pro to continue managing bookings, availability, and settings.
           </p>
-          <p style={{ color: "#111110", fontWeight: 700, fontSize: "1.1rem", marginBottom: "28px" }}>£100/month</p>
+          <p style={{ color: "#111110", fontWeight: 700, fontSize: "1.1rem", marginBottom: "28px" }}>£99.99/month</p>
           <Link
             href="/pricing"
             style={{ background: "#111110", color: "#ffffff", padding: "12px 28px", borderRadius: 100, fontWeight: 600, fontSize: "0.95rem", textDecoration: "none" }}

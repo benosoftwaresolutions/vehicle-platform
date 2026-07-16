@@ -2,12 +2,12 @@ import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { getStripe } from "@/app/lib/stripe"
 import { prisma } from "@/app/lib/prisma"
-import { env } from "@/app/lib/env"
 
 export async function POST(req: Request) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 })
 
+  const origin = new URL(req.url).origin
   const { entity } = await req.json()
 
   let stripeCustomerId: string | null = null
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
 
   const session = await getStripe().billingPortal.sessions.create({
     customer: stripeCustomerId,
-    return_url: entity === "garage" ? `${env.appUrl}/garage-dashboard` : `${env.appUrl}/vehicles`,
+    return_url: entity === "garage" ? `${origin}/garage-dashboard` : `${origin}/vehicles`,
   })
 
   return NextResponse.json({ url: session.url })

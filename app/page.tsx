@@ -313,7 +313,7 @@ async function HomeInner({
               Accept bookings 24/7 without answering the phone. Manage your schedule, track inventory, and grow your business.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 32 }}>
-              {["Free to list your garage", "Online booking management", "Automatic customer notifications", "AI-powered inventory predictions"].map(point => (
+              {["Free one-month trial", "Online booking management", "Automatic customer notifications", "AI-powered inventory predictions"].map(point => (
                 <div key={point} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
                   <span style={{ color: "rgba(0,0,0,0.25)", fontSize: "0.75rem", marginTop: 2 }}>✓</span>
                   <span style={{ color: "#444441", fontSize: "0.875rem" }}>{point}</span>
