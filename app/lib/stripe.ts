@@ -20,7 +20,7 @@ export const PLANS = {
   },
   GARAGE_PRO: {
     priceId: process.env.STRIPE_GARAGE_PRO_PRICE_ID!,
-    amount: 10000,
+    amount: 9999,
     name: "Garage Pro",
   },
 } as const
