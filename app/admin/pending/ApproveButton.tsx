@@ -2,9 +2,9 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { updateUserRole } from "../actions"
+import { approveGarage } from "../actions"
 
-export default function ApproveButton({ userId, garageName }: { userId: string; garageName: string }) {
+export default function ApproveButton({ garageId, garageName }: { garageId: string; garageName: string }) {
   const router = useRouter()
   const [confirming, setConfirming] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -16,7 +16,7 @@ export default function ApproveButton({ userId, garageName }: { userId: string; 
         <button
           onClick={async () => {
             setLoading(true)
-            await updateUserRole(userId, "garage_owner")
+            await approveGarage(garageId)
             router.refresh()
           }}
           disabled={loading}
