@@ -179,7 +179,7 @@ function SubscriptionWall() {
       <main style={{ maxWidth: "900px", margin: "0 auto", padding: "80px 32px" }}>
         <div style={{ background: "#f4f3ef", borderRadius: 14, padding: "48px", textAlign: "center", maxWidth: "520px", margin: "0 auto" }}>
           <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.4rem", letterSpacing: "-0.02em", color: "#111110", marginBottom: "10px" }}>
-            Your free trial has ended
+            Your free trial has ended.
           </h2>
           <p style={{ color: "#6b6a66", marginBottom: "12px", lineHeight: 1.6, fontSize: "0.95rem" }}>
             Subscribe to Garage Pro to continue managing bookings, availability, and settings.
