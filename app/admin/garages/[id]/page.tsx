@@ -84,7 +84,7 @@ export default async function AdminGarageDetail({ params }: { params: Promise<{ 
                 <span style={{ background: owner.role === "garage_owner" ? "#111110" : "#fef3c7", color: owner.role === "garage_owner" ? "#ffffff" : "#92400e", padding: "3px 10px", borderRadius: 100, fontSize: "0.73rem", fontWeight: 700 }}>
                   {owner.role}
                 </span>
-                {!garage.approved && <ApproveButton userId={owner.id} />}
+                {!garage.approved && <ApproveButton garageId={garage.id} />}
               </div>
             </div>
           ) : (

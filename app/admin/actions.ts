@@ -26,6 +26,8 @@ export async function approveGarage(garageId: string) {
   await prisma.garage.update({ where: { id: garageId }, data: { approved: true } })
   updateTag("garages")
   revalidatePath("/admin/garages")
+  revalidatePath("/admin/pending")
+  revalidatePath("/admin")
 }
 
 export async function saveAdminNotes(garageId: string, notes: string) {

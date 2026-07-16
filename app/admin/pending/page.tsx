@@ -4,17 +4,17 @@ import ApproveButton from "./ApproveButton"
 import DeclineButton from "./DeclineButton"
 
 export default async function AdminPending() {
-  const pendingOwners = await prisma.user.findMany({
-    where: { role: "pending", garageId: { not: null } },
+  // A garage is pending until an admin sets approved=true — its owner already
+  // has the garage_owner role from onboarding, so key off the garage itself
+  const pendingGarages = await prisma.garage.findMany({
+    where: { approved: false },
     orderBy: { createdAt: "asc" },
   })
 
-  const garageIds = pendingOwners.map((u) => u.garageId!)
-
-  const garages = await prisma.garage.findMany({
-    where: { id: { in: garageIds } },
+  const owners = await prisma.user.findMany({
+    where: { garageId: { in: pendingGarages.map((g) => g.id) } },
   })
-  const garageMap = Object.fromEntries(garages.map((g) => [g.id, g]))
+  const ownerMap = Object.fromEntries(owners.filter((o) => o.garageId).map((o) => [o.garageId!, o]))
 
   return (
     <div style={{ padding: "40px" }}>
@@ -22,21 +22,20 @@ export default async function AdminPending() {
         <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.6rem", letterSpacing: "-0.03em", color: "#111110", marginBottom: "4px" }}>
           Pending approvals
         </h1>
-        <p style={{ color: "#6b6a66", fontSize: "0.9rem" }}>{pendingOwners.length} garage{pendingOwners.length !== 1 ? "s" : ""} awaiting approval</p>
+        <p style={{ color: "#6b6a66", fontSize: "0.9rem" }}>{pendingGarages.length} garage{pendingGarages.length !== 1 ? "s" : ""} awaiting approval</p>
       </div>
 
-      {pendingOwners.length === 0 ? (
+      {pendingGarages.length === 0 ? (
         <div style={{ background: "#f4f3ef", borderRadius: 14, padding: "48px", textAlign: "center" }}>
           <p style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.1rem", color: "#111110", marginBottom: "6px" }}>All clear</p>
           <p style={{ color: "#6b6a66" }}>No garages waiting for approval</p>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          {pendingOwners.map((owner) => {
-            const garage = garageMap[owner.garageId!]
-            if (!garage) return null
+          {pendingGarages.map((garage) => {
+            const owner = ownerMap[garage.id]
             return (
-              <div key={owner.id} style={{ background: "#ffffff", border: "0.5px solid rgba(0,0,0,0.1)", borderRadius: 14, padding: "24px 28px" }}>
+              <div key={garage.id} style={{ background: "#ffffff", border: "0.5px solid rgba(0,0,0,0.1)", borderRadius: 14, padding: "24px 28px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "20px", flexWrap: "wrap" }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
@@ -50,9 +49,9 @@ export default async function AdminPending() {
 
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "16px 32px", marginBottom: "16px" }}>
                       <Field label="Address" value={`${garage.address}, ${garage.city}, ${garage.postcode}`} />
-                      <Field label="Owner email" value={owner.email} />
-                      <Field label="Owner name" value={owner.name ?? "—"} />
-                      <Field label="Applied" value={new Date(owner.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })} />
+                      <Field label="Owner email" value={owner?.email ?? "—"} />
+                      <Field label="Owner name" value={owner?.name ?? "—"} />
+                      <Field label="Applied" value={new Date(garage.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })} />
                     </div>
 
                     {garage.services.length > 0 && (
@@ -90,8 +89,8 @@ export default async function AdminPending() {
                     >
                       View public page
                     </Link>
-                    <ApproveButton userId={owner.id} garageName={garage.name} />
-                    <DeclineButton userId={owner.id} garageId={garage.id} garageName={garage.name} />
+                    <ApproveButton garageId={garage.id} garageName={garage.name} />
+                    {owner && <DeclineButton userId={owner.id} garageId={garage.id} garageName={garage.name} />}
                   </div>
                 </div>
               </div>
