@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next"
 import { prisma } from "@/app/lib/prisma"
 
+export const dynamic = "force-dynamic"
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fyca.co.uk"
 
