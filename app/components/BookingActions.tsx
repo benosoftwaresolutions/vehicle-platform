@@ -25,11 +25,16 @@ export default function BookingActions({ bookingId, currentStatus }: { bookingId
   const [messageError, setMessageError] = useState<string | null>(null)
   const [showCompleteForm, setShowCompleteForm] = useState(false)
   const [jobValue, setJobValue] = useState("")
+  const [accepted, setAccepted] = useState(false)
 
   const handleAccept = async () => {
     setLoading(true)
-    await updateBookingStatus(bookingId, "confirmed")
-    setLoading(false)
+    try {
+      await updateBookingStatus(bookingId, "confirmed")
+      setAccepted(true)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleDecline = async () => {
@@ -221,18 +226,20 @@ export default function BookingActions({ bookingId, currentStatus }: { bookingId
         <div style={{ display: "flex", gap: "8px", flexDirection: "column" }}>
           <button
             onClick={handleAccept}
-            disabled={loading}
-            style={{ background: "#111110", color: "#ffffff", padding: "8px 18px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "none", cursor: "pointer", opacity: loading ? 0.5 : 1 }}
+            disabled={loading || accepted}
+            style={{ background: accepted ? "#16a34a" : "#111110", color: "#ffffff", padding: "8px 18px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "none", cursor: loading || accepted ? "default" : "pointer", opacity: loading ? 0.7 : 1, transition: "background 0.2s ease" }}
           >
-            Accept
+            {loading ? "Accepting…" : accepted ? "✓ Accepted" : "Accept"}
           </button>
-          <button
-            onClick={() => setShowDeclineForm(true)}
-            disabled={loading}
-            style={{ background: "transparent", color: "#111110", padding: "8px 18px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "0.5px solid rgba(0,0,0,0.2)", cursor: "pointer" }}
-          >
-            Decline
-          </button>
+          {!accepted && (
+            <button
+              onClick={() => setShowDeclineForm(true)}
+              disabled={loading}
+              style={{ background: "transparent", color: "#111110", padding: "8px 18px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "0.5px solid rgba(0,0,0,0.2)", cursor: "pointer" }}
+            >
+              Decline
+            </button>
+          )}
         </div>
       ) : (
         <div style={{ background: "#f4f3ef", border: "0.5px solid rgba(0,0,0,0.10)", borderRadius: 12, padding: "16px", minWidth: 240 }}>
