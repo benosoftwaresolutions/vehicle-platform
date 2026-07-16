@@ -63,7 +63,7 @@ export default async function PricingPage() {
         {/* Garage owner — only show Garage Pro */}
         {isGarageOwner && (
           <div style={{ maxWidth: 380, margin: "0 auto" }}>
-            {isGarageTrialing && (
+            {isGarageTrialing && garageHasCard && (
               <div style={{ background: "#f4f3ef", borderRadius: 14, padding: "24px 26px", marginBottom: 16 }}>
                 <p style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.2rem", letterSpacing: "-0.02em", color: "#111110", margin: "0 0 6px" }}>
                   Thank you for starting your free trial
@@ -72,6 +72,17 @@ export default async function PricingPage() {
                   {trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} remaining. You&apos;ll be billed automatically when the trial ends — no action needed.
                 </p>
                 <ManageButton entity="garage" label="Manage subscription" />
+              </div>
+            )}
+            {isGarageTrialing && !garageHasCard && (
+              <div style={{ background: "#f4f3ef", borderRadius: 14, padding: "24px 26px", marginBottom: 16 }}>
+                <p style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.2rem", letterSpacing: "-0.02em", color: "#111110", margin: "0 0 6px" }}>
+                  Your free trial is under way
+                </p>
+                <p style={{ fontSize: "0.875rem", color: "#6b6a66", margin: "0 0 16px", lineHeight: 1.5 }}>
+                  {trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} remaining. Add a payment method before your trial ends to keep taking bookings — you won&apos;t be charged until the trial is over.
+                </p>
+                <CheckoutButton plan="garage_pro" label="Add payment method" />
               </div>
             )}
             {!isGarageTrialing && (
