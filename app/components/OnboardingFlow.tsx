@@ -21,6 +21,7 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
   const [step, setStep] = useState(user.onboardingStep)
   const [loading, setLoading] = useState(false)
   const [name, setName] = useState(user.name || "")
+  const [phone, setPhone] = useState("")
   const [garageName, setGarageName] = useState("")
   const [garageAddress, setGarageAddress] = useState("")
   const [garageCity, setGarageCity] = useState("")
@@ -52,12 +53,16 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
     setStep(2)
   }
 
+  // A phone number is mandatory — a garage needs to be able to ring the customer
+  // about their vehicle, and email alone isn't good enough for that.
+  const customerBlocked = loading || !name.trim() || phone.trim().length < 7
+
   const completeCustomer = async () => {
     setLoading(true)
     await fetch("/api/onboarding", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ step: 2, name, role: "customer" })
+      body: JSON.stringify({ step: 2, name, phone, role: "customer" })
     })
     setLoading(false)
     setStep(3)
@@ -148,10 +153,21 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
               style={inp}
             />
           </div>
+          <div style={{ marginBottom: "20px" }}>
+            <label style={lbl}>Phone Number</label>
+            <input
+              type="tel" value={phone} onChange={e => setPhone(e.target.value)}
+              placeholder="e.g. 07700 900123"
+              style={inp}
+            />
+            <p style={{ fontSize: "0.78rem", color: "#6b6a66", marginTop: "6px", lineHeight: 1.45 }}>
+              Shared with a garage when you book, so they can reach you about your vehicle.
+            </p>
+          </div>
           <button
             onClick={completeCustomer}
-            disabled={loading || !name}
-            style={{ background: loading || !name ? "#eceae4" : "#111110", color: loading || !name ? "#6b6a66" : "#ffffff", padding: "14px", borderRadius: 100, fontWeight: 600, fontSize: "1rem", border: "none", cursor: loading || !name ? "not-allowed" : "pointer", width: "100%" }}
+            disabled={customerBlocked}
+            style={{ background: customerBlocked ? "#eceae4" : "#111110", color: customerBlocked ? "#6b6a66" : "#ffffff", padding: "14px", borderRadius: 100, fontWeight: 600, fontSize: "1rem", border: "none", cursor: customerBlocked ? "not-allowed" : "pointer", width: "100%" }}
           >
             {loading ? "Saving…" : "Get Started"}
           </button>
