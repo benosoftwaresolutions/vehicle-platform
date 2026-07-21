@@ -28,6 +28,7 @@ export default async function PricingPage() {
   let isGarageTrialing = false
   let garageHasCard = false
   let trialEndsAt: Date | null = null
+  let subscriptionEnd: Date | null = null
 
   if (userId) {
     const user = await prisma.user.findUnique({
@@ -40,16 +41,34 @@ export default async function PricingPage() {
     if (user?.garageId) {
       const garage = await prisma.garage.findUnique({
         where: { id: user.garageId },
-        select: { subscriptionStatus: true, trialEndsAt: true, stripeSubscriptionId: true },
+        select: { subscriptionStatus: true, trialEndsAt: true, stripeSubscriptionId: true, subscriptionEnd: true },
       })
       isGarageActive = garage?.subscriptionStatus === "active"
       isGarageTrialing = garage?.subscriptionStatus === "trialing"
       garageHasCard = !!garage?.stripeSubscriptionId
       trialEndsAt = garage?.trialEndsAt ?? null
+      subscriptionEnd = garage?.subscriptionEnd ?? null
     }
   }
 
   const trialEndLabel = formatTrialEnd(trialEndsAt)
+  const nextBillingLabel = formatTrialEnd(subscriptionEnd)
+
+  // A subscribed garage is reading an account summary, not a sales pitch — drop
+  // the trial line from the feature list and lead with what they're paying for.
+  const GARAGE_FEATURES = [
+    "Online booking management",
+    "Calendar & availability",
+    "Customer reviews",
+    "Revenue tracking",
+    "Walk-in bookings",
+    "AI parts predictions",
+    "Inventory management",
+  ]
+  const garageFeatures = isGarageActive
+    ? GARAGE_FEATURES
+    : ["1 month free trial", ...GARAGE_FEATURES]
+
   const isGarageOwner = role === "garage_owner"
   const isDriver = role === "customer"
 
@@ -100,17 +119,14 @@ export default async function PricingPage() {
               <PlanCard
                 name="Garage Pro"
                 price="£99.99/month"
-                description="The complete platform for independent garages."
-                features={[
-                  "1 month free trial",
-                  "Online booking management",
-                  "Calendar & availability",
-                  "Customer reviews",
-                  "Revenue tracking",
-                  "Walk-in bookings",
-                  "AI parts predictions",
-                  "Inventory management",
-                ]}
+                description={
+                  isGarageActive
+                    ? nextBillingLabel
+                      ? `Your subscription is active. Next payment ${nextBillingLabel}.`
+                      : "Your subscription is active."
+                    : "The complete platform for independent garages."
+                }
+                features={garageFeatures}
                 cta={
                   isGarageActive
                     ? <ManageButton entity="garage" label="Manage billing" />
