@@ -211,13 +211,15 @@ export async function createWalkInBooking(data: {
 
   // Email notification to garage owner
   const [garage, garageOwner] = await Promise.all([
-    prisma.garage.findUnique({ where: { id: data.garageId }, select: { name: true } }),
+    prisma.garage.findUnique({ where: { id: data.garageId }, select: { name: true, email: true } }),
     prisma.user.findFirst({ where: { garageId: data.garageId, role: "garage_owner" }, select: { email: true } }),
   ])
 
   if (garage && garageOwner) {
     await sendWalkInBookingToGarage({
-      garageOwnerEmail: garageOwner.email,
+      // Prefer the garage's own bookings inbox; fall back to the owner's
+      // account email for garages signed up before it was mandatory.
+      garageOwnerEmail: garage.email ?? garageOwner.email,
       garageName: garage.name,
       customerName: data.customerName,
       customerPhone: data.customerPhone.trim() || undefined,

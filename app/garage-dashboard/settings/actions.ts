@@ -28,12 +28,23 @@ export async function updateGarageSettings(formData: {
     throw new Error("Unauthorised")
   }
 
+  // Contact details are mandatory at signup, so they can't be cleared here
+  // either — the `required` attributes on the form are client-side only.
+  const email = formData.email.trim()
+  const phone = formData.phone.trim()
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new Error("A valid garage email is required")
+  }
+  if (phone.length < 7) {
+    throw new Error("A valid phone number is required")
+  }
+
   await prisma.garage.update({
     where: { id: user.garageId },
     data: {
       name: formData.name.trim(),
-      email: formData.email.trim() || null,
-      phone: formData.phone.trim() || null,
+      email,
+      phone,
       address: formData.address.trim(),
       city: formData.city.trim(),
       postcode: formData.postcode.trim().toUpperCase(),

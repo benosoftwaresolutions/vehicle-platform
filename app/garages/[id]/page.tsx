@@ -139,6 +139,17 @@ export default async function GarageDetail({ params }: Params) {
               <p style={{ color: "#444441" }}>{garage.postcode}</p>
             </div>
 
+            {/* Contact — phone only. The garage email is held for booking
+                notifications and admin use, never shown publicly. */}
+            {garage.phone && (
+              <div style={card}>
+                <h2 style={h2}>Contact</h2>
+                <p style={{ color: "#444441" }}>
+                  <a href={`tel:${garage.phone.replace(/\s+/g, "")}`} style={{ color: "#111110" }}>{garage.phone}</a>
+                </p>
+              </div>
+            )}
+
             {/* About */}
             {garage.description && (
               <div style={card}>

@@ -38,7 +38,9 @@ export async function respondToAlternative(bookingId: string, response: "accept"
 
     if (garageOwner && garage && customer) {
       await sendAlternativeAcceptedToGarage({
-        garageOwnerEmail: garageOwner.email,
+        // Prefer the garage's own bookings inbox; fall back to the owner's
+        // account email for garages signed up before it was mandatory.
+        garageOwnerEmail: garage.email ?? garageOwner.email,
         garageName: garage.name,
         customerName: customer.name ?? customer.email,
         service: booking.service,
@@ -68,7 +70,9 @@ export async function respondToAlternative(bookingId: string, response: "accept"
 
     if (garageOwner && garage && customer) {
       await sendAlternativeDeclinedToGarage({
-        garageOwnerEmail: garageOwner.email,
+        // Prefer the garage's own bookings inbox; fall back to the owner's
+        // account email for garages signed up before it was mandatory.
+        garageOwnerEmail: garage.email ?? garageOwner.email,
         garageName: garage.name,
         customerName: customer.name ?? customer.email,
         service: booking.service,
@@ -105,7 +109,7 @@ export async function cancelBooking(bookingId: string) {
 
   if (garageOwner && garage && customer) {
     await sendBookingCancelledToGarage({
-      garageOwnerEmail: garageOwner.email,
+      garageOwnerEmail: garage.email ?? garageOwner.email,
       garageName: garage.name,
       customerName: customer.name ?? customer.email,
       service: booking.service,
