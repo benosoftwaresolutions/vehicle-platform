@@ -79,7 +79,9 @@ export async function POST(req: Request) {
 
     if (customer && garage && garageOwner) {
       await sendNewBookingToGarage({
-        garageOwnerEmail: garageOwner.email,
+        // Prefer the garage's own bookings inbox; fall back to the owner's
+        // account email for garages signed up before it was mandatory.
+        garageOwnerEmail: garage.email ?? garageOwner.email,
         garageName: garage.name,
         customerName: customer.name ?? customer.email,
         customerEmail: customer.email,

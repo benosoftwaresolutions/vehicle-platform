@@ -271,10 +271,16 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
             <div>
               <label style={labelStyle}>Email address</label>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="hello@yourgarage.co.uk" style={inputStyle} />
+              <p style={{ fontSize: "0.78rem", color: "#6b6a66", marginTop: "6px", lineHeight: 1.45 }}>
+                New booking notifications are sent here. Not shown on your public page.
+              </p>
             </div>
             <div>
               <label style={labelStyle}>Phone number</label>
               <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required placeholder="01234 567890" style={inputStyle} />
+              <p style={{ fontSize: "0.78rem", color: "#6b6a66", marginTop: "6px", lineHeight: 1.45 }}>
+                Shown on your public page so customers can call you.
+              </p>
             </div>
           </div>
         </Section>

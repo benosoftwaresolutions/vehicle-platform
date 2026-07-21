@@ -38,6 +38,15 @@ export default async function AdminGarageDetail({ params }: { params: Promise<{ 
             {garage.name}
           </h1>
           <p style={{ color: "#6b6a66", fontSize: "0.9rem" }}>{garage.address}, {garage.city}, {garage.postcode}</p>
+          {/* Tappable on a phone — this is the screen used standing on a forecourt */}
+          <p style={{ color: "#6b6a66", fontSize: "0.9rem", marginTop: "4px", display: "flex", gap: "14px", flexWrap: "wrap" }}>
+            {garage.email
+              ? <a href={`mailto:${garage.email}`} style={{ color: "#111110" }}>{garage.email}</a>
+              : <span style={{ color: "#b91c1c" }}>No email on file</span>}
+            {garage.phone
+              ? <a href={`tel:${garage.phone.replace(/\s+/g, "")}`} style={{ color: "#111110" }}>{garage.phone}</a>
+              : <span style={{ color: "#b91c1c" }}>No phone on file</span>}
+          </p>
         </div>
         <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
           <Link

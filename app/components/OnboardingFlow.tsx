@@ -228,10 +228,16 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
               <div>
                 <label style={lbl}>Garage email</label>
                 <input type="email" value={garageEmail} onChange={e => setGarageEmail(e.target.value)} placeholder="e.g. bookings@cityauto.co.uk" style={inp} />
+                <p style={{ fontSize: "0.78rem", color: "#6b6a66", marginTop: "6px", lineHeight: 1.45 }}>
+                  New booking notifications are sent here. Not shown on your public page — use the inbox you actually check.
+                </p>
               </div>
               <div>
                 <label style={lbl}>Phone number</label>
                 <input type="tel" value={garagePhone} onChange={e => setGaragePhone(e.target.value)} placeholder="e.g. 0161 123 4567" style={inp} />
+                <p style={{ fontSize: "0.78rem", color: "#6b6a66", marginTop: "6px", lineHeight: 1.45 }}>
+                  Shown on your public page so customers can call you.
+                </p>
               </div>
             </div>
           </div>
