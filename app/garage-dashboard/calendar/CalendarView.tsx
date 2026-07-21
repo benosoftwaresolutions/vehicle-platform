@@ -13,6 +13,8 @@ type Booking = {
   vehicleModel: string | null
   status: string
   customerName: string | null
+  customerPhone: string | null
+  customerEmail: string | null
   isWalkIn: boolean
 }
 
@@ -130,8 +132,22 @@ export default function CalendarView({ bookings, weekStart, weekOffset }: { book
               <Row label="Date" value={new Date(selectedBooking.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} />
               <Row label="Time" value={selectedBooking.time} />
               <Row label="Status" value={selectedBooking.status} />
-              {selectedBooking.isWalkIn && selectedBooking.customerName && (
+              {selectedBooking.customerName && (
                 <Row label="Customer" value={selectedBooking.customerName} />
+              )}
+              {selectedBooking.customerPhone && (
+                <Row
+                  label="Phone"
+                  value={selectedBooking.customerPhone}
+                  href={`tel:${selectedBooking.customerPhone.replace(/\s+/g, "")}`}
+                />
+              )}
+              {selectedBooking.customerEmail && (
+                <Row
+                  label="Email"
+                  value={selectedBooking.customerEmail}
+                  href={`mailto:${selectedBooking.customerEmail}`}
+                />
               )}
             </div>
             <button
@@ -152,11 +168,14 @@ const navBtn: React.CSSProperties = {
   padding: "6px 14px", fontSize: "0.8rem", fontWeight: 600, color: "#111110", cursor: "pointer",
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Row({ label, value, href }: { label: string; value: string; href?: string }) {
   return (
     <div style={{ display: "flex", gap: "12px" }}>
       <span style={{ color: "#6b6a66", width: 90, flexShrink: 0 }}>{label}</span>
-      <span style={{ color: "#111110", fontWeight: 600 }}>{value}</span>
+      {href
+        // Tappable on a phone — the garage is usually holding one
+        ? <a href={href} style={{ color: "#111110", fontWeight: 600 }}>{value}</a>
+        : <span style={{ color: "#111110", fontWeight: 600 }}>{value}</span>}
     </div>
   )
 }

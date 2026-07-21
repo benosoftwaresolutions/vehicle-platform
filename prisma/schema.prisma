@@ -12,6 +12,7 @@ model User {
   clerkId              String    @unique
   email                String    @unique
   name                 String?
+  phone                String?
   role                 String    @default("pending")
   garageId             String?
   onboardingStep       Int       @default(0)

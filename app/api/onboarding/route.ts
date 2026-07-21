@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 })
 
     const body = await req.json()
-    const { step, role, name, garageName, garageAddress, garageCity, garagePostcode, garageEmail, garagePhone } = body
+    const { step, role, name, phone, garageName, garageAddress, garageCity, garagePostcode, garageEmail, garagePhone } = body
 
     if (step === 1) {
       if (!["customer", "garage_owner"].includes(role)) {
@@ -25,9 +25,13 @@ export async function POST(req: Request) {
       if (!name?.trim() || name.length > 100) {
         return NextResponse.json({ error: "Invalid name" }, { status: 400 })
       }
+      // Mandatory so a garage can always reach the customer about their vehicle
+      if (!phone?.trim() || phone.trim().length < 7 || phone.length > 20) {
+        return NextResponse.json({ error: "Invalid phone number" }, { status: 400 })
+      }
       await prisma.user.update({
         where: { clerkId: userId },
-        data: { name: name.trim(), onboardingStep: 2, profileComplete: true }
+        data: { name: name.trim(), phone: phone.trim(), onboardingStep: 2, profileComplete: true }
       })
     }
 

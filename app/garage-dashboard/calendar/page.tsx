@@ -29,16 +29,34 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
     orderBy: { date: "asc" },
   })
 
-  const serialized = bookings.map(b => ({
-    ...b,
-    date: b.date.toISOString(),
-    suggestedDate: b.suggestedDate?.toISOString() ?? null,
-    createdAt: b.createdAt.toISOString(),
-    updatedAt: b.updatedAt.toISOString(),
-    jobValue: b.jobValue ?? null,
-    vehicleMake: b.vehicleMake ?? null,
-    vehicleModel: b.vehicleModel ?? null,
-  }))
+  // Online bookings only store clerkId — pull the customer's name and number so
+  // the garage can actually get hold of them from the calendar.
+  const clerkIds = [...new Set(bookings.map(b => b.clerkId).filter((id): id is string => !!id))]
+  const customers = clerkIds.length
+    ? await prisma.user.findMany({
+        where: { clerkId: { in: clerkIds } },
+        select: { clerkId: true, name: true, phone: true, email: true },
+      })
+    : []
+  const customerByClerkId = Object.fromEntries(customers.map(c => [c.clerkId, c]))
+
+  const serialized = bookings.map(b => {
+    const customer = b.clerkId ? customerByClerkId[b.clerkId] : null
+    return {
+      ...b,
+      date: b.date.toISOString(),
+      suggestedDate: b.suggestedDate?.toISOString() ?? null,
+      createdAt: b.createdAt.toISOString(),
+      updatedAt: b.updatedAt.toISOString(),
+      jobValue: b.jobValue ?? null,
+      vehicleMake: b.vehicleMake ?? null,
+      vehicleModel: b.vehicleModel ?? null,
+      // Walk-ins carry their own details; online bookings inherit the account's
+      customerName: b.customerName ?? customer?.name ?? null,
+      customerPhone: b.customerPhone ?? customer?.phone ?? null,
+      customerEmail: b.customerEmail ?? customer?.email ?? null,
+    }
+  })
 
   return (
     <>

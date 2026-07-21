@@ -98,7 +98,9 @@ export default function Navbar({ role }: { role?: string }) {
         <div className="nav-desktop" style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
             <Link href="/" className="nav-link" style={navLink}>Home</Link>
-            <Link href="/garages" className="nav-link" style={navLink}>Garages</Link>
+            {/* The public directory is for drivers — a garage owner has no
+                reason to browse a list of their competitors. */}
+            {!isGarageOwner && <Link href="/garages" className="nav-link" style={navLink}>Garages</Link>}
             {isSignedIn && (isGarageOwner
               ? <Link href="/garage-dashboard" className="nav-link" style={navLink}>Dashboard</Link>
               : <>
@@ -109,7 +111,8 @@ export default function Navbar({ role }: { role?: string }) {
           </div>
           <div style={{ width: "0.5px", height: 18, background: "rgba(0,0,0,0.15)" }} />
           <div style={{ background: "#f4f3ef", borderRadius: 100, padding: 3, display: "flex", gap: 2 }}>
-            {(!isSignedIn || isGarageOwner) && (
+            {/* Marketing pages are for people who haven't signed up yet */}
+            {!isSignedIn && (
               <Link href="/for-garages" style={{
                 padding: "5px 14px", borderRadius: 100, fontSize: "0.82rem", fontWeight: 600,
                 textDecoration: "none",
@@ -180,7 +183,7 @@ export default function Navbar({ role }: { role?: string }) {
           {/* Primary links */}
           <div style={{ padding: "8px 16px" }}>
             <Link href="/" className="mobile-link" style={mobileLink}>Home</Link>
-            <Link href="/garages" className="mobile-link" style={mobileLink}>Garages</Link>
+            {!isGarageOwner && <Link href="/garages" className="mobile-link" style={mobileLink}>Garages</Link>}
             {isSignedIn && (isGarageOwner
               ? <Link href="/garage-dashboard" className="mobile-link" style={mobileLink}>Dashboard</Link>
               : <>
@@ -192,17 +195,17 @@ export default function Navbar({ role }: { role?: string }) {
 
           <div style={{ height: "0.5px", background: "rgba(0,0,0,0.08)", margin: "8px 16px" }} />
 
-          {/* For garages / drivers */}
-          <div style={{ padding: "8px 16px" }}>
-            {(!isSignedIn || isGarageOwner) && (
-              <Link href="/for-garages" className="mobile-link" style={{ ...mobileLink, background: onGarages ? "#f4f3ef" : "transparent" }}>For garages</Link>
-            )}
-            {(!isSignedIn || !isGarageOwner) && (
-              <Link href="/for-drivers" className="mobile-link" style={{ ...mobileLink, background: onDrivers ? "#f4f3ef" : "transparent" }}>For drivers</Link>
-            )}
-          </div>
+          {/* For garages / drivers — signed-out visitors only */}
+          {!isSignedIn && (
+            <>
+              <div style={{ padding: "8px 16px" }}>
+                <Link href="/for-garages" className="mobile-link" style={{ ...mobileLink, background: onGarages ? "#f4f3ef" : "transparent" }}>For garages</Link>
+                <Link href="/for-drivers" className="mobile-link" style={{ ...mobileLink, background: onDrivers ? "#f4f3ef" : "transparent" }}>For drivers</Link>
+              </div>
 
-          <div style={{ height: "0.5px", background: "rgba(0,0,0,0.08)", margin: "8px 16px" }} />
+              <div style={{ height: "0.5px", background: "rgba(0,0,0,0.08)", margin: "8px 16px" }} />
+            </>
+          )}
 
           {/* Auth */}
           <div style={{ padding: "16px 16px 0" }}>
