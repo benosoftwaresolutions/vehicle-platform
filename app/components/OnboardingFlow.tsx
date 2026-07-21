@@ -25,6 +25,8 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
   const [garageAddress, setGarageAddress] = useState("")
   const [garageCity, setGarageCity] = useState("")
   const [garagePostcode, setGaragePostcode] = useState("")
+  const [garageEmail, setGarageEmail] = useState("")
+  const [garagePhone, setGaragePhone] = useState("")
   const [selectedRole, setSelectedRole] = useState<string | null>(
     user.role !== "pending" ? user.role : null
   )
@@ -77,7 +79,7 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
     const res = await fetch("/api/onboarding", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ step: 2, role: "garage_owner", name, garageName, garageAddress, garageCity, garagePostcode })
+      body: JSON.stringify({ step: 2, role: "garage_owner", name, garageName, garageAddress, garageCity, garagePostcode, garageEmail, garagePhone })
     })
     const data = await res.json()
     setLoading(false)
@@ -160,7 +162,7 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
 
   // Step 2 — Garage owner details
   if (step === 2 && selectedRole === "garage_owner") {
-    const canSubmit = !loading && name && garageName && garageAddress && garageCity && garagePostcode
+    const canSubmit = !loading && name && garageName && garageAddress && garageCity && garagePostcode && garageEmail && garagePhone
     return (
       <div style={{ minHeight: "100vh", background: "#ffffff", padding: "48px 24px" }}>
         <div style={{ maxWidth: "560px", margin: "0 auto" }}>
@@ -214,6 +216,22 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
                   <label style={lbl}>Postcode</label>
                   <input type="text" value={garagePostcode} onChange={e => setGaragePostcode(e.target.value.toUpperCase())} placeholder="e.g. M1 1AA" style={inp} />
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact — shown publicly and used to reach the garage */}
+          <div style={{ ...card, marginTop: "14px", marginBottom: "28px" }}>
+            <p style={cardTitle}>Contact details</p>
+            <p style={{ fontSize: "0.78rem", color: "#6b6a66", marginBottom: "14px" }}>How customers and Fyca get hold of you</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div>
+                <label style={lbl}>Garage email</label>
+                <input type="email" value={garageEmail} onChange={e => setGarageEmail(e.target.value)} placeholder="e.g. bookings@cityauto.co.uk" style={inp} />
+              </div>
+              <div>
+                <label style={lbl}>Phone number</label>
+                <input type="tel" value={garagePhone} onChange={e => setGaragePhone(e.target.value)} placeholder="e.g. 0161 123 4567" style={inp} />
               </div>
             </div>
           </div>

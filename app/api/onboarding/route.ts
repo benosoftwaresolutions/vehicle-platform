@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 })
 
     const body = await req.json()
-    const { step, role, name, garageName, garageAddress, garageCity, garagePostcode } = body
+    const { step, role, name, garageName, garageAddress, garageCity, garagePostcode, garageEmail, garagePhone } = body
 
     if (step === 1) {
       if (!["customer", "garage_owner"].includes(role)) {
@@ -47,6 +47,14 @@ export async function POST(req: Request) {
       if (!name?.trim() || name.length > 100) {
         return NextResponse.json({ error: "Invalid name" }, { status: 400 })
       }
+      // Contact details are mandatory — a garage with no way to reach it is
+      // useless to customers and to us.
+      if (!garageEmail?.trim() || garageEmail.length > 200 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(garageEmail.trim())) {
+        return NextResponse.json({ error: "Invalid email" }, { status: 400 })
+      }
+      if (!garagePhone?.trim() || garagePhone.trim().length < 7 || garagePhone.length > 20) {
+        return NextResponse.json({ error: "Invalid phone number" }, { status: 400 })
+      }
       // Create the garage with 30-day trial
       const garage = await prisma.garage.create({
         data: {
@@ -54,6 +62,8 @@ export async function POST(req: Request) {
           address: garageAddress,
           city: garageCity,
           postcode: garagePostcode,
+          email: garageEmail.trim(),
+          phone: garagePhone.trim(),
           rating: 0,
           services: [],
           subscriptionStatus: "trialing",
