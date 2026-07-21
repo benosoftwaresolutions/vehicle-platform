@@ -3,8 +3,14 @@ import { prisma } from "@/app/lib/prisma"
 import Navbar from "@/app/components/Navbar"
 import CheckoutButton from "./CheckoutButton"
 import ManageButton from "./ManageButton"
-import { garageTrialDaysLeft } from "@/app/lib/subscription"
 import type { Metadata } from "next"
+
+// Trial end shown as a date rather than a day count — unambiguous, and it
+// matches what Stripe shows the same garage owner on their invoice.
+function formatTrialEnd(d: Date | null): string | null {
+  if (!d) return null
+  return d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+}
 
 export const dynamic = "force-dynamic"
 
@@ -21,7 +27,7 @@ export default async function PricingPage() {
   let isGarageActive = false
   let isGarageTrialing = false
   let garageHasCard = false
-  let trialDaysLeft = 0
+  let trialEndsAt: Date | null = null
 
   if (userId) {
     const user = await prisma.user.findUnique({
@@ -39,10 +45,11 @@ export default async function PricingPage() {
       isGarageActive = garage?.subscriptionStatus === "active"
       isGarageTrialing = garage?.subscriptionStatus === "trialing"
       garageHasCard = !!garage?.stripeSubscriptionId
-      trialDaysLeft = garageTrialDaysLeft(garage?.trialEndsAt ?? null)
+      trialEndsAt = garage?.trialEndsAt ?? null
     }
   }
 
+  const trialEndLabel = formatTrialEnd(trialEndsAt)
   const isGarageOwner = role === "garage_owner"
   const isDriver = role === "customer"
 
@@ -69,7 +76,9 @@ export default async function PricingPage() {
                   Thank you for starting your free trial
                 </p>
                 <p style={{ fontSize: "0.875rem", color: "#6b6a66", margin: "0 0 16px", lineHeight: 1.5 }}>
-                  {trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} remaining. You&apos;ll be billed automatically when the trial ends — no action needed.
+                  {trialEndLabel
+                    ? <>Your free trial ends on {trialEndLabel}. You&apos;ll be billed automatically then — no action needed.</>
+                    : <>You&apos;ll be billed automatically when your trial ends — no action needed.</>}
                 </p>
                 <ManageButton entity="garage" label="Manage subscription" />
               </div>
@@ -80,7 +89,9 @@ export default async function PricingPage() {
                   Your free trial is under way
                 </p>
                 <p style={{ fontSize: "0.875rem", color: "#6b6a66", margin: "0 0 16px", lineHeight: 1.5 }}>
-                  {trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} remaining. Add a payment method before your trial ends to keep taking bookings — you won&apos;t be charged until the trial is over.
+                  {trialEndLabel
+                    ? <>Your free trial ends on {trialEndLabel}. Add a payment method before then to keep taking bookings — you won&apos;t be charged until the trial is over.</>
+                    : <>Add a payment method before your trial ends to keep taking bookings — you won&apos;t be charged until the trial is over.</>}
                 </p>
                 <CheckoutButton plan="garage_pro" label="Add payment method" />
               </div>
