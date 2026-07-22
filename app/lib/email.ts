@@ -2,6 +2,20 @@ import { Resend } from "resend"
 
 const FROM = process.env.RESEND_FROM ?? "onboarding@resend.dev"
 
+// Canonical www URL — the apex 307-redirects and some mail clients mishandle that.
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://www.fyca.co.uk").replace(/\/$/, "")
+
+// Bulletproof email button (table-based so it renders in Outlook too)
+function emailButton(label: string, href: string) {
+  return `<table cellpadding="0" cellspacing="0" style="margin-top:24px;">
+    <tr>
+      <td style="background:#111110;border-radius:100px;">
+        <a href="${href}" style="display:inline-block;padding:13px 28px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;">${label}</a>
+      </td>
+    </tr>
+  </table>`
+}
+
 // Lazy-initialise so missing key doesn't crash the build
 function getResend() {
   const key = process.env.RESEND_API_KEY
@@ -128,7 +142,8 @@ export async function sendNewBookingToGarage({
         ["Customer email", customerEmail],
         ["Booking ID", bookingId],
       ])}
-      <p style="margin-top:24px;font-size:14px;color:#444441;">Log in to your garage dashboard to accept or decline this booking.</p>
+      <p style="margin-top:24px;font-size:14px;color:#444441;">Accept or decline this booking from your dashboard.</p>
+      ${emailButton("View booking", `${APP_URL}/garage-dashboard`)}
     `),
   })
 }
@@ -203,6 +218,7 @@ export async function sendAlternativeAcceptedToGarage({
         ["Registration", registration],
       ])}
       <p style="margin-top:24px;font-size:14px;color:#444441;">This booking is now confirmed.</p>
+      ${emailButton("Open dashboard", `${APP_URL}/garage-dashboard`)}
     `),
   })
 }
