@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useTransition } from "react"
+import { adminUpdateBookingStatus } from "../actions"
 
 type Booking = {
   id: string
@@ -55,7 +56,7 @@ export default function BookingsTable({ bookings }: { bookings: Booking[] }) {
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.875rem" }}>
           <thead>
             <tr style={{ background: "#f4f3ef", borderBottom: "0.5px solid rgba(0,0,0,0.08)" }}>
-              {["Garage", "Customer", "Service", "Date", "Status", "Type"].map((h) => (
+              {["Garage", "Customer", "Service", "Date", "Status", "Type", ""].map((h) => (
                 <th key={h} style={{ padding: "12px 16px", textAlign: "left", fontWeight: 700, color: "#444441", fontSize: "0.75rem", whiteSpace: "nowrap", letterSpacing: "0.04em", textTransform: "uppercase" }}>{h}</th>
               ))}
             </tr>
@@ -85,6 +86,9 @@ export default function BookingsTable({ bookings }: { bookings: Booking[] }) {
                       : <span style={{ color: "#6b6a66", fontSize: "0.8rem" }}>Online</span>
                     }
                   </td>
+                  <td style={{ padding: "12px 16px", whiteSpace: "nowrap" }}>
+                    {booking.status === "pending" && <RowActions bookingId={booking.id} />}
+                  </td>
                 </tr>
               )
             })}
@@ -95,5 +99,45 @@ export default function BookingsTable({ bookings }: { bookings: Booking[] }) {
         )}
       </div>
     </>
+  )
+}
+
+// Accept / decline a pending booking on the garage's behalf. Internal support
+// tool — the customer just sees the normal confirmation or decline email.
+function RowActions({ bookingId }: { bookingId: string }) {
+  const [pending, startTransition] = useTransition()
+  const [error, setError] = useState(false)
+
+  const act = (status: "confirmed" | "declined") => {
+    if (status === "declined" && !confirm("Decline this booking on the garage's behalf? The customer will be emailed.")) return
+    setError(false)
+    startTransition(async () => {
+      try {
+        await adminUpdateBookingStatus(bookingId, status)
+      } catch {
+        setError(true)
+      }
+    })
+  }
+
+  if (error) return <span style={{ color: "#dc2626", fontSize: "0.78rem", fontWeight: 600 }}>Failed — retry</span>
+
+  return (
+    <div style={{ display: "flex", gap: "6px" }}>
+      <button
+        onClick={() => act("confirmed")}
+        disabled={pending}
+        style={{ background: "#111110", color: "#ffffff", border: "none", borderRadius: 100, padding: "5px 12px", fontSize: "0.75rem", fontWeight: 700, cursor: pending ? "wait" : "pointer", opacity: pending ? 0.5 : 1 }}
+      >
+        {pending ? "…" : "Accept"}
+      </button>
+      <button
+        onClick={() => act("declined")}
+        disabled={pending}
+        style={{ background: "transparent", color: "#444441", border: "0.5px solid rgba(0,0,0,0.2)", borderRadius: 100, padding: "5px 12px", fontSize: "0.75rem", fontWeight: 700, cursor: pending ? "wait" : "pointer", opacity: pending ? 0.5 : 1 }}
+      >
+        Decline
+      </button>
+    </div>
   )
 }

@@ -3,6 +3,7 @@
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
 import { revalidatePath, updateTag } from "next/cache"
+import { sendBookingConfirmedToCustomer, sendBookingDeclinedToCustomer } from "@/app/lib/email"
 
 async function assertAdmin() {
   const adminId = process.env.ADMIN_USER_ID
@@ -28,6 +29,60 @@ export async function approveGarage(garageId: string) {
   revalidatePath("/admin/garages")
   revalidatePath("/admin/pending")
   revalidatePath("/admin")
+}
+
+// Accept or decline a booking on a garage's behalf. A support tool for the
+// hands-on pilot phase — the customer gets the normal confirmation/decline
+// email, identical to the garage doing it themselves. Only pending bookings
+// can be actioned, so admin can't override a decision the garage already made.
+export async function adminUpdateBookingStatus(bookingId: string, status: "confirmed" | "declined", garageNote?: string) {
+  await assertAdmin()
+
+  if (status !== "confirmed" && status !== "declined") throw new Error("Invalid status")
+
+  const existing = await prisma.booking.findUnique({ where: { id: bookingId }, select: { status: true } })
+  if (!existing) throw new Error("Booking not found")
+  if (existing.status !== "pending") throw new Error("Only pending bookings can be actioned")
+
+  const booking = await prisma.booking.update({
+    where: { id: bookingId },
+    data: { status, garageNote: garageNote?.trim() || null },
+  })
+
+  const [customer, garage] = await Promise.all([
+    booking.clerkId ? prisma.user.findUnique({ where: { clerkId: booking.clerkId } }) : null,
+    prisma.garage.findUnique({ where: { id: booking.garageId } }),
+  ])
+
+  if (customer && garage) {
+    const garageAddress = `${garage.address}, ${garage.city}, ${garage.postcode}`
+    if (status === "confirmed") {
+      await sendBookingConfirmedToCustomer({
+        customerEmail: customer.email,
+        customerName: customer.name ?? customer.email,
+        garageName: garage.name,
+        garageAddress,
+        service: booking.service,
+        date: booking.date,
+        time: booking.time,
+        registration: booking.registration,
+      }).catch(err => console.error("[admin] Failed to send confirmation email:", err))
+    } else {
+      await sendBookingDeclinedToCustomer({
+        customerEmail: customer.email,
+        customerName: customer.name ?? customer.email,
+        garageName: garage.name,
+        service: booking.service,
+        date: booking.date,
+        time: booking.time,
+        garageNote: booking.garageNote,
+        suggestedDate: booking.suggestedDate,
+        suggestedTime: booking.suggestedTime,
+      }).catch(err => console.error("[admin] Failed to send decline email:", err))
+    }
+  }
+
+  revalidatePath("/admin/bookings")
 }
 
 export async function saveAdminNotes(garageId: string, notes: string) {
