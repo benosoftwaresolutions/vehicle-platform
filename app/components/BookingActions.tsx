@@ -9,6 +9,27 @@ const timeSlots = [
   "14:00","14:30","15:00","15:30","16:00","16:30",
 ]
 
+// Inline SVG spinner — SMIL rotation, no global CSS needed.
+function Spinner({ color = "#ffffff" }: { color?: string }) {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" style={{ display: "block", flexShrink: 0 }}>
+      <circle cx="12" cy="12" r="9" fill="none" stroke={color} strokeOpacity="0.25" strokeWidth="3" />
+      <path d="M12 3a9 9 0 0 1 9 9" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round">
+        <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.7s" repeatCount="indefinite" />
+      </path>
+    </svg>
+  )
+}
+
+// Consistent "spinner + label" content for a button in its loading state
+function Loading({ label, color }: { label: string; color?: string }) {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+      <Spinner color={color} />{label}
+    </span>
+  )
+}
+
 type ConfirmedPanel = null | "reschedule" | "message"
 
 export default function BookingActions({ bookingId, currentStatus }: { bookingId: string; currentStatus: string }) {
@@ -82,7 +103,7 @@ export default function BookingActions({ bookingId, currentStatus }: { bookingId
               disabled={loading || !rescheduleDate || !rescheduleTime}
               style={{ background: "#111110", color: "#ffffff", padding: "8px 16px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "none", cursor: "pointer", flex: 1, opacity: loading || !rescheduleDate || !rescheduleTime ? 0.5 : 1 }}
             >
-              {loading ? "Saving..." : "Confirm"}
+              {loading ? <Loading label="Saving…" /> : "Confirm"}
             </button>
             <button onClick={() => setConfirmedPanel(null)} style={{ background: "transparent", color: "#444441", padding: "8px 16px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "0.5px solid rgba(0,0,0,0.15)", cursor: "pointer" }}>
               Cancel
@@ -131,7 +152,7 @@ export default function BookingActions({ bookingId, currentStatus }: { bookingId
                 disabled={loading || !messageText.trim()}
                 style={{ background: "#111110", color: "#ffffff", padding: "8px 16px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "none", cursor: "pointer", flex: 1, opacity: loading || !messageText.trim() ? 0.5 : 1 }}
               >
-                {loading ? "Sending..." : "Send"}
+                {loading ? <Loading label="Sending…" /> : "Send"}
               </button>
             )}
             <button onClick={() => { setConfirmedPanel(null); setMessageSent(false); setMessageText("") }} style={{ background: "transparent", color: "#444441", padding: "8px 16px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "0.5px solid rgba(0,0,0,0.15)", cursor: "pointer", flex: messageSent ? 1 : undefined }}>
@@ -167,7 +188,7 @@ export default function BookingActions({ bookingId, currentStatus }: { bookingId
               disabled={loading}
               style={{ background: "#111110", color: "#ffffff", padding: "8px 16px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "none", cursor: "pointer", flex: 1, opacity: loading ? 0.5 : 1 }}
             >
-              {loading ? "Saving..." : "Confirm"}
+              {loading ? <Loading label="Saving…" /> : "Confirm"}
             </button>
             <button onClick={() => setShowCompleteForm(false)} style={{ background: "transparent", color: "#444441", padding: "8px 16px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "0.5px solid rgba(0,0,0,0.15)", cursor: "pointer" }}>
               Cancel
@@ -229,7 +250,7 @@ export default function BookingActions({ bookingId, currentStatus }: { bookingId
             disabled={loading || accepted}
             style={{ background: accepted ? "#16a34a" : "#111110", color: "#ffffff", padding: "8px 18px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "none", cursor: loading || accepted ? "default" : "pointer", opacity: loading ? 0.7 : 1, transition: "background 0.2s ease" }}
           >
-            {loading ? "Accepting…" : accepted ? "✓ Accepted" : "Accept"}
+            {loading ? <Loading label="Accepting…" /> : accepted ? "✓ Accepted" : "Accept"}
           </button>
           {!accepted && (
             <button
@@ -272,7 +293,7 @@ export default function BookingActions({ bookingId, currentStatus }: { bookingId
               disabled={loading}
               style={{ background: "#111110", color: "#ffffff", padding: "8px 16px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "none", cursor: "pointer", flex: 1 }}
             >
-              {loading ? "Saving..." : "Confirm Decline"}
+              {loading ? <Loading label="Declining…" /> : "Confirm Decline"}
             </button>
             <button
               onClick={() => setShowDeclineForm(false)}
