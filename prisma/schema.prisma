@@ -99,7 +99,7 @@ model GarageAvailability {
   id           String   @id @default(cuid())
   garageId     String   @unique
   slotDuration Int
-  capacity     Int
+  capacity     Int?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   schedule     DaySchedule[]

@@ -17,7 +17,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorised" }, { status: 403 })
     }
 
-    if (!Number.isInteger(capacity) || capacity <= 0 || capacity > 100) {
+    // capacity null/undefined = no limit
+    const cap: number | null = capacity ?? null
+    if (cap !== null && (!Number.isInteger(cap) || cap <= 0 || cap > 100)) {
       return NextResponse.json({ error: "Invalid capacity" }, { status: 400 })
     }
     if (!Number.isInteger(slotDuration) || slotDuration <= 0 || slotDuration > 480) {
@@ -32,7 +34,7 @@ export async function POST(req: Request) {
       where: { garageId },
       update: {
         slotDuration,
-        capacity,
+        capacity: cap,
         schedule: {
           deleteMany: {},
           create: cleanSchedule,
@@ -41,7 +43,7 @@ export async function POST(req: Request) {
       create: {
         garageId,
         slotDuration,
-        capacity,
+        capacity: cap,
         schedule: {
           create: cleanSchedule,
         }

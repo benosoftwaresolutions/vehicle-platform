@@ -33,6 +33,7 @@ function Loading({ label, color }: { label: string; color?: string }) {
 type ConfirmedPanel = null | "reschedule" | "message"
 
 export default function BookingActions({ bookingId, currentStatus }: { bookingId: string; currentStatus: string }) {
+  const today = new Date().toISOString().split("T")[0]
   const [showDeclineForm, setShowDeclineForm] = useState(false)
   const [garageNote, setGarageNote] = useState("")
   const [suggestedDate, setSuggestedDate] = useState("")
@@ -74,8 +75,6 @@ export default function BookingActions({ bookingId, currentStatus }: { bookingId
   }
 
   if (currentStatus === "confirmed") {
-    const today = new Date().toISOString().split("T")[0]
-
     if (confirmedPanel === "reschedule") {
       return (
         <div style={{ background: "#f4f3ef", border: "0.5px solid rgba(0,0,0,0.10)", borderRadius: 12, padding: "16px", minWidth: 240 }}>
@@ -278,7 +277,7 @@ export default function BookingActions({ bookingId, currentStatus }: { bookingId
           <p style={{ fontSize: "0.75rem", fontWeight: 600, marginBottom: "8px", color: "#444441" }}>Suggest alternative (optional)</p>
           <div style={{ marginBottom: "10px" }}>
             <label style={lbl}>Date</label>
-            <input type="date" value={suggestedDate} onChange={e => setSuggestedDate(e.target.value)} style={inp} />
+            <input type="date" value={suggestedDate} min={today} onChange={e => setSuggestedDate(e.target.value)} style={inp} />
           </div>
           <div style={{ marginBottom: "12px" }}>
             <label style={lbl}>Time</label>

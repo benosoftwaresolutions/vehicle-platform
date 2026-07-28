@@ -8,7 +8,7 @@ const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sun
 type DaySchedule = { day: string; isOpen: boolean; startTime: string; endTime: string }
 type Props = {
   garageId: string
-  existing: { slotDuration: number; capacity: number; schedule: DaySchedule[] } | null
+  existing: { slotDuration: number; capacity: number | null; schedule: DaySchedule[] } | null
 }
 
 const defaultSchedule: DaySchedule[] = days.map(day => ({
@@ -21,7 +21,9 @@ const defaultSchedule: DaySchedule[] = days.map(day => ({
 export default function AvailabilityForm({ garageId, existing }: Props) {
   const router = useRouter()
   const [slotDuration, setSlotDuration] = useState(existing?.slotDuration || 60)
-  const [capacity, setCapacity] = useState(existing?.capacity || 2)
+  // null = no limit (default): every request comes through and the garage
+  // accepts or declines based on real capacity on the day.
+  const [capacity, setCapacity] = useState<number | null>(existing ? existing.capacity : null)
   const [schedule, setSchedule] = useState<DaySchedule[]>(() => {
     if (!existing?.schedule.length) return defaultSchedule
     // Merge saved schedule with defaults. For sat/sun: if they were saved
@@ -116,13 +118,25 @@ export default function AvailabilityForm({ garageId, existing }: Props) {
             </select>
           </div>
           <div>
-            <label style={lbl}>Daily capacity (vehicles)</label>
-            <input
-              type="number" value={capacity}
-              onChange={e => setCapacity(Number(e.target.value))}
-              min={1} max={20}
-              style={inp}
-            />
+            <label style={lbl}>Bookings per time slot</label>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", padding: "9px 0" }}>
+              <input
+                type="checkbox"
+                checked={capacity === null}
+                onChange={e => setCapacity(e.target.checked ? null : 2)}
+              />
+              <span style={{ fontSize: "0.85rem", color: "#111110" }}>
+                No limit — I&apos;ll accept or decline each request
+              </span>
+            </label>
+            {capacity !== null && (
+              <input
+                type="number" value={capacity}
+                onChange={e => setCapacity(Number(e.target.value))}
+                min={1} max={20}
+                style={inp}
+              />
+            )}
           </div>
         </div>
       </div>
