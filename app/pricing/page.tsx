@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
 import Navbar from "@/app/components/Navbar"
+import FycaFooter from "@/app/components/FycaFooter"
 import CheckoutButton from "./CheckoutButton"
 import ManageButton from "./ManageButton"
 import type { Metadata } from "next"
@@ -194,6 +195,8 @@ export default async function PricingPage() {
           All plans are billed monthly. Cancel any time. Prices include VAT.
         </p>
       </main>
+
+      <FycaFooter />
     </>
   )
 }
