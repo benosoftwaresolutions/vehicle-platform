@@ -16,6 +16,15 @@ export function generateSlots(startTime: string, endTime: string, durationMinute
   return slots
 }
 
+/** Current date (YYYY-MM-DD) and time (HH:MM) in UK local time. */
+function ukNow(): { date: string; time: string } {
+  const now = new Date()
+  return {
+    date: new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(now),
+    time: new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", hour: "2-digit", minute: "2-digit", hour12: false }).format(now),
+  }
+}
+
 export type SlotAvailability =
   | { open: false; reason: "no_availability" | "closed" }
   | { open: true; slots: string[] }
@@ -30,6 +39,10 @@ export async function getAvailableSlots(garageId: string, dateParam: string): Pr
   const date = new Date(`${dateParam}T00:00:00Z`)
   const dayName = DAY_NAMES[date.getUTCDay()]
 
+  // Past dates are never bookable
+  const { date: todayUk, time: nowUk } = ukNow()
+  if (dateParam < todayUk) return { open: false, reason: "closed" }
+
   const availability = await prisma.garageAvailability.findUnique({
     where: { garageId },
     include: { schedule: true },
@@ -41,6 +54,8 @@ export async function getAvailableSlots(garageId: string, dateParam: string): Pr
   if (!daySchedule || !daySchedule.isOpen) return { open: false, reason: "closed" }
 
   const allSlots = generateSlots(daySchedule.startTime, daySchedule.endTime, availability.slotDuration)
+    // Don't offer times that have already passed today (UK time)
+    .filter((slot) => dateParam !== todayUk || slot > nowUk)
 
   const dayStart = date
   const dayEnd = new Date(date.getTime() + 24 * 60 * 60 * 1000)
@@ -59,8 +74,9 @@ export async function getAvailableSlots(garageId: string, dateParam: string): Pr
     bookingCounts[b.time] = (bookingCounts[b.time] ?? 0) + 1
   }
 
+  // capacity null = no limit; the garage vets each request manually
   const availableSlots = allSlots.filter(
-    (slot) => (bookingCounts[slot] ?? 0) < availability.capacity
+    (slot) => (bookingCounts[slot] ?? 0) < (availability.capacity ?? Infinity)
   )
 
   return { open: true, slots: availableSlots }
