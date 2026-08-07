@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Navbar from "@/app/components/Navbar"
-import DryvnFooter from "@/app/components/DryvnFooter"
+import FycaFooter from "@/app/components/FycaFooter"
 import GarageSignupForm from "./GarageSignupForm"
 import { auth } from "@clerk/nextjs/server"
 import { getCachedUser } from "@/app/lib/cache"
@@ -257,7 +257,7 @@ export default async function ForGaragesPage() {
         </div>
       </section>
 
-      <DryvnFooter />
+      <FycaFooter />
     </>
   )
 }

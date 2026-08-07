@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-export default function DryvnFooter() {
+export default function FycaFooter() {
   return (
     <footer className="footer-root" style={{
       borderTop: "0.5px solid rgba(0,0,0,0.10)",

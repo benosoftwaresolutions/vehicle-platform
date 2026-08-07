@@ -1,5 +1,5 @@
 import Navbar from "../components/Navbar"
-import DryvnFooter from "../components/DryvnFooter"
+import FycaFooter from "../components/FycaFooter"
 import GaragesSearch from "./GaragesSearch"
 import OnboardingBanner from "../components/OnboardingBanner"
 import { auth } from "@clerk/nextjs/server"
@@ -46,7 +46,7 @@ export default async function Garages({ searchParams }: { searchParams: Promise<
           initialService={params.service ?? ""}
         />
       </main>
-      <DryvnFooter />
+      <FycaFooter />
     </>
   )
 }

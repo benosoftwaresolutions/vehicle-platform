@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Navbar from "./components/Navbar"
-import DryvnFooter from "./components/DryvnFooter"
+import FycaFooter from "./components/FycaFooter"
 import GarageCard from "./components/GarageCard"
 import HomeHeroSearch from "./components/HomeHeroSearch"
 import OnboardingBanner from "./components/OnboardingBanner"
@@ -135,7 +135,7 @@ async function HomeInner({
           )}
         </main>
 
-        <DryvnFooter />
+        <FycaFooter />
       </>
     )
   }
@@ -347,7 +347,7 @@ async function HomeInner({
         </div>
       </section>
 
-      <DryvnFooter />
+      <FycaFooter />
     </>
   )
 }

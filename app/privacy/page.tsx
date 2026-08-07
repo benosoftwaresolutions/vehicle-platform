@@ -1,5 +1,5 @@
 import Navbar from "@/app/components/Navbar"
-import DryvnFooter from "@/app/components/DryvnFooter"
+import FycaFooter from "@/app/components/FycaFooter"
 import { auth } from "@clerk/nextjs/server"
 import { getCachedUser } from "@/app/lib/cache"
 import type { Metadata } from "next"
@@ -116,7 +116,7 @@ export default async function PrivacyPage() {
         </div>
       </section>
 
-      <DryvnFooter />
+      <FycaFooter />
     </>
   )
 }

@@ -102,7 +102,7 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
       <div style={{ minHeight: "100vh", background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px" }}>
         <div style={{ maxWidth: "560px", width: "100%" }}>
           <div style={{ marginBottom: "48px" }}>
-            <DryvnMark />
+            <FycaMark />
             <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "clamp(28px,4vw,40px)", letterSpacing: "-0.03em", color: "#111110", marginBottom: "10px", marginTop: "32px" }}>
               Welcome to Fyca
             </h1>
@@ -140,7 +140,7 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
     return (
       <div style={{ minHeight: "100vh", background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px" }}>
         <div style={{ maxWidth: "440px", width: "100%" }}>
-          <DryvnMark />
+          <FycaMark />
           <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.75rem", letterSpacing: "-0.03em", color: "#111110", marginBottom: "6px", marginTop: "28px" }}>
             Your Profile
           </h1>
@@ -183,7 +183,7 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
       <div style={{ minHeight: "100vh", background: "#ffffff", padding: "48px 24px" }}>
         <div style={{ maxWidth: "560px", margin: "0 auto" }}>
 
-          <DryvnMark />
+          <FycaMark />
 
           {/* Progress */}
           <div style={{ display: "flex", alignItems: "center", gap: "8px", margin: "28px 0 32px" }}>
@@ -279,7 +279,7 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
     return (
       <div style={{ minHeight: "100vh", background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px" }}>
         <div style={{ maxWidth: "480px", width: "100%" }}>
-          <DryvnMark />
+          <FycaMark />
           <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.75rem", letterSpacing: "-0.03em", color: "#111110", marginBottom: "8px", marginTop: "28px" }}>
             Add your first vehicle
           </h1>
@@ -350,7 +350,7 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
     return (
       <div style={{ minHeight: "100vh", background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px" }}>
         <div style={{ maxWidth: "440px", width: "100%" }}>
-          <DryvnMark />
+          <FycaMark />
           <h1 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.75rem", letterSpacing: "-0.03em", color: "#111110", marginBottom: "8px", marginTop: "28px" }}>
             Garage created!
           </h1>
@@ -384,7 +384,7 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
   return null
 }
 
-function DryvnMark() {
+function FycaMark() {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
       <div style={{ width: 28, height: 28, background: "#111110", borderRadius: 11, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
