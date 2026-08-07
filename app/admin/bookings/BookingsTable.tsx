@@ -102,20 +102,39 @@ export default function BookingsTable({ bookings }: { bookings: Booking[] }) {
   )
 }
 
+// Inline SVG spinner — SMIL rotation so it needs no global CSS keyframes.
+function Spinner({ color }: { color: string }) {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" style={{ display: "block" }}>
+      <circle cx="12" cy="12" r="9" fill="none" stroke={color} strokeOpacity="0.25" strokeWidth="3" />
+      <path d="M12 3a9 9 0 0 1 9 9" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round">
+        <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.7s" repeatCount="indefinite" />
+      </path>
+    </svg>
+  )
+}
+
 // Accept / decline a pending booking on the garage's behalf. Internal support
 // tool — the customer just sees the normal confirmation or decline email.
 function RowActions({ bookingId }: { bookingId: string }) {
   const [pending, startTransition] = useTransition()
+  const [action, setAction] = useState<"confirmed" | "declined" | null>(null)
   const [error, setError] = useState(false)
 
   const act = (status: "confirmed" | "declined") => {
-    if (status === "declined" && !confirm("Decline this booking on the garage's behalf? The customer will be emailed.")) return
+    const msg = status === "confirmed"
+      ? "Accept this booking on the garage's behalf? The customer will be emailed a confirmation."
+      : "Decline this booking on the garage's behalf? The customer will be emailed."
+    if (!confirm(msg)) return
     setError(false)
+    setAction(status)
     startTransition(async () => {
       try {
         await adminUpdateBookingStatus(bookingId, status)
       } catch {
         setError(true)
+      } finally {
+        setAction(null)
       }
     })
   }
@@ -127,16 +146,16 @@ function RowActions({ bookingId }: { bookingId: string }) {
       <button
         onClick={() => act("confirmed")}
         disabled={pending}
-        style={{ background: "#111110", color: "#ffffff", border: "none", borderRadius: 100, padding: "5px 12px", fontSize: "0.75rem", fontWeight: 700, cursor: pending ? "wait" : "pointer", opacity: pending ? 0.5 : 1 }}
+        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", minWidth: 64, background: "#111110", color: "#ffffff", border: "none", borderRadius: 100, padding: "5px 12px", fontSize: "0.75rem", fontWeight: 700, cursor: pending ? "wait" : "pointer", opacity: pending && action !== "confirmed" ? 0.4 : 1 }}
       >
-        {pending ? "…" : "Accept"}
+        {action === "confirmed" ? <Spinner color="#ffffff" /> : "Accept"}
       </button>
       <button
         onClick={() => act("declined")}
         disabled={pending}
-        style={{ background: "transparent", color: "#444441", border: "0.5px solid rgba(0,0,0,0.2)", borderRadius: 100, padding: "5px 12px", fontSize: "0.75rem", fontWeight: 700, cursor: pending ? "wait" : "pointer", opacity: pending ? 0.5 : 1 }}
+        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", minWidth: 64, background: "transparent", color: "#444441", border: "0.5px solid rgba(0,0,0,0.2)", borderRadius: 100, padding: "5px 12px", fontSize: "0.75rem", fontWeight: 700, cursor: pending ? "wait" : "pointer", opacity: pending && action !== "declined" ? 0.4 : 1 }}
       >
-        Decline
+        {action === "declined" ? <Spinner color="#444441" /> : "Decline"}
       </button>
     </div>
   )
