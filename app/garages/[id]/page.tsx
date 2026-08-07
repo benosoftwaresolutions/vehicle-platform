@@ -1,5 +1,6 @@
 import Link from "next/link"
 import Navbar from "@/app/components/Navbar"
+import FycaFooter from "@/app/components/FycaFooter"
 import BookingForm from "@/app/components/BookingForm"
 import ReviewForm from "@/app/components/ReviewForm"
 import { prisma } from "@/app/lib/prisma"
@@ -231,6 +232,8 @@ export default async function GarageDetail({ params }: Params) {
           </div>
         </div>
       </main>
+
+      <FycaFooter />
     </>
   )
 }
