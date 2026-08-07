@@ -1,5 +1,5 @@
 import Navbar from "@/app/components/Navbar"
-import DryvnFooter from "@/app/components/DryvnFooter"
+import FycaFooter from "@/app/components/FycaFooter"
 import Link from "next/link"
 
 export default function GarageNotFound() {
@@ -29,7 +29,7 @@ export default function GarageNotFound() {
           </Link>
         </div>
       </section>
-      <DryvnFooter />
+      <FycaFooter />
     </>
   )
 }

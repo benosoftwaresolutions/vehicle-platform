@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
 import { getGarageOwnerContext } from "./layout"
-import DryvnFooter from "@/app/components/DryvnFooter"
+import FycaFooter from "@/app/components/FycaFooter"
 import BookingActions from "@/app/components/BookingActions"
 import BookingHistory from "./BookingHistory"
 import CustomerNoteEditor from "./CustomerNoteEditor"
@@ -232,7 +232,7 @@ async function ReviewsSummary({ garageId }: { garageId: string }) {
           </div>
         ))}
       </div>
-      <DryvnFooter />
+      <FycaFooter />
     </div>
   )
 }

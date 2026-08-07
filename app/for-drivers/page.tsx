@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Navbar from "@/app/components/Navbar"
-import DryvnFooter from "@/app/components/DryvnFooter"
+import FycaFooter from "@/app/components/FycaFooter"
 import GarageSearchPreview from "./GarageSearchPreview"
 import { auth } from "@clerk/nextjs/server"
 import { getCachedUser, getCachedGarages } from "@/app/lib/cache"
@@ -238,7 +238,7 @@ export default async function ForDriversPage() {
         </div>
       </section>
 
-      <DryvnFooter />
+      <FycaFooter />
     </>
   )
 }
