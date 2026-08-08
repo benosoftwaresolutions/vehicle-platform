@@ -33,6 +33,13 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
   )
   const [createdGarageId, setCreatedGarageId] = useState<string | null>(null)
   const [billingLoading, setBillingLoading] = useState(false)
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
+  const [termsError, setTermsError] = useState("")
+
+  const handleAgreedToTermsChange = (v: boolean) => {
+    setAgreedToTerms(v)
+    if (v) setTermsError("")
+  }
 
   // Driver vehicle step
   const [vehicleMake, setVehicleMake] = useState("")
@@ -58,6 +65,8 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
   const customerBlocked = loading || !name.trim() || phone.trim().length < 7
 
   const completeCustomer = async () => {
+    if (!agreedToTerms) { setTermsError("Please agree to the Terms of Service and Privacy Policy to continue."); return }
+    setTermsError("")
     setLoading(true)
     await fetch("/api/onboarding", {
       method: "POST",
@@ -80,6 +89,8 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
   }
 
   const completeGarageDetails = async () => {
+    if (!agreedToTerms) { setTermsError("Please agree to the Terms of Service and Privacy Policy to continue."); return }
+    setTermsError("")
     setLoading(true)
     const res = await fetch("/api/onboarding", {
       method: "POST",
@@ -164,6 +175,7 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
               Shared with a garage when you book, so they can reach you about your vehicle.
             </p>
           </div>
+          <TermsCheckbox checked={agreedToTerms} onChange={handleAgreedToTermsChange} error={termsError} />
           <button
             onClick={completeCustomer}
             disabled={customerBlocked}
@@ -258,6 +270,7 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
             </div>
           </div>
 
+          <TermsCheckbox checked={agreedToTerms} onChange={handleAgreedToTermsChange} error={termsError} />
           <button
             onClick={completeGarageDetails}
             disabled={!canSubmit}
@@ -394,6 +407,28 @@ function FycaMark() {
         <span style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 700, fontSize: "1rem", color: "#111110", letterSpacing: "-0.04em", lineHeight: 1 }}>Fyca</span>
         <span style={{ fontSize: 8, fontWeight: 500, letterSpacing: "0.13em", textTransform: "uppercase" as const, color: "#aaa9a4", lineHeight: 1 }}>Fix Your Car Anywhere</span>
       </div>
+    </div>
+  )
+}
+
+function TermsCheckbox({ checked, onChange, error }: { checked: boolean; onChange: (v: boolean) => void; error: string }) {
+  return (
+    <div style={{ marginBottom: "16px" }}>
+      <label style={{ display: "flex", alignItems: "flex-start", gap: "8px", cursor: "pointer" }}>
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={e => onChange(e.target.checked)}
+          style={{ marginTop: "3px" }}
+        />
+        <span style={{ fontSize: "0.85rem", color: "#444441", lineHeight: 1.5 }}>
+          I agree to the{" "}
+          <a href="/terms" target="_blank" rel="noopener noreferrer" style={{ color: "#111110", fontWeight: 600 }}>Terms of Service</a>
+          {" "}and{" "}
+          <a href="/privacy" target="_blank" rel="noopener noreferrer" style={{ color: "#111110", fontWeight: 600 }}>Privacy Policy</a>
+        </span>
+      </label>
+      {error && <p style={{ color: "#dc2626", fontSize: "0.85rem", marginTop: "6px" }}>{error}</p>}
     </div>
   )
 }
