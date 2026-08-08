@@ -168,12 +168,15 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState("")
 
-  // Auto-dismiss the saved toast
+  // Auto-dismiss the saved toast, then return to the previous screen
   useEffect(() => {
     if (!saved) return
-    const t = setTimeout(() => setSaved(false), 3500)
+    const t = setTimeout(() => {
+      setSaved(false)
+      router.back()
+    }, 1800)
     return () => clearTimeout(t)
-  }, [saved])
+  }, [saved, router])
 
   // ── Profile completion ────────────────────────────────────────────────────
   const completionItems = useMemo(() => [
