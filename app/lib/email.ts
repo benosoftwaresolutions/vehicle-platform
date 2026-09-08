@@ -447,6 +447,49 @@ export async function sendAppointmentReminder({
   })
 }
 
+export async function sendUpcomingAppointmentReminder({
+  customerEmail,
+  customerName,
+  garageName,
+  garageAddress,
+  service,
+  date,
+  time,
+  registration,
+  hoursUntil,
+}: {
+  customerEmail: string
+  customerName: string
+  garageName: string
+  garageAddress: string
+  service: string
+  date: Date
+  time: string
+  registration: string
+  hoursUntil: 12 | 1
+}) {
+  const timeframe = hoursUntil === 12 ? "in 12 hours" : "in 1 hour"
+  await sendWithRetry({
+    from: FROM,
+    to: customerEmail,
+    subject: `Reminder: ${service} at ${garageName} ${timeframe}`,
+    html: emailBase(`
+      <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Your appointment is ${timeframe}</h2>
+      <p style="color:#6b6a66;font-size:14px;margin:0 0 4px;">Hi ${customerName}, just a reminder about your upcoming booking.</p>
+      ${dataTable([
+        ["Service", service],
+        ["Date", formatDate(date)],
+        ["Time", time],
+        ["Registration", registration],
+        ["Garage", garageName],
+        ["Address", garageAddress],
+      ])}
+      <p style="margin-top:24px;font-size:14px;color:#444441;">Please arrive a few minutes before your appointment time.</p>
+      ${emailButton("Manage booking", `${APP_URL}/bookings`)}
+    `),
+  })
+}
+
 export async function sendBookingCancelledToGarage({
   garageOwnerEmail,
   garageName,

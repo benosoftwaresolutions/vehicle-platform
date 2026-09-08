@@ -25,6 +25,31 @@ function ukNow(): { date: string; time: string } {
   }
 }
 
+function getTimeZoneOffsetMinutes(date: Date, timeZone: string): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone, hour12: false,
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+  }).formatToParts(date)
+  const map: Record<string, string> = {}
+  for (const p of parts) map[p.type] = p.value
+  const asUtc = Date.UTC(+map.year, +map.month - 1, +map.day, +map.hour, +map.minute, +map.second)
+  return (asUtc - date.getTime()) / 60_000
+}
+
+/**
+ * The actual UTC instant of a booking's appointment. `date` is stored as UTC
+ * midnight for the calendar day; `time` (HH:MM) is UK local time, so this
+ * accounts for the Europe/London offset (GMT/BST) on that specific date.
+ */
+export function appointmentInstant(date: Date, time: string): Date {
+  const [year, month, day] = date.toISOString().slice(0, 10).split("-").map(Number)
+  const [hour, minute] = time.split(":").map(Number)
+  const naiveUtc = Date.UTC(year, month - 1, day, hour, minute)
+  const offsetMinutes = getTimeZoneOffsetMinutes(new Date(naiveUtc), "Europe/London")
+  return new Date(naiveUtc - offsetMinutes * 60_000)
+}
+
 export type SlotAvailability =
   | { open: false; reason: "no_availability" | "closed" }
   | { open: true; slots: string[] }
