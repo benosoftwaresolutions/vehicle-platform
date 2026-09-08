@@ -179,7 +179,7 @@ async function HomeInner({
             marginBottom: 24,
             maxWidth: 660,
           }}>
-            Your garage,{" "}
+            Your local garage,{" "}
             <em className="hero-em" style={{ fontStyle: "italic", color: "#111110", fontWeight: 700 }}>booked in minutes.</em>
           </h1>
           <p style={{ fontSize: "1.05rem", color: "#6b6a66", marginBottom: 40, maxWidth: 480, lineHeight: 1.7 }}>
