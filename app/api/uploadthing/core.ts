@@ -6,7 +6,7 @@ import { prisma } from "@/app/lib/prisma"
 const f = createUploadthing()
 
 export const ourFileRouter = {
-  garageLogoUploader: f({ image: { maxFileSize: "2MB", maxFileCount: 1 } })
+  garageLogoUploader: f({ image: { maxFileSize: "8MB", maxFileCount: 1 } })
     .middleware(async () => {
       const { userId } = await auth()
       if (!userId) throw new UploadThingError("Unauthorised")

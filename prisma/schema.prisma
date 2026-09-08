@@ -91,6 +91,8 @@ model Booking {
   suggestedDate   DateTime?
   suggestedTime   String?
   jobValue        Float?
+  reminder12hSentAt DateTime?
+  reminder1hSentAt  DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 }

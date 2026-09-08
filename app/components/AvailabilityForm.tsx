@@ -42,12 +42,15 @@ export default function AvailabilityForm({ garageId, existing }: Props) {
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState("")
 
-  // Auto-dismiss the saved toast
+  // Auto-dismiss the saved toast, then return to the previous screen
   useEffect(() => {
     if (!success) return
-    const t = setTimeout(() => setSuccess(false), 3500)
+    const t = setTimeout(() => {
+      setSuccess(false)
+      router.back()
+    }, 1800)
     return () => clearTimeout(t)
-  }, [success])
+  }, [success, router])
 
   const updateDay = (day: string, field: keyof DaySchedule, value: string | boolean) =>
     setSchedule(prev => prev.map(d => d.day === day ? { ...d, [field]: value } : d))

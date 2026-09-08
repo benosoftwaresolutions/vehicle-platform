@@ -37,7 +37,7 @@ export default function LogoUploader({
 
       <div>
         <p style={{ fontWeight: 600, fontSize: "0.875rem", color: "#111110", marginBottom: "4px" }}>Garage Logo</p>
-        <p style={{ color: "#6b6a66", fontSize: "0.8rem", marginBottom: "10px" }}>PNG or JPG, up to 2MB</p>
+        <p style={{ color: "#6b6a66", fontSize: "0.8rem", marginBottom: "10px" }}>PNG or JPG, up to 8MB</p>
         <UploadButton
           endpoint="garageLogoUploader"
           onClientUploadComplete={(res) => {

@@ -60,6 +60,7 @@ export default function FycaFooter() {
               { label: "About", href: "/about" },
               { label: "Contact", href: "/contact" },
               { label: "Privacy", href: "/privacy" },
+              { label: "Terms", href: "/terms" },
             ].map(({ label, href }) => (
               <Link key={label} href={href} className="footer-link" style={{
                 color: "#6b6a66", fontSize: "0.875rem", fontWeight: 500,
