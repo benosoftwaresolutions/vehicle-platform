@@ -1,0 +1,20 @@
+name: Booking reminders (12h / 1h)
+
+# Vercel Hobby only allows daily crons, so GitHub Actions pings the
+# reminder endpoint every 15 minutes instead. Needs a repo secret
+# CRON_SECRET matching the Vercel production env var of the same name.
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call send-reminders
+        run: |
+          curl --fail --silent --show-error \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://www.fyca.co.uk/api/cron/send-reminders
