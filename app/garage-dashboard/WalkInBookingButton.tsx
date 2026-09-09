@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { useRouter } from "next/navigation"
 import { createWalkInBooking } from "./actions"
+import { useSettledRefresh } from "@/app/components/useSettledRefresh"
 
 type SlotsResponse =
   | { open: false; reason: "no_availability" | "closed" }
@@ -31,7 +31,8 @@ export default function WalkInBookingButton({ garageId, services, initialData, l
   initialData?: InitialData
   label?: string
 }) {
-  const router = useRouter()
+  const { finish } = useSettledRefresh(1500)
+  const [saved, setSaved] = useState(false)
   const [open, setOpen] = useState(false)
 
   const [customerName, setCustomerName] = useState(initialData?.customerName ?? "")
@@ -116,8 +117,9 @@ export default function WalkInBookingButton({ garageId, services, initialData, l
     try {
       const resolvedService = service === "__other__" ? customService.trim() : service
       await createWalkInBooking({ garageId, customerName, customerPhone, customerEmail, registration, service: resolvedService, date, time })
-      handleClose()
-      router.refresh()
+      setSaved(true)
+      finish("Walk-in booked")
+      setTimeout(() => { setSaved(false); handleClose() }, 1500)
     } catch (err) {
       console.error("[WalkInBookingButton] Submission error:", err)
       setError("Something went wrong. Please try again.")
@@ -329,17 +331,17 @@ export default function WalkInBookingButton({ garageId, services, initialData, l
               <div style={{ display: "flex", gap: "10px", marginTop: "4px" }}>
                 <button
                   type="submit"
-                  disabled={loading || !canSubmit}
+                  disabled={loading || saved || !canSubmit}
                   style={{
                     flex: 1,
-                    background: loading || !canSubmit ? "#eceae4" : "#111110",
-                    color: loading || !canSubmit ? "#6b6a66" : "#ffffff",
+                    background: saved ? "#16a34a" : loading || !canSubmit ? "#eceae4" : "#111110",
+                    color: saved ? "#ffffff" : loading || !canSubmit ? "#6b6a66" : "#ffffff",
                     padding: "12px", borderRadius: 100,
                     fontWeight: 600, fontSize: "0.95rem", border: "none",
                     cursor: loading || !canSubmit ? "not-allowed" : "pointer",
                   }}
                 >
-                  {loading ? "Saving…" : "Create Walk-in Booking"}
+                  {saved ? "✓ Walk-in booked" : loading ? "Saving…" : "Create Walk-in Booking"}
                 </button>
                 <button
                   type="button" onClick={handleClose}

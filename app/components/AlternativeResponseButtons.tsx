@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { respondToAlternative } from "@/app/bookings/actions"
+import { useSettledRefresh } from "./useSettledRefresh"
+import ActionDone from "./ActionDone"
 
 export default function AlternativeResponseButtons({
   bookingId,
@@ -13,7 +14,7 @@ export default function AlternativeResponseButtons({
   suggestedDate: Date
   suggestedTime: string
 }) {
-  const router = useRouter()
+  const { done, finish } = useSettledRefresh()
   const [loading, setLoading] = useState<"accept" | "decline" | null>(null)
   const [error, setError] = useState("")
 
@@ -22,12 +23,16 @@ export default function AlternativeResponseButtons({
     setError("")
     try {
       await respondToAlternative(bookingId, response)
-      router.refresh()
+      finish(response === "accept" ? "Alternative accepted" : "Alternative declined")
     } catch {
       setError("Something went wrong. Please try again.")
     } finally {
       setLoading(null)
     }
+  }
+
+  if (done) {
+    return <div style={{ marginTop: 12 }}><ActionDone label={done} sub="Updating your bookings…" /></div>
   }
 
   const formattedDate = new Date(suggestedDate).toLocaleDateString("en-GB", {
