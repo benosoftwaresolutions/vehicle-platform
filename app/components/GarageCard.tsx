@@ -24,11 +24,14 @@ export default function GarageCard({ id, name, location, rating, reviewCount, se
   const [favourited, setFavourited] = useState(false)
 
   return (
-    <div className="garage-card" style={{
+    <Link href={`/garages/${id}`} className="garage-card" style={{
+      display: "block",
       background: "#f4f3ef",
       borderRadius: 14,
       overflow: "hidden",
       cursor: "pointer",
+      textDecoration: "none",
+      color: "inherit",
     }}>
       {/* Image / logo area */}
       <div style={{ height: 140, background: "#eceae4", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "relative" }}>
@@ -52,11 +55,9 @@ export default function GarageCard({ id, name, location, rating, reviewCount, se
 
       {/* Content */}
       <div style={{ padding: "16px 18px 18px" }}>
-        <Link href={`/garages/${id}`} style={{ textDecoration: "none" }}>
-          <h3 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: 17, color: "#111110", marginBottom: 4, letterSpacing: "-0.02em", lineHeight: 1.2 }}>
-            {name}
-          </h3>
-        </Link>
+        <h3 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: 17, color: "#111110", marginBottom: 4, letterSpacing: "-0.02em", lineHeight: 1.2 }}>
+          {name}
+        </h3>
         <p style={{ fontSize: "0.8rem", color: "#6b6a66", marginBottom: 4 }}>{location}</p>
         <p style={{ fontSize: "0.8rem", color: "#444441", fontWeight: 500, marginBottom: 10 }}>
           {parseFloat(rating) > 0
@@ -69,18 +70,17 @@ export default function GarageCard({ id, name, location, rating, reviewCount, se
             {services.length > 60 ? services.slice(0, 60) + "…" : services}
           </p>
         )}
-        <Link
-          href={`/garages/${id}`}
+        <span
           style={{
             display: "block", textAlign: "center",
             background: "#111110", color: "#ffffff",
             padding: "9px 0", borderRadius: 100,
-            fontSize: "0.85rem", fontWeight: 600, textDecoration: "none",
+            fontSize: "0.85rem", fontWeight: 600,
           }}
         >
           Book now
-        </Link>
+        </span>
       </div>
-    </div>
+    </Link>
   )
 }

@@ -2,7 +2,6 @@
 
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
-import { revalidatePath } from "next/cache"
 import { sendBookingConfirmedToCustomer, sendBookingDeclinedToCustomer, sendWalkInBookingToGarage, sendBookingRescheduledToCustomer, sendMessageToCustomer, sendJobCompletedToCustomer } from "@/app/lib/email"
 
 export async function updateBookingStatus(
@@ -83,7 +82,7 @@ export async function updateBookingStatus(
     }
   }
 
-  revalidatePath("/garage-dashboard")
+  // Client refreshes after showing an in-place confirmation (useSettledRefresh)
 }
 
 export async function rescheduleBooking(bookingId: string, newDate: string, newTime: string) {
@@ -126,7 +125,7 @@ export async function rescheduleBooking(bookingId: string, newDate: string, newT
     }).catch(err => console.error("Failed to send reschedule email:", err))
   }
 
-  revalidatePath("/garage-dashboard")
+  // Client refreshes after showing an in-place confirmation (useSettledRefresh)
 }
 
 export async function messageCustomer(bookingId: string, message: string) {
@@ -231,5 +230,5 @@ export async function createWalkInBooking(data: {
     }).catch((err) => console.error("Failed to send walk-in booking email:", err))
   }
 
-  revalidatePath("/garage-dashboard")
+  // Client refreshes after showing an in-place confirmation (useSettledRefresh)
 }

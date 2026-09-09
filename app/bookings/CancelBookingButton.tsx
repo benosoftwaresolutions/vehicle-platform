@@ -2,10 +2,17 @@
 
 import { useState } from "react"
 import { cancelBooking } from "./actions"
+import { useSettledRefresh } from "@/app/components/useSettledRefresh"
+import ActionDone from "@/app/components/ActionDone"
 
 export default function CancelBookingButton({ bookingId }: { bookingId: string }) {
   const [confirming, setConfirming] = useState(false)
   const [loading, setLoading] = useState(false)
+  const { done, finish } = useSettledRefresh()
+
+  if (done) {
+    return <div style={{ marginTop: 12 }}><ActionDone label={done} sub="Updating your bookings…" /></div>
+  }
 
   if (!confirming) {
     return (
@@ -36,6 +43,7 @@ export default function CancelBookingButton({ bookingId }: { bookingId: string }
         onClick={async () => {
           setLoading(true)
           await cancelBooking(bookingId)
+          finish("Booking cancelled")
         }}
         style={{
           background: "#111110",

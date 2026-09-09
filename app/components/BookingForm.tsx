@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { useAuth, SignUpButton, SignInButton } from "@clerk/nextjs"
 
 type SlotsResponse =
@@ -12,7 +11,6 @@ type Vehicle = { id: string; registration: string; make: string; model: string; 
 type PriceRange = { min: number | null; max: number | null }
 
 export default function BookingForm({ garageId, services, servicePricing = {} }: { garageId: string; services: string[]; servicePricing?: Record<string, PriceRange> }) {
-  const router = useRouter()
   const { isLoaded, isSignedIn } = useAuth()
   const [service, setService] = useState("")
   const [date, setDate] = useState("")
@@ -66,8 +64,8 @@ export default function BookingForm({ garageId, services, servicePricing = {} }:
         }),
       })
       if (res.ok) {
+        // Stay on this page and show the confirmation; no refresh so nothing jumps.
         setSuccess(true)
-        router.refresh()
       } else {
         const data = await res.json().catch(() => ({}))
         setError(data.error ?? "Something went wrong — please try again.")
@@ -80,10 +78,28 @@ export default function BookingForm({ garageId, services, servicePricing = {} }:
   }
 
   if (success) {
+    const resolvedService = service === "__other__" ? customService.trim() : service
+    const prettyDate = new Date(date + "T00:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" })
     return (
-      <div style={{ background: "#f4f3ef", borderRadius: 12, padding: 16 }}>
-        <p style={{ fontWeight: 700, fontSize: "0.9rem", color: "#111110", margin: "0 0 4px" }}>Booking request sent</p>
-        <p style={{ fontSize: "0.85rem", color: "#6b6a66", margin: 0 }}>The garage will confirm your appointment shortly. You can track it in <a href="/bookings" style={{ color: "#111110", fontWeight: 600 }}>My Bookings</a>.</p>
+      <div>
+        <h3 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: 18, color: "#111110", marginBottom: 20, letterSpacing: "-0.02em" }}>
+          Book an appointment
+        </h3>
+        <div style={{ background: "#f4f3ef", borderRadius: 12, padding: 18 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+            <span style={{ width: 28, height: 28, borderRadius: "50%", background: "#16a34a", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "0.9rem", flexShrink: 0 }}>✓</span>
+            <p style={{ fontWeight: 700, fontSize: "0.95rem", color: "#111110", margin: 0 }}>Booking request sent</p>
+          </div>
+          <div style={{ fontSize: "0.85rem", color: "#444441", lineHeight: 1.6, marginBottom: 14 }}>
+            <div><strong>{resolvedService}</strong></div>
+            <div>{prettyDate} at {time}</div>
+            {selectedVehicle && <div>{selectedVehicle.registration} — {selectedVehicle.make} {selectedVehicle.model}</div>}
+          </div>
+          <p style={{ fontSize: "0.82rem", color: "#6b6a66", margin: "0 0 14px" }}>The garage will confirm shortly. You&apos;ll get an email either way.</p>
+          <a href="/bookings" style={{ display: "block", textAlign: "center", background: "#111110", color: "#ffffff", padding: "10px 0", borderRadius: 100, fontSize: "0.85rem", fontWeight: 600, textDecoration: "none" }}>
+            View in My Bookings →
+          </a>
+        </div>
       </div>
     )
   }

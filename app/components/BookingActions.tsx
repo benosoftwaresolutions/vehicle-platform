@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import { updateBookingStatus, rescheduleBooking, messageCustomer } from "@/app/garage-dashboard/actions"
+import { useSettledRefresh } from "./useSettledRefresh"
+import ActionDone from "./ActionDone"
 
 const timeSlots = [
   "08:00","08:30","09:00","09:30","10:00","10:30",
@@ -48,12 +50,14 @@ export default function BookingActions({ bookingId, currentStatus }: { bookingId
   const [showCompleteForm, setShowCompleteForm] = useState(false)
   const [jobValue, setJobValue] = useState("")
   const [accepted, setAccepted] = useState(false)
+  const { done, finish } = useSettledRefresh()
 
   const handleAccept = async () => {
     setLoading(true)
     try {
       await updateBookingStatus(bookingId, "confirmed")
       setAccepted(true)
+      finish("Accepted")
     } finally {
       setLoading(false)
     }
@@ -64,6 +68,12 @@ export default function BookingActions({ bookingId, currentStatus }: { bookingId
     await updateBookingStatus(bookingId, "declined", garageNote, suggestedDate, suggestedTime)
     setLoading(false)
     setShowDeclineForm(false)
+    finish("Declined")
+  }
+
+  // Action just succeeded: stay put and show it, the list refreshes shortly.
+  if (done) {
+    return <ActionDone label={done} sub="Updating your bookings…" />
   }
 
   if (currentStatus === "completed") {
@@ -98,6 +108,7 @@ export default function BookingActions({ bookingId, currentStatus }: { bookingId
                 await rescheduleBooking(bookingId, rescheduleDate, rescheduleTime)
                 setLoading(false)
                 setConfirmedPanel(null)
+                finish(`Rescheduled to ${rescheduleDate} ${rescheduleTime}`)
               }}
               disabled={loading || !rescheduleDate || !rescheduleTime}
               style={{ background: "#111110", color: "#ffffff", padding: "8px 16px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "none", cursor: "pointer", flex: 1, opacity: loading || !rescheduleDate || !rescheduleTime ? 0.5 : 1 }}
@@ -183,6 +194,7 @@ export default function BookingActions({ bookingId, currentStatus }: { bookingId
                 await updateBookingStatus(bookingId, "completed", undefined, undefined, undefined, jobValue ? Number(jobValue) : undefined)
                 setLoading(false)
                 setShowCompleteForm(false)
+                finish("Completed")
               }}
               disabled={loading}
               style={{ background: "#111110", color: "#ffffff", padding: "8px 16px", borderRadius: 100, fontWeight: 600, fontSize: "0.875rem", border: "none", cursor: "pointer", flex: 1, opacity: loading ? 0.5 : 1 }}

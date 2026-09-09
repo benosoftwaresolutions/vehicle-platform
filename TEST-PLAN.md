@@ -16,17 +16,17 @@ Watch both inboxes (and spam — Resend sender reputation is new).
 
 ### 1. Garage onboarding → live
 
-- [ ] Sign up fresh garage owner (B): role select → garage details → dashboard reachable
-- [ ] Billing step "Skip for now" works — dashboard loads with no card, trial banner shows correct days
-- [ ] Garage does NOT appear in public search before approval
-- [ ] Admin (A): garage appears in /admin/pending AND /admin/garages
-- [ ] Approve from /admin/pending — `approved` actually flips (garage detail shows approved)
-- [ ] "Not live" banner persists until services + availability exist, then disappears
-- [ ] Garage now appears in public search (/garages)
+- [x] Sign up fresh garage owner (B): role select → garage details → dashboard reachable
+- [x] Billing step "Skip for now" works — dashboard loads with no card, trial banner shows correct days
+- [x] Garage does NOT appear in public search before approval
+- [x] Admin (A): garage appears in /admin/pending AND /admin/garages
+- [x] Approve from /admin/pending — `approved` actually flips (garage detail shows approved)
+- [x] "Not live" banner persists until services + availability exist, then disappears
+- [x] Garage now appears in public search (/garages)
 
 ### 2. Booking lifecycle
 
-- [ ] Customer (C) books a slot — only slots inside opening hours are offered
+- [x] Customer (C) books a slot — only slots inside opening hours are offered
 - [ ] Garage owner (B) receives "new booking" email; booking shows pending in dashboard
 - [ ] Accept: button shows "Accepting…" then "✓ Accepted"; customer gets confirmation email
 - [ ] Decline with reason + suggested alternative: customer gets decline email with suggestion

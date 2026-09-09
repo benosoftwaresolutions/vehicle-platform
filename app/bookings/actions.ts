@@ -2,7 +2,6 @@
 
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
-import { revalidatePath } from "next/cache"
 import { sendAlternativeAcceptedToGarage, sendAlternativeDeclinedToGarage, sendBookingCancelledToGarage } from "@/app/lib/email"
 
 export async function respondToAlternative(bookingId: string, response: "accept" | "decline") {
@@ -82,7 +81,7 @@ export async function respondToAlternative(bookingId: string, response: "accept"
     }
   }
 
-  revalidatePath("/bookings")
+  // Client refreshes after showing an in-place confirmation (useSettledRefresh)
 }
 
 export async function cancelBooking(bookingId: string) {
@@ -119,5 +118,5 @@ export async function cancelBooking(bookingId: string) {
     }).catch(err => console.error("Failed to send cancellation email:", err))
   }
 
-  revalidatePath("/bookings")
+  // Client refreshes after showing an in-place confirmation (useSettledRefresh)
 }
