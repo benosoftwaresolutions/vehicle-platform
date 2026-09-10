@@ -34,7 +34,10 @@ function Loading({ label, color }: { label: string; color?: string }) {
 
 type ConfirmedPanel = null | "reschedule" | "message"
 
-export default function BookingActions({ bookingId, currentStatus }: { bookingId: string; currentStatus: string }) {
+export default function BookingActions({ bookingId, currentStatus: serverStatus }: { bookingId: string; currentStatus: string }) {
+  // Status we know we just set, shown until the server refresh catches up.
+  const [localStatus, setLocalStatus] = useState<string | null>(null)
+  const currentStatus = localStatus ?? serverStatus
   const today = new Date().toISOString().split("T")[0]
   const [showDeclineForm, setShowDeclineForm] = useState(false)
   const [garageNote, setGarageNote] = useState("")
@@ -50,13 +53,14 @@ export default function BookingActions({ bookingId, currentStatus }: { bookingId
   const [showCompleteForm, setShowCompleteForm] = useState(false)
   const [jobValue, setJobValue] = useState("")
   const [accepted, setAccepted] = useState(false)
-  const { done, finish } = useSettledRefresh()
+  const { done, finish } = useSettledRefresh(2000, { hold: false })
 
   const handleAccept = async () => {
     setLoading(true)
     try {
       await updateBookingStatus(bookingId, "confirmed")
       setAccepted(true)
+      setLocalStatus("confirmed")
       finish("Accepted")
     } finally {
       setLoading(false)
@@ -68,12 +72,13 @@ export default function BookingActions({ bookingId, currentStatus }: { bookingId
     await updateBookingStatus(bookingId, "declined", garageNote, suggestedDate, suggestedTime)
     setLoading(false)
     setShowDeclineForm(false)
+    setLocalStatus("declined")
     finish("Declined")
   }
 
   // Action just succeeded: stay put and show it, the list refreshes shortly.
   if (done) {
-    return <ActionDone label={done} sub="Updating your bookings…" />
+    return <ActionDone label={done} />
   }
 
   if (currentStatus === "completed") {
@@ -194,6 +199,7 @@ export default function BookingActions({ bookingId, currentStatus }: { bookingId
                 await updateBookingStatus(bookingId, "completed", undefined, undefined, undefined, jobValue ? Number(jobValue) : undefined)
                 setLoading(false)
                 setShowCompleteForm(false)
+                setLocalStatus("completed")
                 finish("Completed")
               }}
               disabled={loading}

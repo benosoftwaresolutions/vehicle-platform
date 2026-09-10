@@ -43,13 +43,21 @@ export async function updateBookingStatus(
     prisma.garage.findUnique({ where: { id: booking.garageId } }),
   ])
 
-  if (customer && garage) {
+  // Registered customers are emailed via their account; walk-ins via the
+  // email typed at the counter (if any).
+  const recipient = customer
+    ? { email: customer.email, name: customer.name ?? customer.email }
+    : booking.customerEmail
+      ? { email: booking.customerEmail, name: booking.customerName ?? booking.customerEmail }
+      : null
+
+  if (recipient && garage) {
     const garageAddress = `${garage.address}, ${garage.city}, ${garage.postcode}`
 
     if (status === "confirmed") {
       await sendBookingConfirmedToCustomer({
-        customerEmail: customer.email,
-        customerName: customer.name ?? customer.email,
+        customerEmail: recipient.email,
+        customerName: recipient.name,
         garageName: garage.name,
         garageAddress,
         service: booking.service,
@@ -59,8 +67,8 @@ export async function updateBookingStatus(
       }).catch((err) => console.error("Failed to send confirmation email:", err))
     } else if (status === "completed") {
       await sendJobCompletedToCustomer({
-        customerEmail: customer.email,
-        customerName: customer.name ?? customer.email,
+        customerEmail: recipient.email,
+        customerName: recipient.name,
         garageName: garage.name,
         service: booking.service,
         date: booking.date,
@@ -69,8 +77,8 @@ export async function updateBookingStatus(
       }).catch(err => console.error("Failed to send completion email:", err))
     } else if (status === "declined") {
       await sendBookingDeclinedToCustomer({
-        customerEmail: customer.email,
-        customerName: customer.name ?? customer.email,
+        customerEmail: recipient.email,
+        customerName: recipient.name,
         garageName: garage.name,
         service: booking.service,
         date: booking.date,
@@ -110,10 +118,16 @@ export async function rescheduleBooking(bookingId: string, newDate: string, newT
     prisma.garage.findUnique({ where: { id: booking.garageId } }),
   ])
 
-  if (customer && garage) {
+  const recipient = customer
+    ? { email: customer.email, name: customer.name ?? customer.email }
+    : booking.customerEmail
+      ? { email: booking.customerEmail, name: booking.customerName ?? booking.customerEmail }
+      : null
+
+  if (recipient && garage) {
     await sendBookingRescheduledToCustomer({
-      customerEmail: customer.email,
-      customerName: customer.name ?? customer.email,
+      customerEmail: recipient.email,
+      customerName: recipient.name,
       garageName: garage.name,
       garageAddress: `${garage.address}, ${garage.city}, ${garage.postcode}`,
       service: booking.service,
