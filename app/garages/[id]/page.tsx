@@ -160,7 +160,7 @@ export default async function GarageDetail({ params }: Params) {
             )}
 
             {/* Reviews */}
-            <div style={card}>
+            <div id="reviews" style={card}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
                 <div>
                   <h2 style={{ ...h2, marginBottom: "6px" }}>

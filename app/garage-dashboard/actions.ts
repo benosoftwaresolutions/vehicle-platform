@@ -74,6 +74,8 @@ export async function updateBookingStatus(
         date: booking.date,
         registration: booking.registration,
         jobValue: booking.jobValue,
+        garageId: garage.id,
+        googleReviewUrl: `https://search.google.com/local/writereview?query=${encodeURIComponent(`${garage.name} ${garage.address} ${garage.city}`)}`,
       }).catch(err => console.error("Failed to send completion email:", err))
     } else if (status === "declined") {
       await sendBookingDeclinedToCustomer({

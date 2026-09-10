@@ -425,6 +425,8 @@ export async function sendJobCompletedToCustomer({
   date,
   registration,
   jobValue,
+  garageId,
+  googleReviewUrl,
 }: {
   customerEmail: string
   customerName: string
@@ -433,6 +435,8 @@ export async function sendJobCompletedToCustomer({
   date: Date
   registration: string
   jobValue?: number | null
+  garageId: string
+  googleReviewUrl?: string
 }) {
   await sendWithRetry({
     from: FROM,
@@ -448,6 +452,8 @@ export async function sendJobCompletedToCustomer({
         ...(jobValue ? [["Job total", `£${jobValue.toFixed(2)}`] as [string, string]] : []),
       ])}
       <p style="margin-top:24px;font-size:14px;color:#444441;">If you were happy with the service, we'd love a review — it helps other drivers find great garages.</p>
+      ${emailButton("Leave a review", `${APP_URL}/garages/${garageId}#reviews`)}
+      ${googleReviewUrl ? `<p style="margin-top:14px;font-size:13px;color:#6b6a66;">Or <a href="${googleReviewUrl}" style="color:#111110;font-weight:600;">review ${garageName} on Google</a>.</p>` : ""}
     `),
   })
 }
