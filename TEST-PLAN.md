@@ -27,11 +27,11 @@ Watch both inboxes (and spam — Resend sender reputation is new).
 ### 2. Booking lifecycle
 
 - [x] Customer (C) books a slot — only slots inside opening hours are offered
-- [ ] Garage owner (B) receives "new booking" email; booking shows pending in dashboard
-- [ ] Accept: button shows "Accepting…" then "✓ Accepted"; customer gets confirmation email
-- [ ] Decline with reason + suggested alternative: customer gets decline email with suggestion
-- [ ] Customer accepts alternative → garage notified; customer declines → garage notified
-- [ ] Reschedule a confirmed booking → customer gets reschedule email
+- [x] Garage owner (B) receives "new booking" email; booking shows pending in dashboard
+- [x] Accept: button shows "Accepting…" then "✓ Accepted"; customer gets confirmation email
+- [x] Decline with reason + suggested alternative: customer gets decline email with suggestion
+- [x] Customer accepts alternative → garage notified; customer declines → garage notified
+- [x] Reschedule a confirmed booking → customer gets reschedule email
 - [ ] Complete a booking with job value → customer gets completion email; value shows in insights
 - [ ] Customer cancels a booking → garage gets cancellation email
 - [ ] Walk-in booking created by garage → appears in calendar alongside online bookings
@@ -39,25 +39,25 @@ Watch both inboxes (and spam — Resend sender reputation is new).
 ### 3. Booking validation (server-side guards — try to break it)
 
 - [ ] Book the last remaining slot in two tabs at once (capacity 1): second gets "no longer available"
-- [ ] Attempt booking for a past date via the UI → rejected
+- [x] Attempt booking for a past date via the UI → rejected
 - [ ] Booked-out day shows no available slots; declined bookings free their slot again
-- [ ] Unapproved/expired garage cannot receive bookings (needs API attempt or expired test garage)
+- [x] Unapproved/expired garage cannot receive bookings (needs API attempt or expired test garage)
 
 ### 4. Subscription lifecycle (sandbox)
 
-- [ ] Trialing + no card: pricing page shows "free trial is under way… Add a payment method" (NOT "billed automatically")
-- [ ] Add card via checkout (4242): Stripe shows subscription `trialing` with remaining trial days (not a fresh 30)
-- [ ] DB check: `subscriptionStatus` matches Stripe, `subscriptionEnd` is populated (not null)
-- [ ] Pricing page now shows "billed automatically" card; Manage subscription opens Stripe portal
-- [ ] Click subscribe again while subscribed → lands in billing portal, NO second subscription created
-- [ ] Cancel in portal → status updates; dashboard access behaves per remaining period
-- [ ] Trial expiry: set `trialEndsAt` in past in DB (no card) → SubscriptionWall blocks dashboard, £99.99 shown
-- [ ] Past-due: use failing card / Stripe test clock → past-due banner with 7-day grace countdown; access blocked after grace
+- [x] Trialing + no card: pricing page shows "free trial is under way… Add a payment method" (NOT "billed automatically")
+- [x] Add card via checkout (4242): Stripe shows subscription `trialing` with remaining trial days (not a fresh 30)
+- [x] DB check: `subscriptionStatus` matches Stripe, `subscriptionEnd` is populated (not null)
+- [x] Pricing page now shows "billed automatically" card; Manage subscription opens Stripe portal
+- [x] Click subscribe again while subscribed → lands in billing portal, NO second subscription created
+- [x] Cancel in portal → status updates; dashboard access behaves per remaining period
+- [x] Trial expiry: set `trialEndsAt` in past in DB (no card) → SubscriptionWall blocks dashboard, £99.99 shown
+- [x] Past-due: use failing card / Stripe test clock → past-due banner with 7-day grace countdown; access blocked after grace
 
 ### 5. Money truth
 
-- [ ] Stripe sandbox price = £99.99/month Garage Pro, £7/month Driver Pro — matches site copy everywhere
-- [ ] Webhook deliveries in Stripe dashboard all 200 (checkout.completed, subscription.updated, subscription.deleted)
+- [x] Stripe sandbox price = £99.99/month Garage Pro, £7/month Driver Pro — matches site copy everywhere
+- [x] Webhook deliveries in Stripe dashboard all 200 (checkout.completed, subscription.updated, subscription.deleted)
 
 ---
 
