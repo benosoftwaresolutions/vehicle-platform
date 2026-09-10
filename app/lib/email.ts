@@ -294,6 +294,50 @@ export async function sendWalkInBookingToGarage({
   })
 }
 
+export async function sendWalkInConfirmationToCustomer({
+  customerEmail,
+  customerName,
+  garageName,
+  garageAddress,
+  garagePhone,
+  service,
+  date,
+  time,
+  registration,
+}: {
+  customerEmail: string
+  customerName: string
+  garageName: string
+  garageAddress: string
+  garagePhone?: string | null
+  service: string
+  date: Date
+  time: string
+  registration: string
+}) {
+  const rows: [string, string][] = [
+    ["Service", service],
+    ["Date", formatDate(date)],
+    ["Time", time],
+    ["Registration", registration],
+    ["Garage", garageName],
+    ["Address", garageAddress],
+  ]
+  if (garagePhone) rows.push(["Garage phone", garagePhone])
+
+  await sendWithRetry({
+    from: FROM,
+    to: customerEmail,
+    subject: `Booking confirmed — ${service} at ${garageName}`,
+    html: emailBase(`
+      <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Your booking is confirmed</h2>
+      <p style="color:#6b6a66;font-size:14px;margin:0 0 4px;">Hi ${customerName}, <strong style="color:#111110;">${garageName}</strong> has booked you in.</p>
+      ${dataTable(rows)}
+      <p style="margin-top:24px;font-size:14px;color:#444441;">Please arrive a few minutes before your appointment time. Need to change it? Contact the garage directly.</p>
+    `),
+  })
+}
+
 export async function sendBookingRescheduledToCustomer({
   customerEmail,
   customerName,

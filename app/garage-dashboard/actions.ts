@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
-import { sendBookingConfirmedToCustomer, sendBookingDeclinedToCustomer, sendWalkInBookingToGarage, sendBookingRescheduledToCustomer, sendMessageToCustomer, sendJobCompletedToCustomer } from "@/app/lib/email"
+import { sendBookingConfirmedToCustomer, sendBookingDeclinedToCustomer, sendWalkInBookingToGarage, sendWalkInConfirmationToCustomer, sendBookingRescheduledToCustomer, sendMessageToCustomer, sendJobCompletedToCustomer } from "@/app/lib/email"
 
 export async function updateBookingStatus(
   bookingId: string,
@@ -210,7 +210,7 @@ export async function createWalkInBooking(data: {
 
   // Email notification to garage owner
   const [garage, garageOwner] = await Promise.all([
-    prisma.garage.findUnique({ where: { id: data.garageId }, select: { name: true, email: true } }),
+    prisma.garage.findUnique({ where: { id: data.garageId }, select: { name: true, email: true, address: true, phone: true } }),
     prisma.user.findFirst({ where: { garageId: data.garageId, role: "garage_owner" }, select: { email: true } }),
   ])
 
@@ -228,6 +228,22 @@ export async function createWalkInBooking(data: {
       time: data.time,
       registration: data.registration.toUpperCase(),
     }).catch((err) => console.error("Failed to send walk-in booking email:", err))
+  }
+
+  // Confirmation to the customer, if they gave an email at the counter
+  const customerEmail = data.customerEmail.trim()
+  if (garage && customerEmail) {
+    await sendWalkInConfirmationToCustomer({
+      customerEmail,
+      customerName: data.customerName.trim(),
+      garageName: garage.name,
+      garageAddress: garage.address,
+      garagePhone: garage.phone,
+      service: data.service,
+      date: new Date(data.date),
+      time: data.time,
+      registration: data.registration.toUpperCase(),
+    }).catch((err) => console.error("Failed to send walk-in customer confirmation:", err))
   }
 
   // Client refreshes after showing an in-place confirmation (useSettledRefresh)
