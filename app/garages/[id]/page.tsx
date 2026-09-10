@@ -48,11 +48,12 @@ export default async function GarageDetail({ params }: Params) {
 
   let canReview = false
   if (userId) {
-    const [confirmedBooking, existingReview] = await Promise.all([
-      prisma.booking.findFirst({ where: { garageId: id, clerkId: userId, status: "confirmed" } }),
+    // Only customers whose job has actually been completed can review
+    const [completedBooking, existingReview] = await Promise.all([
+      prisma.booking.findFirst({ where: { garageId: id, clerkId: userId, status: "completed" } }),
       prisma.review.findUnique({ where: { garageId_clerkId: { garageId: id, clerkId: userId } } }),
     ])
-    canReview = !!confirmedBooking && !existingReview
+    canReview = !!completedBooking && !existingReview
   }
 
   const reviewCount = reviews.length
