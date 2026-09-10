@@ -26,12 +26,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Comment must be 3–1000 characters" }, { status: 400 })
     }
 
-    // Must have a confirmed booking at this garage
-    const confirmedBooking = await prisma.booking.findFirst({
-      where: { garageId, clerkId: userId, status: "confirmed" },
+    // Must have a completed booking at this garage
+    const completedBooking = await prisma.booking.findFirst({
+      where: { garageId, clerkId: userId, status: "completed" },
     })
-    if (!confirmedBooking) {
-      return NextResponse.json({ error: "You must have a confirmed booking to leave a review" }, { status: 403 })
+    if (!completedBooking) {
+      return NextResponse.json({ error: "You can review a garage once your booking has been completed" }, { status: 403 })
     }
 
     // Must not have already reviewed
