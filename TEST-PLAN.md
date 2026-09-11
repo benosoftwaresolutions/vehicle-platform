@@ -33,7 +33,7 @@ Watch both inboxes (and spam — Resend sender reputation is new).
 - [x] Customer accepts alternative → garage notified; customer declines → garage notified
 - [x] Reschedule a confirmed booking → customer gets reschedule email
 - [ ] Complete a booking with job value → customer gets completion email; value shows in insights
-- [ ] Customer cancels a booking → garage gets cancellation email
+- [x] Customer cancels a booking → garage gets cancellation email
 - [ ] Walk-in booking created by garage → appears in calendar alongside online bookings
 
 ### 3. Booking validation (server-side guards — try to break it)
