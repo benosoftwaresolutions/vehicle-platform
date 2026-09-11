@@ -32,15 +32,15 @@ Watch both inboxes (and spam — Resend sender reputation is new).
 - [x] Decline with reason + suggested alternative: customer gets decline email with suggestion
 - [x] Customer accepts alternative → garage notified; customer declines → garage notified
 - [x] Reschedule a confirmed booking → customer gets reschedule email
-- [ ] Complete a booking with job value → customer gets completion email; value shows in insights
+- [x] Complete a booking with job value → customer gets completion email; value shows in insights
 - [x] Customer cancels a booking → garage gets cancellation email
-- [ ] Walk-in booking created by garage → appears in calendar alongside online bookings
+- [x] Walk-in booking created by garage → appears in calendar alongside online bookings
 
 ### 3. Booking validation (server-side guards — try to break it)
 
-- [ ] Book the last remaining slot in two tabs at once (capacity 1): second gets "no longer available"
+- [x] Book the last remaining slot in two tabs at once (capacity 1): second gets "no longer available"
 - [x] Attempt booking for a past date via the UI → rejected
-- [ ] Booked-out day shows no available slots; declined bookings free their slot again
+- [x] Booked-out day shows no available slots; declined bookings free their slot again
 - [x] Unapproved/expired garage cannot receive bookings (needs API attempt or expired test garage)
 
 ### 4. Subscription lifecycle (sandbox)
