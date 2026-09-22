@@ -250,6 +250,16 @@ h1 i { color: #111110 !important; font-weight: 700 !important; }
   .dash-actions > * { flex-shrink: 0; }
 
 
+  /* Admin shell → sidebar becomes a horizontally scrollable top bar
+     instead of squeezing the page content into a sliver next to a fixed
+     216px sidebar */
+  .admin-shell        { flex-direction: column !important; }
+  .admin-sidebar       { width: 100% !important; position: static !important; height: auto !important; flex-direction: row !important; align-items: center !important; overflow-y: visible !important; }
+  .admin-sidebar-header,
+  .admin-sidebar-footer { display: none !important; }
+  .admin-sidebar-nav   { display: flex !important; flex: 1 !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch; padding: 10px !important; }
+  .admin-sidebar-nav a { flex-shrink: 0 !important; white-space: nowrap !important; margin-bottom: 0 !important; }
+
   /* Footer → single column, reduced padding */
   .footer-root        { padding: 32px 20px !important; }
   .footer-body        { flex-direction: column !important; align-items: flex-start !important; gap: 28px !important; }

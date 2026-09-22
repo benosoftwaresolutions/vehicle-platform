@@ -44,7 +44,7 @@ export default async function GarageReport({ params }: { params: Promise<{ id: s
       </div>
 
       {/* Key stats */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px", marginBottom: "32px" }}>
+      <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px", marginBottom: "32px" }}>
         {[
           { label: "Jobs Completed", value: bookings.length.toString() },
           { label: "Revenue Logged", value: totalRevenue > 0 ? `£${totalRevenue.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "—" },

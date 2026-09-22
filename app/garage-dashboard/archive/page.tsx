@@ -59,7 +59,7 @@ export default async function ArchivePage() {
       <main style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 32px" }}>
 
         {completedCount > 0 && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "32px" }}>
+          <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "32px" }}>
             <div style={{ background: "#f4f3ef", borderRadius: 14, padding: "20px 22px" }}>
               <p style={{ fontSize: "0.78rem", fontWeight: 600, color: "#6b6a66", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Total revenue logged</p>
               <p style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.8rem", color: "#111110", letterSpacing: "-0.03em" }}>

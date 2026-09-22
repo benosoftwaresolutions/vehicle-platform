@@ -1,4 +1,4 @@
-import { ClerkProvider } from "@clerk/nextjs"
+import AuthProvider from "./components/AuthProvider"
 import type { Metadata } from "next"
 import { Fraunces, DM_Sans } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider signInFallbackRedirectUrl="/onboarding" signUpFallbackRedirectUrl="/onboarding">
+    <AuthProvider>
       <html lang="en" className={`${fraunces.variable} ${dmSans.variable}`}>
         <body>
           <EnvironmentBanner />
@@ -32,6 +32,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Analytics />
         </body>
       </html>
-    </ClerkProvider>
+    </AuthProvider>
   )
 }

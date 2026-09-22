@@ -67,7 +67,7 @@ export default async function AdminGarageDetail({ params }: { params: Promise<{ 
       </div>
 
       {/* Top stats */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "14px", marginBottom: "20px" }}>
+      <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "14px", marginBottom: "20px" }}>
         {[
           { label: "Total Bookings", value: bookings.length },
           { label: "Completed", value: `${completedBookings.length} (${completionRate}%)` },
@@ -81,7 +81,7 @@ export default async function AdminGarageDetail({ params }: { params: Promise<{ 
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
         {/* Owner card */}
         <div style={{ background: "#ffffff", border: "0.5px solid rgba(0,0,0,0.08)", borderRadius: 14, padding: "24px" }}>
           <p style={{ fontSize: "0.72rem", fontWeight: 700, color: "#6b6a66", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px" }}>Owner</p>
@@ -104,7 +104,7 @@ export default async function AdminGarageDetail({ params }: { params: Promise<{ 
         {/* Performance card */}
         <div style={{ background: "#ffffff", border: "0.5px solid rgba(0,0,0,0.08)", borderRadius: 14, padding: "24px" }}>
           <p style={{ fontSize: "0.72rem", fontWeight: 700, color: "#6b6a66", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px" }}>Performance</p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+          <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
             <div>
               <p style={{ fontSize: "1.4rem", fontWeight: 700, fontFamily: "var(--font-fraunces),'Fraunces',serif", color: "#111110", lineHeight: 1 }}>
                 {garage.rating > 0 ? `★ ${garage.rating.toFixed(1)}` : "—"}

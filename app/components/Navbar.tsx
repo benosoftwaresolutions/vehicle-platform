@@ -3,7 +3,7 @@
 import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useSyncExternalStore } from "react"
 
 function FycaLogo() {
   return (
@@ -47,24 +47,71 @@ function HamburgerIcon({ open }: { open: boolean }) {
   )
 }
 
+// Synced via useSyncExternalStore instead of useState+useEffect — the
+// canonical primitive for reading a browser-only value (matchMedia here)
+// that has no meaningful value during SSR, without the extra render pass an
+// effect-driven setState would cost.
+const DESKTOP_QUERY = "(min-width: 768px)"
+
+function subscribeToDesktopQuery(callback: () => void) {
+  const mq = window.matchMedia(DESKTOP_QUERY)
+  mq.addEventListener("change", callback)
+  return () => mq.removeEventListener("change", callback)
+}
+
+function getIsDesktopSnapshot() {
+  return window.matchMedia(DESKTOP_QUERY).matches
+}
+
+function getIsDesktopServerSnapshot() {
+  return false
+}
+
 export default function Navbar({ role }: { role?: string }) {
   const { isSignedIn } = useAuth()
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
-  const [isDesktop, setIsDesktop] = useState(false)
+  const [fetchedRole, setFetchedRole] = useState<string | undefined>(undefined)
 
-  // Close on route change
-  useEffect(() => { setMenuOpen(false) }, [pathname])
+  // Close the mobile menu when the route changes. Navbar is hosted in
+  // garage-dashboard's layout, so it persists across client-side navigations
+  // there rather than remounting — this can't just be "start closed" state.
+  // Adjusting state during render (React's documented pattern for "reset
+  // state when a prop changes") instead of in an effect: one extra render
+  // pass instead of a mount render followed by a second effect-driven one.
+  const [prevPathname, setPrevPathname] = useState(pathname)
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname)
+    setMenuOpen(false)
+  }
 
-  // Track viewport so we only mount UserButton on desktop —
-  // prevents Clerk rendering a floating avatar when nav-desktop is CSS-hidden on mobile
+  // Marketing/static pages don't fetch the user's role server-side (that
+  // would force auth() and pull the whole page out of static rendering just
+  // for a nav label) — they render <Navbar /> with no role prop and this
+  // fills it in client-side instead. Pages that already need the user's row
+  // for their own logic keep passing role directly, which skips this fetch.
   useEffect(() => {
-    const mq = window.matchMedia("(min-width: 768px)")
-    setIsDesktop(mq.matches)
-    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
-    mq.addEventListener("change", handler)
-    return () => mq.removeEventListener("change", handler)
-  }, [])
+    if (role !== undefined || fetchedRole !== undefined) return
+    let cancelled = false
+    async function loadRole() {
+      if (!isSignedIn) { if (!cancelled) setFetchedRole(undefined); return }
+      try {
+        const res = await fetch("/api/onboarding-status")
+        const data = res.ok ? await res.json() : null
+        if (!cancelled) setFetchedRole(data?.role)
+      } catch {
+        // leave fetchedRole as-is — nav just renders without the garage-owner link
+      }
+    }
+    loadRole()
+    return () => { cancelled = true }
+  }, [role, isSignedIn, fetchedRole])
+
+  const effectiveRole = role ?? fetchedRole
+
+  // Only mount UserButton on desktop — prevents Clerk rendering a floating
+  // avatar when nav-desktop is CSS-hidden on mobile.
+  const isDesktop = useSyncExternalStore(subscribeToDesktopQuery, getIsDesktopSnapshot, getIsDesktopServerSnapshot)
 
   // Close on Escape
   useEffect(() => {
@@ -74,7 +121,7 @@ export default function Navbar({ role }: { role?: string }) {
     return () => document.removeEventListener("keydown", handler)
   }, [menuOpen])
 
-  const isGarageOwner = role === "garage_owner"
+  const isGarageOwner = effectiveRole === "garage_owner"
   const onGarages = pathname === "/for-garages"
   const onDrivers = pathname === "/for-drivers"
 

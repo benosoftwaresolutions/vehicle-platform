@@ -3,7 +3,7 @@ import { prisma } from "@/app/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
 import { sendNewBookingToGarage } from "@/app/lib/email"
 import { rateLimit } from "@/app/lib/rateLimit"
-import { isGarageAccessAllowed } from "@/app/lib/subscription"
+import { activeGarageWhere } from "@/app/lib/subscription"
 import { getAvailableSlots } from "@/app/lib/slots"
 import { headers } from "next/headers"
 
@@ -39,12 +39,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Booking date cannot be in the past" }, { status: 400 })
     }
 
-    // Garage must exist, be approved, and have an active trial/subscription
-    const garageAccess = await prisma.garage.findUnique({
-      where: { id: garageId },
-      select: { approved: true, subscriptionStatus: true, trialEndsAt: true, subscriptionEnd: true, pastDueAt: true },
+    // Garage must exist, be approved, and have an active trial/subscription —
+    // checked in the query itself (same filter as the public listing and
+    // garage page) so a direct link/garageId can't bypass an expired garage.
+    const garageAccess = await prisma.garage.findFirst({
+      where: { id: garageId, approved: true, ...activeGarageWhere() },
+      select: { id: true },
     })
-    if (!garageAccess || !garageAccess.approved || !isGarageAccessAllowed(garageAccess)) {
+    if (!garageAccess) {
       return NextResponse.json({ error: "This garage is not currently taking bookings" }, { status: 400 })
     }
 

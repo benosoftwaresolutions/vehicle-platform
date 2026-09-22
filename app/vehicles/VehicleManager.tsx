@@ -84,7 +84,7 @@ function VehicleForm({ initial, onSave, onCancel, loading }: {
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div style={card}>
         <p style={cardTitle}>Vehicle details</p>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           <div>
             <label style={lbl}>Make <Req /></label>
             <input value={form.make} onChange={e => set("make", e.target.value)} placeholder="e.g. Ford" style={inp} />
@@ -117,7 +117,7 @@ function VehicleForm({ initial, onSave, onCancel, loading }: {
 
       <div style={card}>
         <p style={cardTitle}>MOT &amp; servicing</p>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           <div>
             <label style={lbl}>MOT expiry</label>
             <input type="date" value={form.motExpiry} onChange={e => set("motExpiry", e.target.value)} style={inp} />

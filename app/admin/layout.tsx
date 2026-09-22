@@ -27,17 +27,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#f4f3ef" }}>
-      <aside style={{
+    <div className="admin-shell" style={{ display: "flex", minHeight: "100vh", background: "#f4f3ef" }}>
+      <aside className="admin-sidebar" style={{
         width: 216, background: "#111110", display: "flex",
         flexDirection: "column", flexShrink: 0, position: "sticky",
         top: 0, height: "100vh", overflowY: "auto",
       }}>
-        <div style={{ padding: "24px 20px", borderBottom: "0.5px solid rgba(255,255,255,0.08)" }}>
+        <div className="admin-sidebar-header" style={{ padding: "24px 20px", borderBottom: "0.5px solid rgba(255,255,255,0.08)" }}>
           <p style={{ color: "rgba(255,255,255,0.4)", fontWeight: 700, fontSize: "0.7rem", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "6px" }}>Admin</p>
           <p style={{ color: "#ffffff", fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 700, fontSize: "1rem", letterSpacing: "-0.04em" }}>Fyca</p>
         </div>
-        <nav style={{ padding: "12px 10px", flex: 1 }}>
+        <nav className="admin-sidebar-nav" style={{ padding: "12px 10px", flex: 1 }}>
           {NAV.map((item) => (
             <Link
               key={item.href}
@@ -54,13 +54,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </Link>
           ))}
         </nav>
-        <div style={{ padding: "16px 20px", borderTop: "0.5px solid rgba(255,255,255,0.08)" }}>
+        <div className="admin-sidebar-footer" style={{ padding: "16px 20px", borderTop: "0.5px solid rgba(255,255,255,0.08)" }}>
           <Link href="/" style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.8rem", textDecoration: "none" }}>
             ← Back to site
           </Link>
         </div>
       </aside>
-      <div style={{ flex: 1, overflowY: "auto" }}>
+      <div style={{ flex: 1, overflowY: "auto", minWidth: 0 }}>
         {children}
       </div>
     </div>

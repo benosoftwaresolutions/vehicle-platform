@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react"
 import Link from "next/link"
+import Image from "next/image"
 
 type Garage = {
   id: string
@@ -90,10 +91,10 @@ export default function GarageSearchPreview({ garages }: { garages: Garage[] }) 
                 width: 40, height: 40, borderRadius: 10,
                 background: g.logoUrl ? "transparent" : "#111110",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                flexShrink: 0, overflow: "hidden",
+                flexShrink: 0, overflow: "hidden", position: "relative",
               }}>
                 {g.logoUrl
-                  ? <img src={g.logoUrl} alt={g.name} style={{ width: 40, height: 40, objectFit: "cover" }} />
+                  ? <Image src={g.logoUrl} alt={g.name} fill sizes="40px" style={{ objectFit: "cover" }} />
                   : <span style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontSize: "0.78rem", fontWeight: 600, color: "#ffffff", letterSpacing: "0.02em" }}>{initials}</span>
                 }
               </div>

@@ -58,7 +58,7 @@ function PartForm({ initial, onSave, onCancel, loading }: {
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div style={card}>
         <p style={cardTitle}>Part details</p>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           <div style={{ gridColumn: "1 / -1" }}>
             <label style={lbl}>Name *</label>
             <input value={form.name} onChange={e => set("name", e.target.value)} placeholder="e.g. 5W-30 Engine Oil" style={inp} />
@@ -93,7 +93,7 @@ function PartForm({ initial, onSave, onCancel, loading }: {
 
       <div style={card}>
         <p style={cardTitle}>Supplier</p>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           <div>
             <label style={lbl}>Supplier name</label>
             <input value={form.supplier} onChange={e => set("supplier", e.target.value)} placeholder="e.g. GSF Car Parts" style={inp} />
@@ -235,7 +235,7 @@ export default function InventoryManager({ initialParts }: { initialParts: Part[
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {parts.map(p => (
-            <div key={p.id} style={{ background: "#f4f3ef", borderRadius: 12, padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: 16, border: stockStatus(p) !== "ok" ? "0.5px solid rgba(234,179,8,0.4)" : "0.5px solid transparent" }}>
+            <div className="booking-card" key={p.id} style={{ background: "#f4f3ef", borderRadius: 12, padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: 16, border: stockStatus(p) !== "ok" ? "0.5px solid rgba(234,179,8,0.4)" : "0.5px solid transparent" }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4, flexWrap: "wrap" }}>
                   <span style={{ fontWeight: 600, fontSize: "0.9rem", color: "#111110" }}>{p.name}</span>

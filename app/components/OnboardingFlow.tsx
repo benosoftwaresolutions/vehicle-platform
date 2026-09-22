@@ -13,10 +13,10 @@ type User = {
 
 type OnboardingFlowProps = {
   user: User
-  returnTo?: string
+  next?: string
 }
 
-export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) {
+export default function OnboardingFlow({ user, next }: OnboardingFlowProps) {
   const router = useRouter()
   const [step, setStep] = useState(user.onboardingStep)
   const [loading, setLoading] = useState(false)
@@ -85,7 +85,7 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
       body: JSON.stringify({ make: vehicleMake, model: vehicleModel, year: vehicleYear, registration: vehicleReg }),
     })
     setVehicleSaving(false)
-    router.push(returnTo ?? "/")
+    router.push(next ?? "/")
   }
 
   const completeGarageDetails = async () => {
@@ -119,7 +119,7 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
             </h1>
             <p style={{ color: "#6b6a66", fontSize: "1rem" }}>How will you be using the platform?</p>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+          <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
             <button
               onClick={() => chooseRole("customer")}
               disabled={loading}
@@ -235,7 +235,7 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
                 <label style={lbl}>Street address</label>
                 <input type="text" value={garageAddress} onChange={e => setGarageAddress(e.target.value)} placeholder="e.g. 42 Industrial Way" style={inp} />
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                 <div>
                   <label style={lbl}>City / Town</label>
                   <input type="text" value={garageCity} onChange={e => setGarageCity(e.target.value)} placeholder="e.g. Manchester" style={inp} />
@@ -301,7 +301,7 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
           </p>
 
           <div style={{ background: "#f4f3ef", borderRadius: 14, padding: "22px", display: "flex", flexDirection: "column", gap: 14, marginBottom: 24 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <div>
                 <label style={lbl}>Make</label>
                 <input type="text" value={vehicleMake} onChange={e => setVehicleMake(e.target.value)} placeholder="e.g. Ford" style={inp} />
@@ -311,7 +311,7 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
                 <input type="text" value={vehicleModel} onChange={e => setVehicleModel(e.target.value)} placeholder="e.g. Focus" style={inp} />
               </div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <div>
                 <label style={lbl}>Year</label>
                 <input type="text" value={vehicleYear} onChange={e => setVehicleYear(e.target.value)} placeholder="e.g. 2019" style={inp} />
@@ -332,7 +332,7 @@ export default function OnboardingFlow({ user, returnTo }: OnboardingFlowProps) 
               {vehicleSaving ? "Saving…" : "Add vehicle & continue"}
             </button>
             <button
-              onClick={() => router.push(returnTo ?? "/")}
+              onClick={() => router.push(next ?? "/")}
               style={{ background: "none", color: "#6b6a66", padding: "10px", border: "none", cursor: "pointer", fontSize: "0.875rem" }}
             >
               Skip for now

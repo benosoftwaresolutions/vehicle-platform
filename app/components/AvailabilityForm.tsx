@@ -112,7 +112,7 @@ export default function AvailabilityForm({ garageId, existing }: Props) {
       {/* General settings */}
       <div style={card}>
         <h3 style={h3}>General settings</h3>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
           <div>
             <label style={lbl}>Slot duration</label>
             <select value={slotDuration} onChange={e => setSlotDuration(Number(e.target.value))} style={inp}>
@@ -147,7 +147,11 @@ export default function AvailabilityForm({ garageId, existing }: Props) {
       {/* Opening hours */}
       <div style={card}>
         <h3 style={h3}>Opening hours</h3>
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {/* Horizontally scrollable on narrow screens instead of squeezing the
+            two time inputs into unusably small columns — same pattern as the
+            weekly calendar grid below. */}
+        <div style={{ overflowX: "auto" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 480 }}>
           {schedule.map(day => (
             <div key={day.day} style={{ display: "grid", gridTemplateColumns: "110px 80px 1fr 1fr", alignItems: "center", gap: 12 }}>
               <span style={{ fontWeight: 600, fontSize: "0.9rem", color: "#111110" }}>{day.day}</span>
@@ -177,6 +181,7 @@ export default function AvailabilityForm({ garageId, existing }: Props) {
               )}
             </div>
           ))}
+        </div>
         </div>
       </div>
 

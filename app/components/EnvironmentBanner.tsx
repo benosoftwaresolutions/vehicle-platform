@@ -1,23 +1,37 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useSyncExternalStore } from "react"
+
+const DISMISS_KEY = "env-banner-dismissed"
+const listeners = new Set<() => void>()
+
+// A tiny external store over sessionStorage, read with useSyncExternalStore
+// instead of useState+useEffect: correct during SSR (server snapshot is
+// always "not dismissed" — the env check below hides the banner there
+// anyway) and avoids the extra effect-driven render pass on mount.
+function subscribe(callback: () => void) {
+  listeners.add(callback)
+  return () => listeners.delete(callback)
+}
+
+function getSnapshot() {
+  return sessionStorage.getItem(DISMISS_KEY) === "1"
+}
+
+function getServerSnapshot() {
+  return false
+}
+
+function dismissBanner() {
+  sessionStorage.setItem(DISMISS_KEY, "1")
+  listeners.forEach(l => l())
+}
 
 export default function EnvironmentBanner() {
   const envLabel = process.env.NEXT_PUBLIC_ENV
-  const [visible, setVisible] = useState(false)
+  const dismissed = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 
-  useEffect(() => {
-    if (envLabel && envLabel !== "production" && !sessionStorage.getItem("env-banner-dismissed")) {
-      setVisible(true)
-    }
-  }, [envLabel])
-
-  if (!visible) return null
-
-  function dismiss() {
-    sessionStorage.setItem("env-banner-dismissed", "1")
-    setVisible(false)
-  }
+  if (!envLabel || envLabel === "production" || dismissed) return null
 
   return (
     <div style={{
@@ -34,7 +48,7 @@ export default function EnvironmentBanner() {
     }}>
       ⚠ {envLabel === "preview" ? "Preview" : "Dev"} environment — this is not the live site
       <button
-        onClick={dismiss}
+        onClick={dismissBanner}
         aria-label="Dismiss"
         style={{
           position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
