@@ -21,7 +21,7 @@ const urgencyColour = { high: "#991b1b", medium: "#92400e", low: "#166534" }
 const urgencyBg = { high: "#fee2e2", medium: "#fffbeb", low: "#f0fdf4" }
 const confidenceLabel = { high: "High confidence", medium: "Medium confidence", low: "Low confidence" }
 
-export default function InsightsView({ garageId }: { garageId: string }) {
+export default function InsightsView() {
   const [data, setData] = useState<InsightsData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -104,7 +104,7 @@ export default function InsightsView({ garageId }: { garageId: string }) {
     )
   }
 
-  const { insights, parts, upcomingBookings } = data
+  const { insights, upcomingBookings } = data
   if (!insights) return null
 
   return (

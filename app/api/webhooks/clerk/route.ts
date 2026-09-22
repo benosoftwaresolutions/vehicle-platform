@@ -33,6 +33,7 @@ export async function POST(req: Request) {
       "svix-signature": svix_signature,
     }) as WebhookEvent
   } catch (err) {
+    console.error("[clerk webhook] signature verification failed:", err)
     return NextResponse.json({ error: "Invalid webhook" }, { status: 400 })
   }
 

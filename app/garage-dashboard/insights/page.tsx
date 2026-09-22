@@ -28,7 +28,7 @@ export default async function InsightsPage() {
         </div>
       </div>
       <main className="page-body" style={{ maxWidth: 900, margin: "0 auto", padding: "40px 32px" }}>
-        <InsightsView garageId={garage.id} />
+        <InsightsView />
       </main>
     </>
   )

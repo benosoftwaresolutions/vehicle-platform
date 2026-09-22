@@ -24,6 +24,7 @@ export async function GET() {
       onboardingStep: user.onboardingStep
     })
   } catch (error) {
+    console.error("[onboarding-status] failed to load onboarding state:", error)
     return NextResponse.json({ onboarded: true }) // Fail safe — don't block the user
   }
 }
