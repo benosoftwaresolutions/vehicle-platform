@@ -113,6 +113,32 @@ export async function deleteGarage(garageId: string) {
   revalidatePath("/admin")
 }
 
+// Removes a review (spam, abuse, fake) and recalculates the garage's average
+// rating the same way the review-create endpoint does, so a deleted review
+// doesn't leave a stale rating behind.
+export async function deleteReview(reviewId: string) {
+  await assertAdmin()
+
+  const review = await prisma.review.findUnique({ where: { id: reviewId }, select: { garageId: true } })
+  if (!review) throw new Error("Review not found")
+
+  await prisma.review.delete({ where: { id: reviewId } })
+
+  const agg = await prisma.review.aggregate({
+    where: { garageId: review.garageId },
+    _avg: { rating: true },
+  })
+  await prisma.garage.update({
+    where: { id: review.garageId },
+    data: { rating: Math.round((agg._avg.rating ?? 0) * 10) / 10 },
+  })
+
+  updateTag("garages")
+  revalidatePath("/admin/reviews")
+  revalidatePath("/admin")
+  revalidatePath(`/garages/${review.garageId}`)
+}
+
 export async function declinePendingGarage(userId: string, garageId: string) {
   await assertAdmin()
 
