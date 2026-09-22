@@ -80,7 +80,7 @@ export default function InsightsView({ garageId }: { garageId: string }) {
             AI Parts Predictions
           </p>
           <p style={{ color: "#6b6a66", fontSize: "0.9rem", marginBottom: 28, lineHeight: 1.6 }}>
-            Claude analyses your upcoming bookings and current stock to predict what parts you'll need — and when to order.
+            Claude analyses your upcoming bookings and current stock to predict what parts you&apos;ll need — and when to order.
           </p>
           {error && <p style={{ color: "#991b1b", fontSize: "0.875rem", marginBottom: 16 }}>{error}</p>}
           <button
@@ -135,7 +135,7 @@ export default function InsightsView({ garageId }: { garageId: string }) {
         <p style={{ color: "#ffffff", fontSize: "0.95rem", lineHeight: 1.6, margin: 0 }}>{insights.summary}</p>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
         {/* Low stock */}
         <div style={{ background: "#f4f3ef", borderRadius: 14, padding: "20px 22px" }}>
           <p style={sectionTitle}>Low stock alerts</p>

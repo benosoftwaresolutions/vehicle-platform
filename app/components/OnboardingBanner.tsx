@@ -1,23 +1,37 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useSyncExternalStore } from "react"
 import Link from "next/link"
 
 const DISMISS_KEY = "onboarding_banner_dismissed"
+const listeners = new Set<() => void>()
+
+// Same external-store approach as EnvironmentBanner: reads localStorage via
+// useSyncExternalStore instead of useState+useEffect, so there's no
+// effect-driven extra render pass and no server/client value to reconcile
+// after the fact.
+function subscribe(callback: () => void) {
+  listeners.add(callback)
+  return () => listeners.delete(callback)
+}
+
+function getSnapshot() {
+  return localStorage.getItem(DISMISS_KEY) !== null
+}
+
+function getServerSnapshot() {
+  return true // unknown on the server — default to hidden, same as before
+}
+
+function dismissBanner() {
+  localStorage.setItem(DISMISS_KEY, "1")
+  listeners.forEach(l => l())
+}
 
 export default function OnboardingBanner() {
-  const [visible, setVisible] = useState(false)
+  const dismissed = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 
-  useEffect(() => {
-    if (!localStorage.getItem(DISMISS_KEY)) setVisible(true)
-  }, [])
-
-  if (!visible) return null
-
-  const dismiss = () => {
-    localStorage.setItem(DISMISS_KEY, "1")
-    setVisible(false)
-  }
+  if (dismissed) return null
 
   return (
     <div style={{
@@ -49,7 +63,7 @@ export default function OnboardingBanner() {
         </Link>
       </div>
       <button
-        onClick={dismiss}
+        onClick={dismissBanner}
         aria-label="Dismiss"
         style={{
           background: "none", border: "none", cursor: "pointer",

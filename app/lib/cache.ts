@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache"
 import { prisma } from "./prisma"
+import { activeGarageWhere } from "./subscription"
 
 // Cached per-user profile — avoids a DB call on every page just for the Navbar role.
 // Cache is invalidated via updateTag(`user-${clerkId}`) when the role changes.
@@ -19,7 +20,7 @@ export function getCachedUser(clerkId: string) {
 export const getCachedGarages = unstable_cache(
   async () => {
     const [garages, reviewCounts] = await Promise.all([
-      prisma.garage.findMany({ where: { approved: true } }),
+      prisma.garage.findMany({ where: { approved: true, ...activeGarageWhere() } }),
       prisma.review.groupBy({ by: ["garageId"], _count: { id: true } }),
     ])
     const reviewCountMap = Object.fromEntries(reviewCounts.map(r => [r.garageId, r._count.id]))

@@ -6,6 +6,7 @@ import ReviewForm from "@/app/components/ReviewForm"
 import { prisma } from "@/app/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
 import { getCachedUser } from "@/app/lib/cache"
+import { activeGarageWhere } from "@/app/lib/subscription"
 import { notFound } from "next/navigation"
 import Image from "next/image"
 import type { Metadata } from "next"
@@ -38,10 +39,17 @@ export default async function GarageDetail({ params }: Params) {
   const { id } = await params
   const { userId } = await auth()
 
-  const [garage, user, reviews] = await Promise.all([
-    prisma.garage.findUnique({ where: { id } }),
+  const [garage, user, reviews, vehicles] = await Promise.all([
+    // Same active-subscription check as the public listing and the booking
+    // endpoint, applied at the query level — an expired or unapproved
+    // garage's page 404s even when reached by a direct link.
+    prisma.garage.findFirst({ where: { id, approved: true, ...activeGarageWhere() } }),
     userId ? getCachedUser(userId) : null,
     prisma.review.findMany({ where: { garageId: id }, orderBy: { createdAt: "desc" } }),
+    // Fetched here (rather than by BookingForm on mount) so the vehicle
+    // picker has data on first paint instead of a client-side round trip
+    // and loading flash for the common case of an already-signed-in visitor.
+    userId ? prisma.vehicle.findMany({ where: { clerkId: userId }, orderBy: { createdAt: "desc" } }) : null,
   ])
 
   if (!garage) notFound()
@@ -228,7 +236,12 @@ export default async function GarageDetail({ params }: Params) {
           {/* Booking sidebar */}
           <div className="md:col-span-1">
             <div style={{ ...card, position: "sticky", top: "72px" }}>
-              <BookingForm garageId={garage.id} services={garage.services ?? []} servicePricing={(garage.servicePricing as Record<string, { min: number | null; max: number | null }> | null) ?? {}} />
+              <BookingForm
+                garageId={garage.id}
+                services={garage.services ?? []}
+                servicePricing={(garage.servicePricing as Record<string, { min: number | null; max: number | null }> | null) ?? {}}
+                initialVehicles={vehicles ? vehicles.map(v => ({ id: v.id, registration: v.registration, make: v.make, model: v.model, year: v.year })) : null}
+              />
             </div>
           </div>
         </div>

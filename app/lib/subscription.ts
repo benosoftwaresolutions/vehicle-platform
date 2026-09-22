@@ -1,3 +1,5 @@
+import type { Prisma } from "@prisma/client"
+
 const TRIAL_DAYS = 30
 const GRACE_PERIOD_DAYS = 7
 
@@ -31,6 +33,20 @@ export function isGarageAccessAllowed(garage: {
     return garageGraceDaysLeft(garage.pastDueAt) > 0
   }
   return false
+}
+
+// Prisma where-clause equivalent of isGarageAccessAllowed(), so listing/detail
+// queries can exclude expired garages at the DB level instead of filtering
+// fetched results afterwards.
+export function activeGarageWhere(now: Date = new Date()): Prisma.GarageWhereInput {
+  const graceCutoff = new Date(now.getTime() - GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000)
+  return {
+    OR: [
+      { subscriptionStatus: "active", OR: [{ subscriptionEnd: null }, { subscriptionEnd: { gte: now } }] },
+      { subscriptionStatus: "trialing", trialEndsAt: { gt: now } },
+      { subscriptionStatus: "past_due", OR: [{ pastDueAt: null }, { pastDueAt: { gte: graceCutoff } }] },
+    ],
+  }
 }
 
 export function trialEndsAtFromNow(): Date {

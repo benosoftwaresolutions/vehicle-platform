@@ -171,7 +171,7 @@ async function InventoryWidget({ garageId }: { garageId: string }) {
           </Link>
         </div>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+      <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
         <div style={{ background: "#ffffff", borderRadius: 10, padding: "14px 16px" }}>
           <p style={{ fontSize: "0.72rem", fontWeight: 700, color: "#6b6a66", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Total parts</p>
           <p style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.6rem", color: "#111110", letterSpacing: "-0.03em" }}>{parts.length}</p>
@@ -275,7 +275,7 @@ async function BookingsList({ garageId }: { garageId: string }) {
   return (
     <>
       {/* Revenue summary */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "28px" }}>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "28px" }}>
         <div style={{ background: "#f4f3ef", borderRadius: 14, padding: "20px 22px" }}>
           <p style={{ fontSize: "0.78rem", fontWeight: 600, color: "#6b6a66", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>{monthName} revenue</p>
           <p style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.8rem", color: "#111110", letterSpacing: "-0.03em" }}>
@@ -311,7 +311,7 @@ async function BookingsList({ garageId }: { garageId: string }) {
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           {bookings.map((booking) => (
-            <div key={booking.id} style={{ background: "#f4f3ef", borderRadius: 14, padding: "22px 24px", display: "grid", gridTemplateColumns: "1fr auto", alignItems: "start", gap: "24px" }}>
+            <div className="booking-card" key={booking.id} style={{ background: "#f4f3ef", borderRadius: 14, padding: "22px 24px", display: "grid", gridTemplateColumns: "1fr auto", alignItems: "start", gap: "24px" }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" }}>
                   <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.05rem", letterSpacing: "-0.02em", color: "#111110" }}>

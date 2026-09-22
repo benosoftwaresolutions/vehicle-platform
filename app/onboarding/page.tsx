@@ -4,13 +4,17 @@ import OnboardingFlow from "@/app/components/OnboardingFlow"
 import AutoRedirect from "./AutoRedirect"
 
 type Props = {
-  searchParams: Promise<{ returnTo?: string }>
+  searchParams: Promise<{ next?: string }>
 }
 
-function safeReturnTo(value: string | undefined): string | undefined {
+// Only allow same-origin relative paths. startsWith("/") alone isn't enough:
+// "//evil.com" and "/\evil.com" both start with a single "/" but browsers
+// normalise them to a scheme-relative URL, i.e. they still navigate off-site —
+// so both must be rejected too, or this "relative path" check is an open redirect.
+function safeNext(value: string | undefined): string | undefined {
   if (!value) return undefined
-  // Only allow relative paths starting with / to prevent open redirect
   if (!value.startsWith("/")) return undefined
+  if (value.startsWith("//") || value.startsWith("/\\")) return undefined
   return value
 }
 
@@ -18,8 +22,8 @@ export default async function OnboardingPage({ searchParams }: Props) {
   const { userId } = await auth()
   if (!userId) return <AutoRedirect to="/" />
 
-  const { returnTo: rawReturnTo } = await searchParams
-  const returnTo = safeReturnTo(rawReturnTo)
+  const { next: rawNext } = await searchParams
+  const next = safeNext(rawNext)
 
   let user = await prisma.user.findUnique({ where: { clerkId: userId } })
 
@@ -56,7 +60,7 @@ export default async function OnboardingPage({ searchParams }: Props) {
     (user.role !== "garage_owner" || !!user.garageId)
   if (fullyOnboarded) {
     const defaultDest = user.role === "garage_owner" ? "/garage-dashboard" : "/"
-    return <AutoRedirect to={returnTo ?? defaultDest} />
+    return <AutoRedirect to={next ?? defaultDest} />
   }
 
   // If role is set but garage wasn't created, jump straight to step 2 of the form
@@ -64,5 +68,5 @@ export default async function OnboardingPage({ searchParams }: Props) {
     ? { ...user, onboardingStep: 2 }
     : user
 
-  return <OnboardingFlow user={flowUser} returnTo={returnTo} />
+  return <OnboardingFlow user={flowUser} next={next} />
 }

@@ -1,7 +1,5 @@
 import Navbar from "@/app/components/Navbar"
 import FycaFooter from "@/app/components/FycaFooter"
-import { auth } from "@clerk/nextjs/server"
-import { getCachedUser } from "@/app/lib/cache"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -9,13 +7,11 @@ export const metadata: Metadata = {
   description: "Get in touch with the Fyca team. We're here to help drivers and garage owners.",
 }
 
-export default async function ContactPage() {
-  const { userId } = await auth()
-  const user = userId ? await getCachedUser(userId) : null
+export default function ContactPage() {
 
   return (
     <>
-      <Navbar role={user?.role} />
+      <Navbar />
 
       <section style={{ padding: "80px 24px 64px", background: "#ffffff", borderBottom: "0.5px solid rgba(0,0,0,0.08)" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>

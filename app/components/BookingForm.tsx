@@ -10,7 +10,7 @@ type SlotsResponse =
 type Vehicle = { id: string; registration: string; make: string; model: string; year: string }
 type PriceRange = { min: number | null; max: number | null }
 
-export default function BookingForm({ garageId, services, servicePricing = {} }: { garageId: string; services: string[]; servicePricing?: Record<string, PriceRange> }) {
+export default function BookingForm({ garageId, services, servicePricing = {}, initialVehicles = null }: { garageId: string; services: string[]; servicePricing?: Record<string, PriceRange>; initialVehicles?: Vehicle[] | null }) {
   const { isLoaded, isSignedIn } = useAuth()
   const [service, setService] = useState("")
   const [date, setDate] = useState("")
@@ -22,16 +22,21 @@ export default function BookingForm({ garageId, services, servicePricing = {} }:
   const [error, setError] = useState<string | null>(null)
   const [slotsData, setSlotsData] = useState<SlotsResponse | null>(null)
   const [slotsLoading, setSlotsLoading] = useState(false)
-  const [vehicles, setVehicles] = useState<Vehicle[] | null>(null)
+  // Seeded from the garage page's server-side fetch when the visitor was
+  // already signed in, so there's usually no client round trip on mount —
+  // only falls back to fetching here when that wasn't available (e.g. the
+  // visitor signs in via the modal after the page already rendered).
+  const [vehicles, setVehicles] = useState<Vehicle[] | null>(initialVehicles)
 
   useEffect(() => {
     if (!isLoaded) return
     if (!isSignedIn) { setVehicles([]); return }
+    if (vehicles !== null) return
     fetch("/api/vehicles")
       .then(r => r.ok ? r.json() : [])
       .then((data: Vehicle[]) => setVehicles(data))
       .catch(() => setVehicles([]))
-  }, [isLoaded, isSignedIn])
+  }, [isLoaded, isSignedIn, vehicles])
 
   useEffect(() => {
     if (!date) { setSlotsData(null); setTime(""); return }
@@ -114,7 +119,7 @@ export default function BookingForm({ garageId, services, servicePricing = {} }:
           <p style={{ fontSize: "0.875rem", color: "#111110", fontWeight: 600, margin: "0 0 4px" }}>Sign up to book</p>
           <p style={{ fontSize: "0.82rem", color: "#6b6a66", margin: "0 0 14px" }}>Create a free account to pick a time and request your appointment.</p>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <SignUpButton mode="modal" forceRedirectUrl={`/onboarding?returnTo=${encodeURIComponent(`/garages/${garageId}`)}`}>
+            <SignUpButton mode="modal" forceRedirectUrl={`/onboarding?next=${encodeURIComponent(`/garages/${garageId}`)}`}>
               <button style={{ background: "#111110", color: "#ffffff", border: "none", borderRadius: 100, padding: "10px 18px", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer", fontFamily: "var(--font-dm-sans), sans-serif" }}>
                 Sign up to book
               </button>

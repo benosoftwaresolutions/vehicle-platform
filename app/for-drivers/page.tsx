@@ -2,8 +2,7 @@ import Link from "next/link"
 import Navbar from "@/app/components/Navbar"
 import FycaFooter from "@/app/components/FycaFooter"
 import GarageSearchPreview from "./GarageSearchPreview"
-import { auth } from "@clerk/nextjs/server"
-import { getCachedUser, getCachedGarages } from "@/app/lib/cache"
+import { getCachedGarages } from "@/app/lib/cache"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -34,11 +33,11 @@ const STEPS = [
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default async function ForDriversPage() {
-  const { userId } = await auth()
-  const [user, { garages, reviewCountMap }] = await Promise.all([
-    userId ? getCachedUser(userId) : null,
-    getCachedGarages(),
-  ])
+  // Not calling auth() here (personalization for the nav happens client-side
+  // in Navbar instead) means this page has no per-request dynamic dependency
+  // left — it renders from the same 60s-revalidated garage cache as the
+  // listing page rather than being forced to re-render server-side on every hit.
+  const { garages, reviewCountMap } = await getCachedGarages()
 
   const sortedGarages = [...garages].sort((a, b) => b.rating - a.rating)
   const garagesWithCounts = sortedGarages.map(g => ({ ...g, reviewCount: reviewCountMap[g.id] ?? 0 }))
@@ -49,7 +48,7 @@ export default async function ForDriversPage() {
 
   return (
     <>
-      <Navbar role={user?.role} />
+      <Navbar />
 
       {/* ─── Hero ──────────────────────────────────────────────────────────── */}
       <section className="sect-hero" style={{ padding: "96px 24px 72px", background: "#ffffff", borderBottom: "0.5px solid rgba(0,0,0,0.08)" }}>

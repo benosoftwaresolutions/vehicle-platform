@@ -270,7 +270,7 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
 
         {/* Contact */}
         <Section title="Contact Details" subtitle="How customers and Fyca can reach you">
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+          <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
             <div>
               <label style={labelStyle}>Email address</label>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="hello@yourgarage.co.uk" style={inputStyle} />
@@ -295,7 +295,7 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
               <label style={labelStyle}>Street Address</label>
               <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} required style={inputStyle} />
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+            <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
               <div>
                 <label style={labelStyle}>City</label>
                 <input type="text" value={city} onChange={(e) => setCity(e.target.value)} required style={inputStyle} />
@@ -326,7 +326,11 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
         {/* Service Pricing */}
         {services.length > 0 && (
           <Section title="Service Pricing" subtitle="Optional price ranges shown to customers when booking">
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            {/* Horizontally scrollable on narrow screens — the two 100px price
+                columns otherwise squeeze the service name down to a couple of
+                characters. */}
+            <div style={{ overflowX: "auto" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", minWidth: 360 }}>
               {services.map(service => {
                 const pricing = servicePricing[service] ?? { min: null, max: null }
                 return (
@@ -353,6 +357,7 @@ export default function GarageSettingsForm({ garage }: { garage: Garage }) {
                   </div>
                 )
               })}
+            </div>
             </div>
             <p style={{ fontSize: "0.78rem", color: "#6b6a66", marginTop: "12px" }}>Leave blank if you prefer to quote on inspection.</p>
           </Section>
