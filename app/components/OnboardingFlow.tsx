@@ -31,7 +31,6 @@ export default function OnboardingFlow({ user, next }: OnboardingFlowProps) {
   const [selectedRole, setSelectedRole] = useState<string | null>(
     user.role !== "pending" ? user.role : null
   )
-  const [createdGarageId, setCreatedGarageId] = useState<string | null>(null)
   const [billingLoading, setBillingLoading] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [termsError, setTermsError] = useState("")
@@ -100,7 +99,6 @@ export default function OnboardingFlow({ user, next }: OnboardingFlowProps) {
     const data = await res.json()
     setLoading(false)
     if (data.garageId) {
-      setCreatedGarageId(data.garageId)
       setStep(3)
     } else {
       router.push("/garage-dashboard")
