@@ -78,10 +78,10 @@ Watch both inboxes (and spam — Resend sender reputation is new).
 
 ### 8. Access boundaries
 
-- [ ] Customer account cannot open /garage-dashboard or /admin
-- [ ] Garage owner cannot open /admin
-- [ ] Non-admin hitting /admin sees "Access denied" (never a crash)
-- [ ] Logged-out user booking → redirected to sign-in, booking preserved or graceful restart
+- [x] Customer account cannot open /garage-dashboard or /admin
+- [x] Garage owner cannot open /admin
+- [x] Non-admin hitting /admin sees "Access denied" (never a crash)
+- [x] Logged-out user booking → redirected to sign-in, booking preserved or graceful restart
 
 ### 9. Driver plans
 
