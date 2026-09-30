@@ -10,6 +10,7 @@ import { activeGarageWhere } from "@/app/lib/subscription"
 import { notFound } from "next/navigation"
 import Image from "next/image"
 import type { Metadata } from "next"
+import { pageMetadata } from "@/app/lib/seo"
 
 type Params = {
   params: Promise<{ id: string }>
@@ -17,12 +18,18 @@ type Params = {
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params
-  const garage = await prisma.garage.findUnique({ where: { id }, select: { name: true, city: true, postcode: true, description: true } })
-  if (!garage) return { title: "Garage not found — Fyca" }
-  return {
-    title: `${garage.name} — Fyca`,
-    description: garage.description ?? `Book ${garage.name} in ${garage.city}. Fast, online garage booking with Fyca.`,
-  }
+  // Same visibility rule as the page below, so a hidden garage's name and
+  // description never leak into link previews or search results.
+  const garage = await prisma.garage.findFirst({
+    where: { id, approved: true, ...activeGarageWhere() },
+    select: { name: true, city: true, description: true },
+  })
+  if (!garage) return { title: "Garage not found", robots: { index: false } }
+  return pageMetadata({
+    title: garage.name,
+    description: garage.description?.trim() || `Book ${garage.name} in ${garage.city} online — pick a service and a time, no phone calls needed.`,
+    path: `/garages/${id}`,
+  })
 }
 
 function Stars({ rating }: { rating: number }) {

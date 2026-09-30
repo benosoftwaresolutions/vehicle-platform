@@ -1,11 +1,13 @@
 import Navbar from "@/app/components/Navbar"
 import FycaFooter from "@/app/components/FycaFooter"
 import type { Metadata } from "next"
+import { pageMetadata } from "@/app/lib/seo"
 
-export const metadata: Metadata = {
-  title: "Contact — Fyca",
+export const metadata: Metadata = pageMetadata({
+  title: "Contact",
   description: "Get in touch with the Fyca team. We're here to help drivers and garage owners.",
-}
+  path: "/contact",
+})
 
 export default function ContactPage() {
 

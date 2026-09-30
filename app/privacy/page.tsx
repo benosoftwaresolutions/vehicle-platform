@@ -1,11 +1,13 @@
 import Navbar from "@/app/components/Navbar"
 import FycaFooter from "@/app/components/FycaFooter"
 import type { Metadata } from "next"
+import { pageMetadata } from "@/app/lib/seo"
 
-export const metadata: Metadata = {
-  title: "Privacy Policy — Fyca",
+export const metadata: Metadata = pageMetadata({
+  title: "Privacy Policy",
   description: "How Fyca collects, uses, and protects your personal data.",
-}
+  path: "/privacy",
+})
 
 export default function PrivacyPage() {
 

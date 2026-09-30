@@ -4,11 +4,13 @@ import FycaFooter from "@/app/components/FycaFooter"
 import GarageSearchPreview from "./GarageSearchPreview"
 import { getCachedGarages } from "@/app/lib/cache"
 import type { Metadata } from "next"
+import { pageMetadata } from "@/app/lib/seo"
 
-export const metadata: Metadata = {
-  title: "For Drivers — Fyca",
+export const metadata: Metadata = pageMetadata({
+  title: "For Drivers",
   description: "Find and book a trusted local garage in seconds. Search by service, read reviews, and confirm your slot — all online.",
-}
+  path: "/for-drivers",
+})
 
 // ─── How it works steps ───────────────────────────────────────────────────────
 

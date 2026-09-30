@@ -6,6 +6,7 @@ import CheckoutButton from "./CheckoutButton"
 import ManageButton from "./ManageButton"
 import { garageTrialDaysLeft } from "@/app/lib/subscription"
 import type { Metadata } from "next"
+import { pageMetadata } from "@/app/lib/seo"
 
 // Trial end shown as a date rather than a day count — unambiguous, and it
 // matches what Stripe shows the same garage owner on their invoice.
@@ -16,10 +17,11 @@ function formatTrialEnd(d: Date | null): string | null {
 
 export const dynamic = "force-dynamic"
 
-export const metadata: Metadata = {
-  title: "Pricing — Fyca",
+export const metadata: Metadata = pageMetadata({
+  title: "Pricing",
   description: "Simple, transparent pricing for drivers and garages. Start free, upgrade when you need more.",
-}
+  path: "/pricing",
+})
 
 export default async function PricingPage() {
   const { userId } = await auth()

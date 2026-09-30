@@ -3,11 +3,13 @@ import FycaFooter from "@/app/components/FycaFooter"
 import GarageSignupForm from "./GarageSignupForm"
 import StartTrialButton from "./StartTrialButton"
 import type { Metadata } from "next"
+import { pageMetadata } from "@/app/lib/seo"
 
-export const metadata: Metadata = {
-  title: "For Garages — Fyca",
+export const metadata: Metadata = pageMetadata({
+  title: "For Garages",
   description: "Fill your bay, not your inbox. Fyca lets customers book online 24/7 so you spend less time on the phone and more time doing the work.",
-}
+  path: "/for-garages",
+})
 
 // ─── Feature card icons ───────────────────────────────────────────────────────
 

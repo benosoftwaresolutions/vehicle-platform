@@ -4,6 +4,15 @@ import GaragesSearch from "./GaragesSearch"
 import OnboardingBanner from "../components/OnboardingBanner"
 import { auth } from "@clerk/nextjs/server"
 import { getCachedUser, getCachedGarages } from "../lib/cache"
+import { pageMetadata } from "../lib/seo"
+
+// Canonical is the bare /garages path, so filtered views (?q=…&service=…)
+// are treated as variations of this page rather than competing duplicates.
+export const metadata = pageMetadata({
+  title: "Find a garage",
+  description: "Browse trusted independent garages, compare services and reviews, and book your slot online.",
+  path: "/garages",
+})
 
 export default async function Garages({ searchParams }: { searchParams: Promise<{ q?: string; service?: string }> }) {
   const { userId } = await auth()

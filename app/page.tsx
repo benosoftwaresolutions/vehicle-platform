@@ -7,6 +7,12 @@ import OnboardingBanner from "./components/OnboardingBanner"
 import { auth } from "@clerk/nextjs/server"
 import { getCachedUser, getCachedGarages } from "./lib/cache"
 import { prisma } from "./lib/prisma"
+import { pageMetadata } from "./lib/seo"
+
+export const metadata = pageMetadata({
+  description: "Find and book a trusted local garage in seconds. Search by service, read reviews, and confirm your slot — all online.",
+  path: "/",
+})
 
 const PREMIUM_MAKES = new Set(["BMW", "Mercedes", "Audi", "Volkswagen", "Porsche", "Land Rover"])
 
