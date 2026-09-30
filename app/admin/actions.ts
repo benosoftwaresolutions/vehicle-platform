@@ -151,7 +151,10 @@ export async function declinePendingGarage(userId: string, garageId: string) {
     prisma.part.deleteMany({ where: { garageId } }),
     prisma.customerNote.deleteMany({ where: { garageId } }),
     prisma.garageAvailability.deleteMany({ where: { garageId } }),
-    prisma.user.update({ where: { id: userId }, data: { garageId: null, role: "driver" } }),
+    // Keep them as a garage owner (with no garage) so they land on "Set up your
+    // garage" and can resubmit. Bookings aren't role-restricted, so they can
+    // still book as a customer in the meantime.
+    prisma.user.update({ where: { id: userId }, data: { garageId: null } }),
     prisma.garage.delete({ where: { id: garageId } }),
   ])
 
