@@ -1,9 +1,9 @@
 "use client"
 
-import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs"
+import { SignInButton, SignUpButton, SignOutButton, UserButton, useAuth } from "@clerk/nextjs"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState, useEffect, useSyncExternalStore } from "react"
+import { useState, useEffect, useRef, useSyncExternalStore } from "react"
 import { PLATFORM_LINKS, COMPANY_LINKS } from "@/app/lib/navLinks"
 
 function FycaLogo() {
@@ -114,32 +114,24 @@ export default function Navbar({ role }: { role?: string }) {
   // avatar when nav-desktop is CSS-hidden on mobile.
   const isDesktop = useSyncExternalStore(subscribeToDesktopQuery, getIsDesktopSnapshot, getIsDesktopServerSnapshot)
 
-  // Lock the page behind the menu while it's open. Without this, iOS Safari
-  // lets the long page underneath scroll, and after a scroll (or its toolbar
-  // resizing) the fixed overlay's tap targets can drift out of line with
-  // where the links are drawn — taps land on nothing and the menu looks dead.
-  // Locking both <html> and <body> covers whichever one iOS treats as the
-  // scroll container, given globals.css sets overflow-x on both at mobile.
+  // The mobile menu is a native modal <dialog>. showModal() puts it in the
+  // browser's top layer and makes the rest of the page inert, so a tap on the
+  // menu can never fall through to whatever is underneath (e.g. a garage card
+  // on the homepage) — the bug iOS Safari had with the old fixed-position div.
+  // It also gives Escape-to-close and focus trapping for free.
+  const dialogRef = useRef<HTMLDialogElement>(null)
+
   useEffect(() => {
-    if (!menuOpen) return
-    const html = document.documentElement
-    const body = document.body
-    const prev = { html: html.style.overflow, body: body.style.overflow }
-    html.style.overflow = "hidden"
-    body.style.overflow = "hidden"
-    return () => {
-      html.style.overflow = prev.html
-      body.style.overflow = prev.body
-    }
+    const dialog = dialogRef.current
+    if (!dialog) return
+    if (menuOpen && !dialog.open) dialog.showModal()
+    if (!menuOpen && dialog.open) dialog.close()
   }, [menuOpen])
 
-  // Close on Escape
-  useEffect(() => {
-    if (!menuOpen) return
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setMenuOpen(false) }
-    document.addEventListener("keydown", handler)
-    return () => document.removeEventListener("keydown", handler)
-  }, [menuOpen])
+  // If the viewport widens to desktop (e.g. rotating a tablet) while the menu
+  // is open, close it — otherwise the page would stay inert behind a menu that
+  // no longer makes sense. Same adjust-state-during-render pattern as above.
+  if (menuOpen && isDesktop) setMenuOpen(false)
 
   const isGarageOwner = effectiveRole === "garage_owner"
   const onGarages = pathname === "/for-garages"
@@ -229,36 +221,55 @@ export default function Navbar({ role }: { role?: string }) {
         {/* Mobile: hamburger */}
         <button
           className="nav-mobile"
-          onClick={() => setMenuOpen(o => !o)}
-          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          onClick={() => setMenuOpen(true)}
+          aria-label="Open menu"
           aria-expanded={menuOpen}
+          aria-controls="mobile-menu"
           style={{ background: "none", border: "none", cursor: "pointer", padding: "10px 12px", display: "flex", alignItems: "center", justifyContent: "center", marginRight: -12 }}
         >
-          <HamburgerIcon open={menuOpen} />
+          <HamburgerIcon open={false} />
         </button>
       </nav>
 
-      {/* Mobile overlay */}
-      {menuOpen && (
-        <div
-          className="nav-mobile"
-          // Close as soon as any link in the menu is tapped, rather than
-          // waiting for the URL to change. Gives instant feedback while the
-          // next page loads, and also closes the menu when you tap the link
-          // for the page you're already on (where the URL never changes).
-          // Runs after next/link's own click handler, so navigation still starts.
-          onClick={(e) => {
-            if ((e.target as HTMLElement).closest("a")) setMenuOpen(false)
-          }}
-          style={{
-          position: "fixed", top: 56, left: 0, right: 0, bottom: 0,
-          background: "#ffffff", zIndex: 49, overflowY: "auto",
-          // Scrolling the menu to its end shouldn't carry on into the page behind
-          overscrollBehavior: "contain",
-          display: "flex", flexDirection: "column",
-          padding: "8px 0 40px",
-          borderTop: "0.5px solid rgba(0,0,0,0.08)",
+      {/* Mobile menu — native modal dialog (see dialogRef comment above).
+          Always rendered so the ref exists; the browser hides it until
+          showModal(). Layout and scroll-lock rules live in globals.css. */}
+      <dialog
+        ref={dialogRef}
+        id="mobile-menu"
+        className="mobile-menu"
+        aria-label="Menu"
+        // Fires on Escape / Android back as well as our own close() — keeps
+        // React state in step with the browser.
+        onClose={() => setMenuOpen(false)}
+        // Close as soon as a link is tapped (instant feedback, and it closes
+        // even when tapping the page you're already on). Buttons that open
+        // Clerk's sign-in/sign-up/sign-out flows are marked data-close-menu,
+        // because Clerk renders those outside the dialog.
+        onClick={(e) => {
+          if ((e.target as HTMLElement).closest("a, [data-close-menu]")) setMenuOpen(false)
+        }}
+      >
+        {/* The page's own navbar is inert while the dialog is open, so the
+            dialog carries its own copy of the bar with a close button. */}
+        <div className="mobile-menu-bar" style={{
+          height: 56, flexShrink: 0, padding: "0 28px",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          borderBottom: "0.5px solid rgba(0,0,0,0.12)",
+          position: "sticky", top: 0, background: "#ffffff", zIndex: 1,
         }}>
+          <FycaLogo />
+          <button
+            autoFocus
+            onClick={() => setMenuOpen(false)}
+            aria-label="Close menu"
+            style={{ background: "none", border: "none", cursor: "pointer", padding: "10px 12px", display: "flex", alignItems: "center", justifyContent: "center", marginRight: -12 }}
+          >
+            <HamburgerIcon open />
+          </button>
+        </div>
+
+        <div style={{ padding: "8px 0 40px" }}>
           {/* Primary links */}
           <div style={{ padding: "8px 16px" }}>
             <Link href="/" className="mobile-link" style={mobileLink}>Home</Link>
@@ -298,24 +309,27 @@ export default function Navbar({ role }: { role?: string }) {
             {!isSignedIn ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <SignInButton mode="modal">
-                  <button style={{ width: "100%", background: "transparent", color: "#111110", border: "0.5px solid rgba(0,0,0,0.2)", borderRadius: 100, padding: "13px", fontSize: "0.95rem", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-dm-sans), sans-serif" }}>
+                  <button data-close-menu style={{ width: "100%", background: "transparent", color: "#111110", border: "0.5px solid rgba(0,0,0,0.2)", borderRadius: 100, padding: "13px", fontSize: "0.95rem", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-dm-sans), sans-serif" }}>
                     Log in
                   </button>
                 </SignInButton>
                 <SignUpButton mode="modal">
-                  <button style={{ width: "100%", background: "#111110", color: "#ffffff", border: "none", borderRadius: 100, padding: "13px", fontSize: "0.95rem", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-dm-sans), sans-serif" }}>
+                  <button data-close-menu style={{ width: "100%", background: "#111110", color: "#ffffff", border: "none", borderRadius: 100, padding: "13px", fontSize: "0.95rem", fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-dm-sans), sans-serif" }}>
                     Get started
                   </button>
                 </SignUpButton>
               </div>
             ) : (
-              <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "0 14px" }}>
-                <UserButton>
-                  <UserButton.MenuItems>
-                    <UserButton.Link label="My Profile" href="/profile" labelIcon={<ProfileIcon />} />
-                  </UserButton.MenuItems>
-                </UserButton>
-                <span style={{ fontSize: "0.875rem", color: "#444441" }}>My account</span>
+              // Plain link + sign-out button rather than Clerk's <UserButton>:
+              // its popover renders outside this dialog, where the modal would
+              // make it inert and untappable.
+              <div>
+                <Link href="/profile" className="mobile-link" style={mobileLink}>My profile</Link>
+                <SignOutButton>
+                  <button data-close-menu className="mobile-link" style={{ ...mobileLink, width: "100%", textAlign: "left", background: "transparent", border: "none", cursor: "pointer", color: "#6b6a66" }}>
+                    Sign out
+                  </button>
+                </SignOutButton>
               </div>
             )}
           </div>
@@ -345,7 +359,7 @@ export default function Navbar({ role }: { role?: string }) {
             </div>
           </div>
         </div>
-      )}
+      </dialog>
     </>
   )
 }
