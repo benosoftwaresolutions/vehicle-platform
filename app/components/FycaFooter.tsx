@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { PLATFORM_LINKS, COMPANY_LINKS } from "@/app/lib/navLinks"
 
 export default function FycaFooter() {
   return (
@@ -41,11 +42,7 @@ export default function FycaFooter() {
         <div className="footer-links" style={{ display: "flex", gap: 48, flexWrap: "wrap" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <p style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#aaa9a4", margin: 0 }}>Platform</p>
-            {[
-              { label: "Find a garage", href: "/garages" },
-              { label: "For drivers", href: "/for-drivers" },
-              { label: "For garages", href: "/for-garages" },
-            ].map(({ label, href }) => (
+            {PLATFORM_LINKS.map(({ label, href }) => (
               <Link key={label} href={href} className="footer-link" style={{
                 color: "#6b6a66", fontSize: "0.875rem", fontWeight: 500,
                 textDecoration: "none",
@@ -56,12 +53,7 @@ export default function FycaFooter() {
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <p style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#aaa9a4", margin: 0 }}>Company</p>
-            {[
-              { label: "About", href: "/about" },
-              { label: "Contact", href: "/contact" },
-              { label: "Privacy", href: "/privacy" },
-              { label: "Terms", href: "/terms" },
-            ].map(({ label, href }) => (
+            {COMPANY_LINKS.map(({ label, href }) => (
               <Link key={label} href={href} className="footer-link" style={{
                 color: "#6b6a66", fontSize: "0.875rem", fontWeight: 500,
                 textDecoration: "none",
