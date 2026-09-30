@@ -4,6 +4,7 @@ import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState, useEffect, useSyncExternalStore } from "react"
+import { PLATFORM_LINKS, COMPANY_LINKS } from "@/app/lib/navLinks"
 
 function FycaLogo() {
   return (
@@ -242,17 +243,24 @@ export default function Navbar({ role }: { role?: string }) {
 
           <div style={{ height: "0.5px", background: "rgba(0,0,0,0.08)", margin: "8px 16px" }} />
 
-          {/* For garages / drivers — signed-out visitors only */}
-          {!isSignedIn && (
-            <>
-              <div style={{ padding: "8px 16px" }}>
-                <Link href="/for-garages" className="mobile-link" style={{ ...mobileLink, background: onGarages ? "#f4f3ef" : "transparent" }}>For garages</Link>
-                <Link href="/for-drivers" className="mobile-link" style={{ ...mobileLink, background: onDrivers ? "#f4f3ef" : "transparent" }}>For drivers</Link>
-              </div>
+          {/* Platform — same list as the footer. "Find a garage" is skipped
+              because the primary links above already show it as "Garages". */}
+          <div style={{ padding: "8px 16px" }}>
+            <p style={menuEyebrow}>Platform</p>
+            {PLATFORM_LINKS.filter(l => l.href !== "/garages").map(({ label, href }) => (
+              <Link
+                key={href}
+                href={href}
+                className="mobile-link"
+                aria-current={pathname === href ? "page" : undefined}
+                style={{ ...mobileLink, background: pathname === href ? "#f4f3ef" : "transparent" }}
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
 
-              <div style={{ height: "0.5px", background: "rgba(0,0,0,0.08)", margin: "8px 16px" }} />
-            </>
-          )}
+          <div style={{ height: "0.5px", background: "rgba(0,0,0,0.08)", margin: "8px 16px" }} />
 
           {/* Auth */}
           <div style={{ padding: "16px 16px 0" }}>
@@ -280,6 +288,31 @@ export default function Navbar({ role }: { role?: string }) {
               </div>
             )}
           </div>
+
+          {/* Company — the menu's "footer". Placed after the auth buttons so
+              Log in / Get started stay near the top of the screen, and styled
+              smaller in a 2-column grid because these are low-priority links. */}
+          <div style={{ padding: "24px 16px 0", marginTop: 16, borderTop: "0.5px solid rgba(0,0,0,0.08)" }}>
+            <p style={menuEyebrow}>Company</p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+              {COMPANY_LINKS.map(({ label, href }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="mobile-link"
+                  aria-current={pathname === href ? "page" : undefined}
+                  style={{
+                    ...mobileLink,
+                    fontSize: "0.9rem",
+                    color: pathname === href ? "#111110" : "#6b6a66",
+                    background: pathname === href ? "#f4f3ef" : "transparent",
+                  }}
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </>
@@ -299,6 +332,11 @@ const navLink: React.CSSProperties = {
   background: "none", border: "none", fontSize: "0.875rem", fontWeight: 500,
   color: "#444441", cursor: "pointer", padding: "6px 10px", borderRadius: 8,
   textDecoration: "none", fontFamily: "var(--font-dm-sans), sans-serif",
+}
+
+const menuEyebrow: React.CSSProperties = {
+  fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+  color: "#aaa9a4", margin: "4px 14px 6px", fontFamily: "var(--font-dm-sans), sans-serif",
 }
 
 const mobileLink: React.CSSProperties = {
