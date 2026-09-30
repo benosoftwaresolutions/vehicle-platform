@@ -114,6 +114,25 @@ export default function Navbar({ role }: { role?: string }) {
   // avatar when nav-desktop is CSS-hidden on mobile.
   const isDesktop = useSyncExternalStore(subscribeToDesktopQuery, getIsDesktopSnapshot, getIsDesktopServerSnapshot)
 
+  // Lock the page behind the menu while it's open. Without this, iOS Safari
+  // lets the long page underneath scroll, and after a scroll (or its toolbar
+  // resizing) the fixed overlay's tap targets can drift out of line with
+  // where the links are drawn — taps land on nothing and the menu looks dead.
+  // Locking both <html> and <body> covers whichever one iOS treats as the
+  // scroll container, given globals.css sets overflow-x on both at mobile.
+  useEffect(() => {
+    if (!menuOpen) return
+    const html = document.documentElement
+    const body = document.body
+    const prev = { html: html.style.overflow, body: body.style.overflow }
+    html.style.overflow = "hidden"
+    body.style.overflow = "hidden"
+    return () => {
+      html.style.overflow = prev.html
+      body.style.overflow = prev.body
+    }
+  }, [menuOpen])
+
   // Close on Escape
   useEffect(() => {
     if (!menuOpen) return
@@ -221,9 +240,21 @@ export default function Navbar({ role }: { role?: string }) {
 
       {/* Mobile overlay */}
       {menuOpen && (
-        <div className="nav-mobile" style={{
+        <div
+          className="nav-mobile"
+          // Close as soon as any link in the menu is tapped, rather than
+          // waiting for the URL to change. Gives instant feedback while the
+          // next page loads, and also closes the menu when you tap the link
+          // for the page you're already on (where the URL never changes).
+          // Runs after next/link's own click handler, so navigation still starts.
+          onClick={(e) => {
+            if ((e.target as HTMLElement).closest("a")) setMenuOpen(false)
+          }}
+          style={{
           position: "fixed", top: 56, left: 0, right: 0, bottom: 0,
           background: "#ffffff", zIndex: 49, overflowY: "auto",
+          // Scrolling the menu to its end shouldn't carry on into the page behind
+          overscrollBehavior: "contain",
           display: "flex", flexDirection: "column",
           padding: "8px 0 40px",
           borderTop: "0.5px solid rgba(0,0,0,0.08)",
