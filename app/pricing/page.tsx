@@ -4,6 +4,7 @@ import Navbar from "@/app/components/Navbar"
 import FycaFooter from "@/app/components/FycaFooter"
 import CheckoutButton from "./CheckoutButton"
 import ManageButton from "./ManageButton"
+import { garageTrialDaysLeft } from "@/app/lib/subscription"
 import type { Metadata } from "next"
 
 // Trial end shown as a date rather than a day count — unambiguous, and it
@@ -27,6 +28,8 @@ export default async function PricingPage() {
   let isDriverPro = false
   let isGarageActive = false
   let isGarageTrialing = false
+  let isGaragePastDue = false
+  let hasGarage = false
   let garageHasCard = false
   let trialEndsAt: Date | null = null
   let subscriptionEnd: Date | null = null
@@ -44,8 +47,12 @@ export default async function PricingPage() {
         where: { id: user.garageId },
         select: { subscriptionStatus: true, trialEndsAt: true, stripeSubscriptionId: true, subscriptionEnd: true },
       })
+      hasGarage = !!garage
       isGarageActive = garage?.subscriptionStatus === "active"
-      isGarageTrialing = garage?.subscriptionStatus === "trialing"
+      // DB status stays "trialing" after the trial date passes (nothing flips it),
+      // so an expired trial must be detected from trialEndsAt, not the status.
+      isGarageTrialing = garage?.subscriptionStatus === "trialing" && garageTrialDaysLeft(garage?.trialEndsAt ?? null) > 0
+      isGaragePastDue = garage?.subscriptionStatus === "past_due"
       garageHasCard = !!garage?.stripeSubscriptionId
       trialEndsAt = garage?.trialEndsAt ?? null
       subscriptionEnd = garage?.subscriptionEnd ?? null
@@ -55,8 +62,8 @@ export default async function PricingPage() {
   const trialEndLabel = formatTrialEnd(trialEndsAt)
   const nextBillingLabel = formatTrialEnd(subscriptionEnd)
 
-  // A subscribed garage is reading an account summary, not a sales pitch — drop
-  // the trial line from the feature list and lead with what they're paying for.
+  // This card is only shown to garage owners who are past the trial stage
+  // (active, expired, cancelled or past due), so it never offers a free trial.
   const GARAGE_FEATURES = [
     "Online booking management",
     "Calendar & availability",
@@ -66,9 +73,6 @@ export default async function PricingPage() {
     "AI parts predictions",
     "Inventory management",
   ]
-  const garageFeatures = isGarageActive
-    ? GARAGE_FEATURES
-    : ["1 month free trial", ...GARAGE_FEATURES]
 
   const isGarageOwner = role === "garage_owner"
   const isDriver = role === "customer"
@@ -125,13 +129,19 @@ export default async function PricingPage() {
                     ? nextBillingLabel
                       ? `Your subscription is active. Next payment ${nextBillingLabel}.`
                       : "Your subscription is active."
-                    : "The complete platform for independent garages."
+                    : !hasGarage
+                      ? "The complete platform for independent garages."
+                      : isGaragePastDue
+                        ? "Your last payment failed. Update your payment method to keep taking bookings."
+                        : "Your free trial has ended. Subscribe to keep taking bookings."
                 }
-                features={garageFeatures}
+                features={GARAGE_FEATURES}
                 cta={
                   isGarageActive
                     ? <ManageButton entity="garage" label="Manage billing" />
-                    : <CheckoutButton plan="garage_pro" label="Start free trial" />
+                    : isGaragePastDue
+                      ? <ManageButton entity="garage" label="Update payment method" />
+                      : <CheckoutButton plan="garage_pro" label="Subscribe now" />
                 }
                 highlight={true}
                 badge={isGarageActive ? "Active" : undefined}

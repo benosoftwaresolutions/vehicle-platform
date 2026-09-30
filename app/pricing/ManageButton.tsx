@@ -4,23 +4,32 @@ import { useState } from "react"
 
 export default function ManageButton({ entity, label }: { entity: string; label: string }) {
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleClick = async () => {
     setLoading(true)
-    const res = await fetch("/api/subscriptions/portal", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ entity }),
-    })
-    const data = await res.json()
-    if (data.url) {
-      window.location.href = data.url
-    } else {
-      setLoading(false)
+    setError(null)
+    try {
+      const res = await fetch("/api/subscriptions/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ entity }),
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+        return
+      }
+      setError(data.error || "Something went wrong — please try again")
+    } catch {
+      setError("Something went wrong — please try again")
     }
+    setLoading(false)
   }
 
   return (
+    <>
+    {error && <p style={{ fontSize: "0.8rem", color: "#ef4444", marginBottom: 8 }}>{error}</p>}
     <button
       onClick={handleClick}
       disabled={loading}
@@ -28,5 +37,6 @@ export default function ManageButton({ entity, label }: { entity: string; label:
     >
       {loading ? "Loading…" : label}
     </button>
+    </>
   )
 }

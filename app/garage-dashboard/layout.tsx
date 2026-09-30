@@ -3,6 +3,7 @@ import { prisma } from "@/app/lib/prisma"
 import { cache } from "react"
 import Navbar from "@/app/components/Navbar"
 import Link from "next/link"
+import CheckoutButton from "@/app/pricing/CheckoutButton"
 import { isGarageAccessAllowed, garageTrialDaysLeft, garageGraceDaysLeft } from "@/app/lib/subscription"
 
 // Deduplicates across layout + page in the same request
@@ -185,12 +186,11 @@ function SubscriptionWall() {
             Subscribe to Garage Pro to continue managing bookings, availability, and settings.
           </p>
           <p style={{ color: "#111110", fontWeight: 700, fontSize: "1.1rem", marginBottom: "28px" }}>£99.99/month</p>
-          <Link
-            href="/pricing"
-            style={{ background: "#111110", color: "#ffffff", padding: "12px 28px", borderRadius: 100, fontWeight: 600, fontSize: "0.95rem", textDecoration: "none" }}
-          >
-            Subscribe now
-          </Link>
+          {/* Straight to Stripe Checkout — one click, and any failure shows an error
+              message instead of a dead link. */}
+          <div style={{ maxWidth: 260, margin: "0 auto" }}>
+            <CheckoutButton plan="garage_pro" label="Subscribe now" variant="dark" />
+          </div>
         </div>
       </main>
     </>
