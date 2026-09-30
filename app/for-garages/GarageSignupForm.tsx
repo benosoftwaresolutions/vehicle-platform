@@ -2,15 +2,29 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useAuth, useClerk } from "@clerk/nextjs"
 
+// There is no /sign-up page — sign-up happens in Clerk's modal (same as the
+// Navbar). Open that modal with the email pre-filled, then send the new user
+// to /onboarding, which routes garage owners on to their dashboard.
 export default function GarageSignupForm() {
   const router = useRouter()
+  const { isSignedIn } = useAuth()
+  const { openSignUp } = useClerk()
   const [email, setEmail] = useState("")
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.trim()) return
-    router.push(`/sign-up?email=${encodeURIComponent(email.trim())}`)
+    const trimmed = email.trim()
+    if (!trimmed) return
+    if (isSignedIn) {
+      router.push("/onboarding")
+      return
+    }
+    openSignUp({
+      initialValues: { emailAddress: trimmed },
+      forceRedirectUrl: "/onboarding",
+    })
   }
 
   return (

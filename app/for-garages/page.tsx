@@ -1,7 +1,7 @@
-import Link from "next/link"
 import Navbar from "@/app/components/Navbar"
 import FycaFooter from "@/app/components/FycaFooter"
 import GarageSignupForm from "./GarageSignupForm"
+import StartTrialButton from "./StartTrialButton"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -131,13 +131,13 @@ export default function ForGaragesPage() {
           </p>
 
           <div className="cta-row" style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 56 }}>
-            <Link href="/sign-up" style={{
+            <StartTrialButton style={{
               background: "#111110", color: "#ffffff",
               padding: "14px 28px", borderRadius: 100,
-              fontWeight: 600, fontSize: "0.95rem", textDecoration: "none",
+              fontWeight: 600, fontSize: "0.95rem", fontFamily: "inherit",
             }}>
               Start your free month
-            </Link>
+            </StartTrialButton>
             <a href="#features" style={{
               background: "transparent", color: "#111110",
               padding: "14px 28px", borderRadius: 100,
