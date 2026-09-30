@@ -3,7 +3,9 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 
-export default function CheckoutButton({ plan, label }: { plan: string; label: string }) {
+// variant: "light" = white button (for dark cards, the default for garage_pro),
+// "dark" = black button (for light backgrounds, e.g. the dashboard trial-ended wall).
+export default function CheckoutButton({ plan, label, variant }: { plan: string; label: string; variant?: "light" | "dark" }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
@@ -32,7 +34,7 @@ export default function CheckoutButton({ plan, label }: { plan: string; label: s
     }
   }
 
-  const isGarage = plan === "garage_pro"
+  const isLight = variant ? variant === "light" : plan === "garage_pro"
 
   return (
     <>
@@ -42,8 +44,8 @@ export default function CheckoutButton({ plan, label }: { plan: string; label: s
       disabled={loading}
       style={{
         width: "100%",
-        background: isGarage ? "#ffffff" : "#111110",
-        color: isGarage ? "#111110" : "#ffffff",
+        background: isLight ? "#ffffff" : "#111110",
+        color: isLight ? "#111110" : "#ffffff",
         padding: "11px 20px",
         borderRadius: 100,
         fontWeight: 600,
