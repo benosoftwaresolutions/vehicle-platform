@@ -1,11 +1,13 @@
 import Navbar from "@/app/components/Navbar"
 import FycaFooter from "@/app/components/FycaFooter"
 import type { Metadata } from "next"
+import { pageMetadata } from "@/app/lib/seo"
 
-export const metadata: Metadata = {
-  title: "Terms of Service — Fyca",
+export const metadata: Metadata = pageMetadata({
+  title: "Terms of Service",
   description: "The terms that govern your use of Fyca.",
-}
+  path: "/terms",
+})
 
 /*
  * DRAFT — placeholder copy, not legally reviewed.

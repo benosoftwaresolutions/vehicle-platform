@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next"
 import { prisma } from "@/app/lib/prisma"
+import { activeGarageWhere } from "@/app/lib/subscription"
 
 export const dynamic = "force-dynamic"
 
@@ -7,7 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fyca.co.uk"
 
   const garages = await prisma.garage.findMany({
-    where: { approved: true },
+    where: { approved: true, ...activeGarageWhere() },
     select: { id: true, updatedAt: true },
   })
 
@@ -27,6 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/about`,              lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/contact`,            lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/privacy`,            lastModified: new Date(), changeFrequency: "monthly", priority: 0.4 },
+    { url: `${base}/terms`,              lastModified: new Date(), changeFrequency: "monthly", priority: 0.4 },
     ...garageUrls,
   ]
 }
