@@ -26,6 +26,16 @@ export const getGarageOwnerContext = cache(async (userId: string) => {
     }),
   ])
 
+  // User.garageId is a plain string, not a foreign key, so the database can't
+  // stop it pointing at a garage that no longer exists (e.g. deleted by hand in
+  // the DB). Without this check the defaults below would treat the missing
+  // garage as an expired trial and show the paywall. Instead, clear the dangling
+  // id and send the owner back through setup.
+  if (!garage) {
+    await prisma.user.update({ where: { clerkId: userId }, data: { garageId: null } })
+    return { garageId: null, approved: false, isLive: false }
+  }
+
   const approved = garage?.approved ?? false
   const hasServices = (garage?.services ?? []).length > 0
   const hasAvailability = !!availability
