@@ -3,6 +3,7 @@ import { prisma } from "@/app/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
 import { sendNewBookingToGarage } from "@/app/lib/email"
 import { rateLimit } from "@/app/lib/rateLimit"
+import { requiredText, text, ValidationError, validationErrorResponse } from "@/app/lib/validate"
 import { activeGarageWhere } from "@/app/lib/subscription"
 import { getAvailableSlots } from "@/app/lib/slots"
 import { headers } from "next/headers"
@@ -20,13 +21,23 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json()
-    const { garageId, service, date, time, registration, vehicleMake, vehicleModel } = body
-
-    if (!garageId || !service?.trim() || !date || !time || !registration?.trim()) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
-    }
-    if (service.length > 100 || registration.length > 20) {
-      return NextResponse.json({ error: "Invalid input" }, { status: 400 })
+    // Validate types as well as lengths: a non-string here used to crash
+    // .trim() and come back as a 500 instead of a clear 400
+    let garageId: string, service: string, time: string, registration: string
+    let vehicleMake: string | null, vehicleModel: string | null
+    const { date } = body
+    try {
+      garageId = requiredText(body.garageId, "Garage", 50)
+      service = requiredText(body.service, "Service", 100)
+      time = requiredText(body.time, "Time", 5)
+      registration = requiredText(body.registration, "Registration", 20)
+      vehicleMake = text(body.vehicleMake, "Vehicle make", 50)
+      vehicleModel = text(body.vehicleModel, "Vehicle model", 50)
+      if (!date) throw new ValidationError("Date is required")
+    } catch (err) {
+      const res = validationErrorResponse(err)
+      if (res) return res
+      throw err
     }
     const parsedDate = new Date(date)
     if (isNaN(parsedDate.getTime())) {
@@ -66,8 +77,8 @@ export async function POST(req: Request) {
         date: new Date(date),
         time,
         registration,
-        vehicleMake: vehicleMake?.trim() || null,
-        vehicleModel: vehicleModel?.trim() || null,
+        vehicleMake,
+        vehicleModel,
         status: "pending"
       }
     })

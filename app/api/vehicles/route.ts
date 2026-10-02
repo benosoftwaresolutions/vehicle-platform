@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
 import { isDriverPro, DRIVER_FREE_VEHICLE_LIMIT } from "@/app/lib/subscription"
+import { text, requiredText, number, ValidationError, validationErrorResponse } from "@/app/lib/validate"
 
 const FUEL_TYPES = ["petrol", "diesel", "electric", "hybrid", "phev"]
 
@@ -27,10 +28,25 @@ export async function POST(req: Request) {
   if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 })
 
   const body = await req.json()
-  const { make, model, year, registration, colour, fuelType, motExpiry, lastServiceDate, nextServiceDue, currentMileage, notes } = body
+  const { fuelType, motExpiry, lastServiceDate, nextServiceDue } = body
 
-  if (!make?.trim() || !model?.trim() || !year?.trim() || !registration?.trim()) {
-    return NextResponse.json({ error: "Make, model, year and registration are required" }, { status: 400 })
+  // Validate everything up front — see app/lib/validate.ts for why
+  let input
+  try {
+    input = {
+      make: requiredText(body.make, "Make", 50),
+      model: requiredText(body.model, "Model", 50),
+      year: requiredText(body.year, "Year", 4),
+      registration: requiredText(body.registration, "Registration", 12).toUpperCase(),
+      colour: text(body.colour, "Colour", 30),
+      notes: text(body.notes, "Notes", 2000),
+      currentMileage: number(body.currentMileage, "Mileage", { integer: true, max: 2_000_000 }),
+    }
+    if (!/^\d{4}$/.test(input.year)) throw new ValidationError("Year must be four digits, e.g. 2019")
+  } catch (err) {
+    const res = validationErrorResponse(err)
+    if (res) return res
+    throw err
   }
 
   // Enforce vehicle limit for free plan
@@ -44,25 +60,22 @@ export async function POST(req: Request) {
   if (fuelType && !FUEL_TYPES.includes(fuelType)) {
     return NextResponse.json({ error: "Invalid fuel type" }, { status: 400 })
   }
-  if (currentMileage !== undefined && currentMileage !== null && (!Number.isInteger(currentMileage) || currentMileage < 0)) {
-    return NextResponse.json({ error: "Invalid mileage" }, { status: 400 })
-  }
 
   try {
     const vehicle = await prisma.vehicle.create({
       data: {
         clerkId: userId,
-        make: make.trim(),
-        model: model.trim(),
-        year: year.trim(),
-        registration: registration.trim().toUpperCase(),
-        colour: colour?.trim() || null,
+        make: input.make,
+        model: input.model,
+        year: input.year,
+        registration: input.registration,
+        colour: input.colour,
         fuelType: fuelType || null,
         motExpiry: parseDate(motExpiry),
         lastServiceDate: parseDate(lastServiceDate),
         nextServiceDue: parseDate(nextServiceDue),
-        currentMileage: currentMileage ?? null,
-        notes: notes?.trim() || null,
+        currentMileage: input.currentMileage,
+        notes: input.notes,
       },
     })
     return NextResponse.json(vehicle, { status: 201 })
