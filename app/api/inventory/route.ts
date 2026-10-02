@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
+import { text, requiredText, email, number, validationErrorResponse } from "@/app/lib/validate"
 import { isGarageAccessAllowed } from "@/app/lib/subscription"
 
 async function getGarageId(userId: string): Promise<string | null> {
@@ -36,22 +37,26 @@ export async function POST(req: Request) {
   if (!garageId) return NextResponse.json({ error: "Not available on your plan" }, { status: 403 })
 
   const body = await req.json()
-  const { name, category, quantity, reorderLevel, unit, supplier, supplierEmail, costPrice } = body
-
-  if (!name?.trim()) return NextResponse.json({ error: "Name is required" }, { status: 400 })
-
-  const part = await prisma.part.create({
-    data: {
+  // Validate — previously "abc" in a number field became NaN and crashed the insert
+  let data
+  try {
+    data = {
       garageId,
-      name: name.trim(),
-      category: category?.trim() || null,
-      quantity: Number(quantity) || 0,
-      reorderLevel: Number(reorderLevel) || 0,
-      unit: unit?.trim() || "units",
-      supplier: supplier?.trim() || null,
-      supplierEmail: supplierEmail?.trim() || null,
-      costPrice: costPrice ? Number(costPrice) : null,
-    },
-  })
+      name: requiredText(body.name, "Name", 100),
+      category: text(body.category, "Category", 50),
+      quantity: number(body.quantity, "Quantity", { max: 1_000_000 }) ?? 0,
+      reorderLevel: number(body.reorderLevel, "Reorder level", { max: 1_000_000 }) ?? 0,
+      unit: text(body.unit, "Unit", 20) ?? "units",
+      supplier: text(body.supplier, "Supplier", 100),
+      supplierEmail: email(body.supplierEmail, "Supplier email"),
+      costPrice: number(body.costPrice, "Cost price", { max: 100_000 }),
+    }
+  } catch (err) {
+    const res = validationErrorResponse(err)
+    if (res) return res
+    throw err
+  }
+
+  const part = await prisma.part.create({ data })
   return NextResponse.json(part, { status: 201 })
 }

@@ -2,6 +2,8 @@
 
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
+import { rateLimit } from "@/app/lib/rateLimit"
+import { requiredText, text, email, ValidationError } from "@/app/lib/validate"
 import { sendBookingConfirmedToCustomer, sendBookingDeclinedToCustomer, sendWalkInBookingToGarage, sendWalkInConfirmationToCustomer, sendBookingRescheduledToCustomer, sendMessageToCustomer, sendJobCompletedToCustomer } from "@/app/lib/email"
 
 export async function updateBookingStatus(
@@ -156,6 +158,13 @@ export async function messageCustomer(bookingId: string, message: string) {
   if (!user || user.role !== "garage_owner" || !user.garageId) throw new Error("Unauthorised")
   if (!booking || booking.garageId !== user.garageId) throw new Error("Unauthorised")
   if (!message.trim()) throw new Error("Message cannot be empty")
+  if (message.length > 2000) throw new Error("Message must be 2000 characters or fewer")
+
+  // Each message is an email sent from our domain. Limit per garage so a
+  // compromised or abusive account can't use Fyca to send bulk email.
+  if (!await rateLimit(`message-customer:${user.garageId}`, 20, 60 * 60_000)) {
+    throw new Error("You've sent a lot of messages in the last hour. Please try again later.")
+  }
 
   const [customer, garage] = await Promise.all([
     booking.clerkId ? prisma.user.findUnique({ where: { clerkId: booking.clerkId } }) : null,
@@ -203,6 +212,28 @@ export async function createWalkInBooking(data: {
   if (!user || user.role !== "garage_owner" || user.garageId !== data.garageId) {
     throw new Error("Unauthorised")
   }
+
+  // Walk-in bookings email a confirmation to whatever address is typed in,
+  // and anyone can start a free trial — so without a limit this is a way to
+  // send spam from our domain. 30 an hour is far above a real garage's pace.
+  if (!await rateLimit(`walk-in:${user.garageId}`, 30, 60 * 60_000)) {
+    throw new Error("Too many walk-in bookings in the last hour. Please try again later.")
+  }
+
+  // Validate and normalise every field. Empty optional fields become "" so
+  // the code below (which calls .trim() on them) works unchanged.
+  data = {
+    garageId: data.garageId,
+    customerName: requiredText(data.customerName, "Customer name", 100),
+    customerPhone: text(data.customerPhone, "Phone", 30) ?? "",
+    customerEmail: email(data.customerEmail, "Email") ?? "",
+    registration: requiredText(data.registration, "Registration", 20),
+    service: requiredText(data.service, "Service", 100),
+    date: requiredText(data.date, "Date", 30),
+    time: requiredText(data.time, "Time", 5),
+  }
+  if (isNaN(new Date(data.date).getTime())) throw new ValidationError("Date is invalid")
+  if (!/^\d{2}:\d{2}$/.test(data.time)) throw new ValidationError("Time must be in HH:MM format")
 
   try {
     await prisma.booking.create({

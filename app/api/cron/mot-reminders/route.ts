@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { isAuthorizedCron } from "@/app/lib/cronAuth"
 import { prisma } from "@/app/lib/prisma"
 import { sendMotReminder, sendServiceReminder } from "@/app/lib/email"
 
@@ -13,8 +14,7 @@ function daysBetween(from: Date, to: Date) {
 }
 
 export async function GET(req: Request) {
-  const authHeader = req.headers.get("authorization")
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!isAuthorizedCron(req)) {
     return NextResponse.json({ error: "Unauthorised" }, { status: 401 })
   }
 

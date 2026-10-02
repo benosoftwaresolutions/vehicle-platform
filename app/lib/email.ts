@@ -2,12 +2,70 @@ import { Resend } from "resend"
 
 const FROM = process.env.RESEND_FROM ?? "onboarding@resend.dev"
 
+// ---------------------------------------------------------------------------
+// HTML escaping for email bodies
+//
+// Customer names, booking notes and garage messages are typed by users. If
+// they were dropped into the HTML as-is, someone could book under a "name"
+// containing a link or fake "update your card" button, and it would arrive in
+// a genuine email from our domain. So every email body is built with the
+// html`...` tag below, which escapes each ${value} by default. Fragments we
+// build ourselves (buttons, tables, other html`...` blocks) are SafeHtml and
+// pass through untouched. Escaping is the default, so it can't be forgotten.
+// Subject lines are plain text, not HTML, so they're left as they are.
+// ---------------------------------------------------------------------------
+
+class SafeHtml {
+  constructor(readonly value: string) {}
+  toString() { return this.value }
+}
+
+export function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
+type HtmlValue = SafeHtml | string | number | null | undefined | false | HtmlValue[]
+
+function renderValue(v: HtmlValue): string {
+  if (v instanceof SafeHtml) return v.value
+  if (Array.isArray(v)) return v.map(renderValue).join("")
+  if (v === null || v === undefined || v === false) return ""
+  return escapeHtml(String(v))
+}
+
+export function html(strings: TemplateStringsArray, ...values: HtmlValue[]): SafeHtml {
+  let out = strings[0]
+  values.forEach((v, i) => { out += renderValue(v) + strings[i + 1] })
+  return new SafeHtml(out)
+}
+
+/** User text that may contain line breaks: escaped first, then newlines become <br>. */
+function multiline(text: string): SafeHtml {
+  return new SafeHtml(escapeHtml(text).replace(/\r?\n/g, "<br>"))
+}
+
+/** Only allow http(s) links from user-entered URLs (blocks javascript: and similar). */
+function safeUrl(url: string | null | undefined): string | null {
+  if (!url) return null
+  try {
+    const u = new URL(url)
+    return u.protocol === "https:" || u.protocol === "http:" ? u.toString() : null
+  } catch {
+    return null
+  }
+}
+
 // Canonical www URL — the apex 307-redirects and some mail clients mishandle that.
 const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://www.fyca.co.uk").replace(/\/$/, "")
 
 // Bulletproof email button (table-based so it renders in Outlook too)
-function emailButton(label: string, href: string) {
-  return `<table cellpadding="0" cellspacing="0" style="margin-top:24px;">
+function emailButton(label: string, href: string): SafeHtml {
+  return html`<table cellpadding="0" cellspacing="0" style="margin-top:24px;">
     <tr>
       <td style="background:#111110;border-radius:100px;">
         <a href="${href}" style="display:inline-block;padding:13px 28px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;">${label}</a>
@@ -45,7 +103,7 @@ function formatDate(date: Date | string): string {
   })
 }
 
-function emailBase(content: string) {
+function emailBase(content: SafeHtml): string {
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -95,13 +153,13 @@ function emailBase(content: string) {
 </html>`
 }
 
-function dataTable(rows: [string, string][]) {
-  return `<table cellpadding="0" cellspacing="0" width="100%" style="margin-top:16px;">
-    ${rows.map(([label, value]) => `
+function dataTable(rows: [string, string][]): SafeHtml {
+  return html`<table cellpadding="0" cellspacing="0" width="100%" style="margin-top:16px;">
+    ${rows.map(([label, value]) => html`
       <tr>
         <td style="padding:8px 0;border-bottom:0.5px solid rgba(0,0,0,0.07);font-size:13px;color:#6b6a66;width:140px;vertical-align:top;">${label}</td>
         <td style="padding:8px 0;border-bottom:0.5px solid rgba(0,0,0,0.07);font-size:13px;color:#111110;font-weight:500;">${value}</td>
-      </tr>`).join("")}
+      </tr>`)}
   </table>`
 }
 
@@ -130,7 +188,7 @@ export async function sendNewBookingToGarage({
     from: FROM,
     to: garageOwnerEmail,
     subject: `New booking request — ${service} on ${formatDate(date)}`,
-    html: emailBase(`
+    html: emailBase(html`
       <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">New Booking Request</h2>
       <p style="color:#6b6a66;font-size:14px;margin:0 0 4px;">You have a new booking request at <strong style="color:#111110;">${garageName}</strong>.</p>
       ${dataTable([
@@ -171,7 +229,7 @@ export async function sendBookingConfirmedToCustomer({
     from: FROM,
     to: customerEmail,
     subject: `Booking confirmed — ${service} at ${garageName}`,
-    html: emailBase(`
+    html: emailBase(html`
       <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Your booking is confirmed</h2>
       <p style="color:#6b6a66;font-size:14px;margin:0 0 4px;">Hi ${customerName}, your booking has been accepted by <strong style="color:#111110;">${garageName}</strong>.</p>
       ${dataTable([
@@ -208,7 +266,7 @@ export async function sendAlternativeAcceptedToGarage({
     from: FROM,
     to: garageOwnerEmail,
     subject: `Customer accepted alternative — ${service} on ${formatDate(confirmedDate)}`,
-    html: emailBase(`
+    html: emailBase(html`
       <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Customer Accepted Alternative Slot</h2>
       <p style="color:#6b6a66;font-size:14px;margin:0 0 4px;"><strong style="color:#111110;">${customerName}</strong> has accepted the alternative time you offered at <strong style="color:#111110;">${garageName}</strong>.</p>
       ${dataTable([
@@ -242,7 +300,7 @@ export async function sendAlternativeDeclinedToGarage({
     from: FROM,
     to: garageOwnerEmail,
     subject: `Customer declined alternative — ${service}`,
-    html: emailBase(`
+    html: emailBase(html`
       <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Customer Declined Alternative Slot</h2>
       <p style="color:#6b6a66;font-size:14px;margin:0;"><strong style="color:#111110;">${customerName}</strong> has declined the alternative time you offered at <strong style="color:#111110;">${garageName}</strong> for <strong style="color:#111110;">${service}</strong> on <strong style="color:#111110;">${formatDate(date)} at ${time}</strong>.</p>
       <p style="margin-top:16px;font-size:14px;color:#444441;">The booking has been closed.</p>
@@ -279,7 +337,7 @@ export async function sendWalkInBookingToGarage({
     from: FROM,
     to: garageOwnerEmail,
     subject: `Walk-in booked — ${service} on ${formatDate(date)}`,
-    html: emailBase(`
+    html: emailBase(html`
       <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Walk-in Booking Created</h2>
       <p style="color:#6b6a66;font-size:14px;margin:0 0 4px;">A walk-in booking has been added to <strong style="color:#111110;">${garageName}</strong>.</p>
       ${dataTable([
@@ -329,7 +387,7 @@ export async function sendWalkInConfirmationToCustomer({
     from: FROM,
     to: customerEmail,
     subject: `Booking confirmed — ${service} at ${garageName}`,
-    html: emailBase(`
+    html: emailBase(html`
       <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Your booking is confirmed</h2>
       <p style="color:#6b6a66;font-size:14px;margin:0 0 4px;">Hi ${customerName}, <strong style="color:#111110;">${garageName}</strong> has booked you in.</p>
       ${dataTable(rows)}
@@ -365,7 +423,7 @@ export async function sendBookingRescheduledToCustomer({
     from: FROM,
     to: customerEmail,
     subject: `Booking rescheduled — ${service} at ${garageName}`,
-    html: emailBase(`
+    html: emailBase(html`
       <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Your booking has been rescheduled</h2>
       <p style="color:#6b6a66;font-size:14px;margin:0 0 16px;">Hi ${customerName}, <strong style="color:#111110;">${garageName}</strong> has moved your booking to a new time.</p>
       <p style="font-size:13px;color:#6b6a66;margin:0 0 4px;">Previous slot</p>
@@ -408,10 +466,10 @@ export async function sendMessageToCustomer({
     from: FROM,
     to: customerEmail,
     subject: `Message from ${garageName} about your booking`,
-    html: emailBase(`
+    html: emailBase(html`
       <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Message from ${garageName}</h2>
       <p style="color:#6b6a66;font-size:14px;margin:0 0 16px;">Hi ${customerName}, you have a message regarding your <strong style="color:#111110;">${service}</strong> booking on <strong style="color:#111110;">${formatDate(date)} at ${time}</strong>.</p>
-      <div style="background:#f4f3ef;border-radius:10px;padding:16px 20px;font-size:14px;color:#111110;line-height:1.6;">${message.replace(/\n/g, "<br>")}</div>
+      <div style="background:#f4f3ef;border-radius:10px;padding:16px 20px;font-size:14px;color:#111110;line-height:1.6;">${multiline(message)}</div>
       <p style="margin-top:20px;font-size:13px;color:#6b6a66;">This message was sent via Fyca on behalf of ${garageName}. To reply, contact the garage directly.</p>
     `),
   })
@@ -442,7 +500,7 @@ export async function sendJobCompletedToCustomer({
     from: FROM,
     to: customerEmail,
     subject: `Your car is ready — ${service} at ${garageName}`,
-    html: emailBase(`
+    html: emailBase(html`
       <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Your car is ready</h2>
       <p style="color:#6b6a66;font-size:14px;margin:0 0 4px;">Hi ${customerName}, your <strong style="color:#111110;">${service}</strong> at <strong style="color:#111110;">${garageName}</strong> has been completed.</p>
       ${dataTable([
@@ -453,7 +511,7 @@ export async function sendJobCompletedToCustomer({
       ])}
       <p style="margin-top:24px;font-size:14px;color:#444441;">If you were happy with the service, we'd love a review — it helps other drivers find great garages.</p>
       ${emailButton("Leave a review", `${APP_URL}/garages/${garageId}#reviews`)}
-      ${googleReviewUrl ? `<p style="margin-top:14px;font-size:13px;color:#6b6a66;">Or <a href="${googleReviewUrl}" style="color:#111110;font-weight:600;">review ${garageName} on Google</a>.</p>` : ""}
+      ${safeUrl(googleReviewUrl) ? html`<p style="margin-top:14px;font-size:13px;color:#6b6a66;">Or <a href="${safeUrl(googleReviewUrl)}" style="color:#111110;font-weight:600;">review ${garageName} on Google</a>.</p>` : ""}
     `),
   })
 }
@@ -481,7 +539,7 @@ export async function sendAppointmentReminder({
     from: FROM,
     to: customerEmail,
     subject: `Reminder: ${service} at ${garageName} tomorrow`,
-    html: emailBase(`
+    html: emailBase(html`
       <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Your appointment is tomorrow</h2>
       <p style="color:#6b6a66;font-size:14px;margin:0 0 4px;">Hi ${customerName}, just a reminder about your upcoming booking.</p>
       ${dataTable([
@@ -523,7 +581,7 @@ export async function sendUpcomingAppointmentReminder({
     from: FROM,
     to: customerEmail,
     subject: `Reminder: ${service} at ${garageName} ${timeframe}`,
-    html: emailBase(`
+    html: emailBase(html`
       <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Your appointment is ${timeframe}</h2>
       <p style="color:#6b6a66;font-size:14px;margin:0 0 4px;">Hi ${customerName}, just a reminder about your upcoming booking.</p>
       ${dataTable([
@@ -561,7 +619,7 @@ export async function sendBookingCancelledToGarage({
     from: FROM,
     to: garageOwnerEmail,
     subject: `Booking cancelled — ${service} on ${formatDate(date)}`,
-    html: emailBase(`
+    html: emailBase(html`
       <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Booking Cancelled</h2>
       <p style="color:#6b6a66;font-size:14px;margin:0 0 4px;">A customer has cancelled their booking at <strong style="color:#111110;">${garageName}</strong>.</p>
       ${dataTable([
@@ -600,7 +658,7 @@ export async function sendMotReminder({
     from: FROM,
     to: customerEmail,
     subject: `${urgencyLabel}MOT due in ${daysUntilExpiry} day${daysUntilExpiry === 1 ? "" : "s"} — ${registration}`,
-    html: emailBase(`
+    html: emailBase(html`
       <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Your MOT is due soon</h2>
       <p style="color:#6b6a66;font-size:14px;margin:0 0 16px;">Hi ${customerName}, your MOT expires in <strong style="color:${daysUntilExpiry <= 7 ? "#dc2626" : "#111110"};">${daysUntilExpiry} day${daysUntilExpiry === 1 ? "" : "s"}</strong>. Driving without a valid MOT is illegal — book your test now.</p>
       ${dataTable([
@@ -637,7 +695,7 @@ export async function sendServiceReminder({
     from: FROM,
     to: customerEmail,
     subject: `Service due in ${daysUntilService} day${daysUntilService === 1 ? "" : "s"} — ${registration}`,
-    html: emailBase(`
+    html: emailBase(html`
       <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Your service is due soon</h2>
       <p style="color:#6b6a66;font-size:14px;margin:0 0 16px;">Hi ${customerName}, your next service is due in <strong style="color:#111110;">${daysUntilService} day${daysUntilService === 1 ? "" : "s"}</strong>. Regular servicing keeps your car running safely and protects its value.</p>
       ${dataTable([
@@ -675,18 +733,18 @@ export async function sendBookingDeclinedToCustomer({
   suggestedTime?: string | null
 }) {
   const alternativeBlock = suggestedDate
-    ? `<p style="margin-top:16px;font-size:14px;color:#444441;background:#f4f3ef;padding:12px 16px;border-radius:8px;"><strong>Alternative slot offered:</strong> ${formatDate(suggestedDate)}${suggestedTime ? ` at ${suggestedTime}` : ""}</p>`
+    ? html`<p style="margin-top:16px;font-size:14px;color:#444441;background:#f4f3ef;padding:12px 16px;border-radius:8px;"><strong>Alternative slot offered:</strong> ${formatDate(suggestedDate)}${suggestedTime ? ` at ${suggestedTime}` : ""}</p>`
     : ""
 
   const noteBlock = garageNote
-    ? `<p style="margin-top:12px;font-size:14px;color:#444441;"><strong>Reason:</strong> ${garageNote}</p>`
+    ? html`<p style="margin-top:12px;font-size:14px;color:#444441;"><strong>Reason:</strong> ${multiline(garageNote)}</p>`
     : ""
 
   await sendWithRetry({
     from: FROM,
     to: customerEmail,
     subject: `Booking update — ${service} at ${garageName}`,
-    html: emailBase(`
+    html: emailBase(html`
       <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Your booking could not be accepted</h2>
       <p style="color:#6b6a66;font-size:14px;margin:0;">Hi ${customerName}, unfortunately <strong style="color:#111110;">${garageName}</strong> is unable to take your booking for <strong style="color:#111110;">${service}</strong> on <strong style="color:#111110;">${formatDate(date)} at ${time}</strong>.</p>
       ${noteBlock}

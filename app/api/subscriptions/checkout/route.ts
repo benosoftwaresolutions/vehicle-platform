@@ -85,7 +85,12 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ error: "Invalid plan" }, { status: 400 })
   } catch (err) {
+    // Full details go to the server logs only. Returning String(err) sent
+    // Stripe's raw error (price IDs, account details, request IDs) to the browser.
     console.error("Checkout error:", err)
-    return NextResponse.json({ error: String(err) }, { status: 500 })
+    return NextResponse.json(
+      { error: "We couldn't start checkout. Please try again, or contact hello@fyca.co.uk if it keeps happening." },
+      { status: 500 },
+    )
   }
 }
