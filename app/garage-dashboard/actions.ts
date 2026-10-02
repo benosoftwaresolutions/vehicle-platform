@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
+import { rateLimit } from "@/app/lib/rateLimit"
 import { sendBookingConfirmedToCustomer, sendBookingDeclinedToCustomer, sendWalkInBookingToGarage, sendWalkInConfirmationToCustomer, sendBookingRescheduledToCustomer, sendMessageToCustomer, sendJobCompletedToCustomer } from "@/app/lib/email"
 
 export async function updateBookingStatus(
@@ -157,6 +158,12 @@ export async function messageCustomer(bookingId: string, message: string) {
   if (!booking || booking.garageId !== user.garageId) throw new Error("Unauthorised")
   if (!message.trim()) throw new Error("Message cannot be empty")
 
+  // Each message is an email sent from our domain. Limit per garage so a
+  // compromised or abusive account can't use Fyca to send bulk email.
+  if (!await rateLimit(`message-customer:${user.garageId}`, 20, 60 * 60_000)) {
+    throw new Error("You've sent a lot of messages in the last hour. Please try again later.")
+  }
+
   const [customer, garage] = await Promise.all([
     booking.clerkId ? prisma.user.findUnique({ where: { clerkId: booking.clerkId } }) : null,
     prisma.garage.findUnique({ where: { id: booking.garageId } }),
@@ -202,6 +209,13 @@ export async function createWalkInBooking(data: {
 
   if (!user || user.role !== "garage_owner" || user.garageId !== data.garageId) {
     throw new Error("Unauthorised")
+  }
+
+  // Walk-in bookings email a confirmation to whatever address is typed in,
+  // and anyone can start a free trial — so without a limit this is a way to
+  // send spam from our domain. 30 an hour is far above a real garage's pace.
+  if (!await rateLimit(`walk-in:${user.garageId}`, 30, 60 * 60_000)) {
+    throw new Error("Too many walk-in bookings in the last hour. Please try again later.")
   }
 
   try {
