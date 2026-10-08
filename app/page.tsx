@@ -4,6 +4,7 @@ import FycaFooter from "./components/FycaFooter"
 import GarageCard from "./components/GarageCard"
 import HomeHeroSearch from "./components/HomeHeroSearch"
 import OnboardingBanner from "./components/OnboardingBanner"
+import MarketingMotion from "./components/MarketingMotion"
 import { auth } from "@clerk/nextjs/server"
 import { getCachedUser, getCachedGarages } from "./lib/cache"
 import { prisma } from "./lib/prisma"
@@ -165,7 +166,7 @@ async function HomeInner({
   const garageNameMap = Object.fromEntries(garages.map(g => [g.id, g.name]))
 
   return (
-    <>
+    <MarketingMotion>
       <Navbar role={user?.role} />
       {showBanner && <OnboardingBanner />}
 
@@ -210,11 +211,11 @@ async function HomeInner({
       {/* How it works */}
       <section className="sect" style={{ padding: "80px 32px", background: "#ffffff" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
-          <p style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#444441", marginBottom: 14 }}>How it works</p>
-          <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "clamp(24px,3vw,34px)", letterSpacing: "-0.025em", color: "#111110", marginBottom: 52 }}>
+          <p data-reveal style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#444441", marginBottom: 14 }}>How it works</p>
+          <h2 data-reveal style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "clamp(24px,3vw,34px)", letterSpacing: "-0.025em", color: "#111110", marginBottom: 52 }}>
             Three steps to sorted
           </h2>
-          <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
+          <div data-reveal data-reveal-stagger className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
             {[
               { n: "1", title: "Search", body: "Enter your location and the service you need. Filter by specialist make, service type, or browse all." },
               { n: "2", title: "Book", body: "Pick a garage, choose a time that works for you, and confirm in seconds — no phone call needed." },
@@ -235,7 +236,7 @@ async function HomeInner({
       {/* Specialist makes */}
       {allMakes.length > 0 && (
         <section style={{ padding: "64px 32px", background: "#f4f3ef", borderTop: "0.5px solid rgba(0,0,0,0.06)" }}>
-          <div style={{ maxWidth: 900, margin: "0 auto" }}>
+          <div data-reveal style={{ maxWidth: 900, margin: "0 auto" }}>
             <p style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#444441", marginBottom: 14 }}>Specialist garages</p>
             <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "clamp(24px,3vw,34px)", letterSpacing: "-0.025em", color: "#111110", marginBottom: 28 }}>
               Find a specialist for your make
@@ -262,7 +263,7 @@ async function HomeInner({
             <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "clamp(24px,3vw,34px)", letterSpacing: "-0.025em", color: "#111110", marginBottom: 36 }}>
               Real reviews from real customers
             </h2>
-            <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+            <div data-reveal data-reveal-stagger className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
               {featuredReviews.map(review => (
                 <div key={review.id} style={{ background: "#f4f3ef", borderRadius: 16, padding: "24px 22px", display: "flex", flexDirection: "column", gap: 14 }}>
                   <div style={{ display: "flex", gap: 2 }}>
@@ -288,7 +289,7 @@ async function HomeInner({
 
       {/* For drivers / for garages split */}
       <section className="sect" style={{ padding: "72px 32px", background: "#f4f3ef" }}>
-        <div className="grid-2" style={{ maxWidth: 900, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, alignItems: "stretch" }}>
+        <div data-reveal data-reveal-stagger className="grid-2" style={{ maxWidth: 900, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, alignItems: "stretch" }}>
           <div style={{ background: "#111110", borderRadius: 20, padding: "44px 40px", display: "flex", flexDirection: "column" }}>
             <p style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 16 }}>For drivers</p>
             <h3 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "1.5rem", letterSpacing: "-0.025em", color: "#ffffff", marginBottom: 16, lineHeight: 1.2 }}>
@@ -335,7 +336,7 @@ async function HomeInner({
 
       {/* CTA band */}
       <section className="sect" style={{ padding: "80px 32px", background: "#111110" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
+        <div data-reveal style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
           <h2 style={{ fontFamily: "var(--font-fraunces),'Fraunces',serif", fontWeight: 600, fontSize: "clamp(26px,4vw,42px)", letterSpacing: "-0.025em", color: "#ffffff", marginBottom: 14 }}>
             Ready to get started?
           </h2>
@@ -354,7 +355,7 @@ async function HomeInner({
       </section>
 
       <FycaFooter />
-    </>
+    </MarketingMotion>
   )
 }
 
