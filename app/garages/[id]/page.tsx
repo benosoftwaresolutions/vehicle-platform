@@ -8,6 +8,7 @@ import { auth } from "@clerk/nextjs/server"
 import { getCachedUser } from "@/app/lib/cache"
 import { activeGarageWhere } from "@/app/lib/subscription"
 import { notFound } from "next/navigation"
+import { cache } from "react"
 import Image from "next/image"
 import type { Metadata } from "next"
 import { pageMetadata } from "@/app/lib/seo"
@@ -16,14 +17,21 @@ type Params = {
   params: Promise<{ id: string }>
 }
 
+// generateMetadata and the page both need the garage. React's cache()
+// memoises per request, so the two calls share ONE database query instead of
+// making two round trips to Neon on every visit to a garage page — the page
+// drivers land on from a garage's booking link.
+// Same active-subscription check as the public listing and the booking
+// endpoint, applied at the query level — an expired or unapproved garage's
+// page 404s (and its name never leaks into link previews) even when reached
+// by a direct link.
+const getVisibleGarage = cache((id: string) =>
+  prisma.garage.findFirst({ where: { id, approved: true, ...activeGarageWhere() } })
+)
+
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params
-  // Same visibility rule as the page below, so a hidden garage's name and
-  // description never leak into link previews or search results.
-  const garage = await prisma.garage.findFirst({
-    where: { id, approved: true, ...activeGarageWhere() },
-    select: { name: true, city: true, description: true },
-  })
+  const garage = await getVisibleGarage(id)
   if (!garage) return { title: "Garage not found", robots: { index: false } }
   return pageMetadata({
     title: garage.name,
@@ -47,10 +55,7 @@ export default async function GarageDetail({ params }: Params) {
   const { userId } = await auth()
 
   const [garage, user, reviews, vehicles] = await Promise.all([
-    // Same active-subscription check as the public listing and the booking
-    // endpoint, applied at the query level — an expired or unapproved
-    // garage's page 404s even when reached by a direct link.
-    prisma.garage.findFirst({ where: { id, approved: true, ...activeGarageWhere() } }),
+    getVisibleGarage(id),
     userId ? getCachedUser(userId) : null,
     prisma.review.findMany({ where: { garageId: id }, orderBy: { createdAt: "desc" } }),
     // Fetched here (rather than by BookingForm on mount) so the vehicle

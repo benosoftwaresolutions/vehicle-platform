@@ -29,3 +29,20 @@ export const getCachedGarages = unstable_cache(
   ["garages-approved"],
   { revalidate: 60, tags: ["garages"] }
 )
+
+// Homepage "What drivers say" — recent 4★+ reviews. Logged-out visitors are
+// most of the homepage's traffic, so caching this saves a DB round trip on
+// almost every hit. Only plain strings/numbers are selected: unstable_cache
+// stores results as JSON, which would turn Date fields into strings.
+// Tagged "garages" so the admin actions that already call
+// updateTag("garages") (e.g. deleting a review) clear it straight away.
+export const getCachedTopReviews = unstable_cache(
+  () => prisma.review.findMany({
+    where: { rating: { gte: 4 }, comment: { not: "" } },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+    select: { id: true, customerName: true, rating: true, comment: true, garageId: true },
+  }),
+  ["top-reviews"],
+  { revalidate: 300, tags: ["garages", "reviews"] }
+)
