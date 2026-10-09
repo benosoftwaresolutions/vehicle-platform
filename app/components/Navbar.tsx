@@ -137,6 +137,19 @@ export default function Navbar({ role }: { role?: string }) {
   const onGarages = pathname === "/for-garages"
   const onDrivers = pathname === "/for-drivers"
 
+  // Plain nav links mark the current page with darker, bolder text (not a
+  // background) so a "selected" grey pill only ever appears in the
+  // logged-out segmented control below, where it means "you are here".
+  const linkProps = (href: string) => {
+    const active = pathname === href
+    return {
+      href,
+      className: "nav-link",
+      "aria-current": active ? ("page" as const) : undefined,
+      style: active ? { ...navLink, color: "#111110", fontWeight: 600 } : navLink,
+    }
+  }
+
   return (
     <>
       <nav style={{
@@ -156,44 +169,45 @@ export default function Navbar({ role }: { role?: string }) {
         {/* Desktop: centre nav */}
         <div className="nav-desktop" style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <Link href="/" className="nav-link" style={navLink}>Home</Link>
+            <Link {...linkProps("/")}>Home</Link>
             {/* The public directory is for drivers — a garage owner has no
                 reason to browse a list of their competitors. */}
-            {!isGarageOwner && <Link href="/garages" className="nav-link" style={navLink}>Garages</Link>}
+            {!isGarageOwner && <Link {...linkProps("/garages")}>Garages</Link>}
             {isSignedIn && (isGarageOwner
-              ? <Link href="/garage-dashboard" className="nav-link" style={navLink}>Dashboard</Link>
+              ? <Link {...linkProps("/garage-dashboard")}>Dashboard</Link>
               : <>
-                  <Link href="/bookings" className="nav-link" style={navLink}>My Bookings</Link>
-                  <Link href="/vehicles" className="nav-link" style={navLink}>My Vehicles</Link>
+                  <Link {...linkProps("/bookings")}>My Bookings</Link>
+                  <Link {...linkProps("/vehicles")}>My Vehicles</Link>
                 </>
             )}
+            {/* Signed in, the segmented control would hold only one or two
+                items — a lone "Pricing" inside a grey pill looks permanently
+                selected. So signed-in users get these as ordinary links. */}
+            {isSignedIn && !isGarageOwner && <Link {...linkProps("/for-drivers")}>For drivers</Link>}
+            {isSignedIn && <Link {...linkProps("/pricing")}>Pricing</Link>}
           </div>
-          <div style={{ width: "0.5px", height: 18, background: "rgba(0,0,0,0.15)" }} />
-          <div style={{ background: "#f4f3ef", borderRadius: 100, padding: 3, display: "flex", gap: 2 }}>
-            {/* Marketing pages are for people who haven't signed up yet */}
-            {!isSignedIn && (
-              <Link href="/for-garages" style={{
-                padding: "5px 14px", borderRadius: 100, fontSize: "0.82rem", fontWeight: 600,
-                textDecoration: "none",
-                background: onGarages ? "#111110" : "transparent",
-                color: onGarages ? "#ffffff" : "#444441",
-              }}>For garages</Link>
-            )}
-            {(!isSignedIn || !isGarageOwner) && (
-              <Link href="/for-drivers" style={{
-                padding: "5px 14px", borderRadius: 100, fontSize: "0.82rem", fontWeight: 600,
-                textDecoration: "none",
-                background: onDrivers ? "#111110" : "transparent",
-                color: onDrivers ? "#ffffff" : "#444441",
-              }}>For drivers</Link>
-            )}
-            <Link href="/pricing" style={{
-              padding: "5px 14px", borderRadius: 100, fontSize: "0.82rem", fontWeight: 600,
-              textDecoration: "none",
-              background: pathname === "/pricing" ? "#111110" : "transparent",
-              color: pathname === "/pricing" ? "#ffffff" : "#444441",
-            }}>Pricing</Link>
-          </div>
+          {/* Logged out: segmented "who are you?" control. It always holds
+              all three options, so the grey track reads as a toggle rather
+              than as one item being selected. */}
+          {!isSignedIn && (
+            <>
+              <div style={{ width: "0.5px", height: 18, background: "rgba(0,0,0,0.15)" }} />
+              <div style={{ background: "#f4f3ef", borderRadius: 100, padding: 3, display: "flex", gap: 2 }}>
+                {[
+                  { href: "/for-garages", label: "For garages", active: onGarages },
+                  { href: "/for-drivers", label: "For drivers", active: onDrivers },
+                  { href: "/pricing", label: "Pricing", active: pathname === "/pricing" },
+                ].map(({ href, label, active }) => (
+                  <Link key={href} href={href} aria-current={active ? "page" : undefined} style={{
+                    padding: "5px 14px", borderRadius: 100, fontSize: "0.82rem", fontWeight: 600,
+                    textDecoration: "none",
+                    background: active ? "#111110" : "transparent",
+                    color: active ? "#ffffff" : "#444441",
+                  }}>{label}</Link>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Desktop: auth — UserButton only mounted when actually on desktop */}

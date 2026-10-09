@@ -6,7 +6,7 @@ import HomeHeroSearch from "./components/HomeHeroSearch"
 import OnboardingBanner from "./components/OnboardingBanner"
 import MarketingMotion from "./components/MarketingMotion"
 import { auth } from "@clerk/nextjs/server"
-import { getCachedUser, getCachedGarages } from "./lib/cache"
+import { getCachedUser, getCachedGarages, getCachedTopReviews } from "./lib/cache"
 import { prisma } from "./lib/prisma"
 import { pageMetadata } from "./lib/seo"
 
@@ -148,12 +148,7 @@ async function HomeInner({
   }
 
   // ─── Marketing page (logged out) ───────────────────────────────────────────
-  const topReviews = await prisma.review.findMany({
-    where: { rating: { gte: 4 }, comment: { not: "" } },
-    orderBy: { createdAt: "desc" },
-    take: 20,
-    select: { id: true, customerName: true, rating: true, comment: true, garageId: true },
-  })
+  const topReviews = await getCachedTopReviews()
 
   const allMakes = [...new Set(garages.flatMap(g => g.specialistMakes ?? []))].sort()
 
