@@ -173,12 +173,61 @@ export default async function GarageOwnerHome({ userId, firstName }: { userId: s
           {/* Unfinished first, so the next thing to do is always at the top */}
           {[...steps.filter(s => !s.done), ...steps.filter(s => s.done)].map(s => <StepRow key={s.label} {...s} />)}
         </div>
+
+        {/* Why Fyca — the payoff, so the checklist above feels worth doing */}
+        <p style={{ ...eyebrow, marginTop: 56 }}>Why Fyca</p>
+        <h2 style={{ ...serif, fontSize: "1.3rem", letterSpacing: "-0.02em", marginBottom: 18 }}>What Fyca does for your garage</h2>
+        <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+          {ADVANTAGES.map(({ title, body, href }, i) => (
+            <Link key={title} href={href} style={{
+              display: "flex", flexDirection: "column", gap: 8, textDecoration: "none",
+              background: i === 0 ? "#111110" : "#f4f3ef", borderRadius: 14, padding: "22px 22px 24px",
+            }}>
+              <p style={{ ...serif, fontSize: "1.02rem", lineHeight: 1.25, margin: 0, color: i === 0 ? "#ffffff" : "#111110" }}>{title}</p>
+              <p style={{ fontSize: "0.86rem", lineHeight: 1.6, margin: 0, color: i === 0 ? "rgba(255,255,255,0.7)" : "#444441" }}>{body}</p>
+            </Link>
+          ))}
+        </div>
       </main>
 
       <FycaFooter />
     </>
   )
 }
+
+// Only claims Fyca actually delivers today — each card links to where it lives.
+const ADVANTAGES = [
+  {
+    title: "Bookings while you’re under a car",
+    body: "Customers book online from your link, day or night. No phone ringing mid-job and no missed enquiries.",
+    href: "/garage-dashboard",
+  },
+  {
+    title: "Bin the paper diary",
+    body: "Online, phone and walk-in bookings sit in one diary you can check from anywhere.",
+    href: "/garage-dashboard/calendar",
+  },
+  {
+    title: "Accept in one click",
+    body: "You get an email the moment someone books. Accept or decline and the customer is told straight away.",
+    href: "/garage-dashboard",
+  },
+  {
+    title: "Fewer no-shows",
+    body: "Customers get an automatic reminder email the day before their booking.",
+    href: "/garage-dashboard",
+  },
+  {
+    title: "Parts ready before the car arrives",
+    body: "Track your stock and get AI predictions of the parts you’ll need, so cars are turned round faster.",
+    href: "/garage-dashboard/insights",
+  },
+  {
+    title: "Know your numbers",
+    body: "See completed jobs and revenue for the month, and build up reviews from happy customers.",
+    href: "/garage-dashboard",
+  },
+]
 
 type Step = { done: boolean; label: string; why: string; href: string; cta: string }
 
