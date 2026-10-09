@@ -178,13 +178,13 @@ export default async function GarageOwnerHome({ userId, firstName }: { userId: s
         <p style={{ ...eyebrow, marginTop: 56 }}>Why Fyca</p>
         <h2 style={{ ...serif, fontSize: "1.3rem", letterSpacing: "-0.02em", marginBottom: 18 }}>What Fyca does for your garage</h2>
         <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
-          {ADVANTAGES.map(({ title, body, href }, i) => (
+          {ADVANTAGES.map(({ title, body, href }) => (
             <Link key={title} href={href} style={{
               display: "flex", flexDirection: "column", gap: 8, textDecoration: "none",
-              background: i === 0 ? "#111110" : "#f4f3ef", borderRadius: 14, padding: "22px 22px 24px",
+              background: "#f4f3ef", borderRadius: 14, padding: "22px 22px 24px",
             }}>
-              <p style={{ ...serif, fontSize: "1.02rem", lineHeight: 1.25, margin: 0, color: i === 0 ? "#ffffff" : "#111110" }}>{title}</p>
-              <p style={{ fontSize: "0.86rem", lineHeight: 1.6, margin: 0, color: i === 0 ? "rgba(255,255,255,0.7)" : "#444441" }}>{body}</p>
+              <p style={{ ...serif, fontSize: "1.02rem", lineHeight: 1.25, margin: 0, color: "#111110" }}>{title}</p>
+              <p style={{ fontSize: "0.86rem", lineHeight: 1.6, margin: 0, color: "#444441" }}>{body}</p>
             </Link>
           ))}
         </div>
