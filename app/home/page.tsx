@@ -6,6 +6,7 @@ import FycaFooter from "../components/FycaFooter"
 import GarageCard from "../components/GarageCard"
 import HomeHeroSearch from "../components/HomeHeroSearch"
 import MarketingHome from "../components/MarketingHome"
+import GarageOwnerHome from "./GarageOwnerHome"
 import { getCachedUser, getCachedGarages } from "../lib/cache"
 import { prisma } from "../lib/prisma"
 import { pageMetadata } from "../lib/seo"
@@ -36,6 +37,12 @@ export default async function SignedInHome() {
     return <MarketingHome role={user?.role} showBanner />
   }
 
+  // Garage owners get their own homepage: what needs attention today and how
+  // to get more out of Fyca, rather than a search for other garages.
+  if (user.role === "garage_owner") {
+    return <GarageOwnerHome userId={userId} firstName={user.name?.split(" ")[0]} />
+  }
+
   // Find their most recent booking to determine local city
   const recentBooking = await prisma.booking.findFirst({
     where: { clerkId: userId },
@@ -54,13 +61,12 @@ export default async function SignedInHome() {
 
   // Fall back to all garages by rating if no local ones
   const displayGarages = localGarages.length > 0 ? localGarages : [...garages].sort((a, b) => b.rating - a.rating)
-  const isGarageOwner = user.role === "garage_owner"
 
   return (
     <>
       <Navbar role={user.role} />
 
-      {/* Logged-in hero — search focused */}
+      {/* Driver hero — search focused */}
       <section className="sect-hero" style={{ padding: "56px 32px 48px", background: "#ffffff", borderBottom: "0.5px solid rgba(0,0,0,0.08)" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <p style={{ fontSize: "0.82rem", fontWeight: 500, color: "#6b6a66", marginBottom: 10 }}>
@@ -81,14 +87,8 @@ export default async function SignedInHome() {
 
           {/* Quick links */}
           <div style={{ display: "flex", gap: 10, marginTop: 24, flexWrap: "wrap" }}>
-            {isGarageOwner ? (
-              <Link href="/garage-dashboard" style={pill}>Go to dashboard →</Link>
-            ) : (
-              <>
-                <Link href="/bookings" style={pill}>My bookings</Link>
-                <Link href="/vehicles" style={pill}>My vehicles</Link>
-              </>
-            )}
+            <Link href="/bookings" style={pill}>My bookings</Link>
+            <Link href="/vehicles" style={pill}>My vehicles</Link>
           </div>
         </div>
       </section>
