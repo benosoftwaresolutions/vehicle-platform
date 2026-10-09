@@ -3,7 +3,8 @@
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
 import { revalidatePath, updateTag } from "next/cache"
-import { sendBookingConfirmedToCustomer, sendBookingDeclinedToCustomer } from "@/app/lib/email"
+import { sendBookingConfirmedToCustomer, sendBookingDeclinedToCustomer, sendGarageApproved } from "@/app/lib/email"
+import { trialEndsAtFromNow } from "@/app/lib/subscription"
 
 async function assertAdmin() {
   const adminId = process.env.ADMIN_USER_ID
@@ -24,7 +25,34 @@ export async function updateUserRole(userId: string, role: string) {
 
 export async function approveGarage(garageId: string) {
   await assertAdmin()
-  await prisma.garage.update({ where: { id: garageId }, data: { approved: true } })
+  const garage = await prisma.garage.findUnique({
+    where: { id: garageId },
+    select: { name: true, email: true, approved: true, subscriptionStatus: true },
+  })
+  if (!garage || garage.approved) return
+
+  // The free trial runs from the day the garage goes live, not the day it
+  // signed up — days spent waiting for approval shouldn't eat into it.
+  const restartTrial = garage.subscriptionStatus === "trialing"
+  const updated = await prisma.garage.update({
+    where: { id: garageId },
+    data: { approved: true, ...(restartTrial ? { trialEndsAt: trialEndsAtFromNow() } : {}) },
+    select: { trialEndsAt: true },
+  })
+
+  // Tell the garage it's live and give them their booking link. Falls back to
+  // the owner's account email for garages without a bookings inbox.
+  const owner = garage.email ? null : await prisma.user.findFirst({ where: { garageId, role: "garage_owner" }, select: { email: true } })
+  const to = garage.email ?? owner?.email
+  if (to) {
+    await sendGarageApproved({
+      to,
+      garageName: garage.name,
+      garageId,
+      trialEndsAt: restartTrial ? updated.trialEndsAt : null,
+    }).catch((err) => console.error("Failed to send garage approved email:", err))
+  }
+
   updateTag("garages")
   revalidatePath("/admin/garages")
   revalidatePath("/admin/pending")

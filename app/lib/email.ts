@@ -753,3 +753,73 @@ export async function sendBookingDeclinedToCustomer({
     `),
   })
 }
+
+// ---------------------------------------------------------------------------
+// Garage lifecycle — sign-up and approval
+// ---------------------------------------------------------------------------
+
+/** To the garage when an admin approves it: it's now bookable, here's the link. */
+export async function sendGarageApproved({
+  to,
+  garageName,
+  garageId,
+  trialEndsAt,
+}: {
+  to: string
+  garageName: string
+  garageId: string
+  trialEndsAt: Date | null
+}) {
+  const bookingLink = `${APP_URL}/garages/${garageId}`
+  await sendWithRetry({
+    from: FROM,
+    to,
+    subject: `${garageName} is live on Fyca`,
+    html: emailBase(html`
+      <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">You’re live on Fyca</h2>
+      <p style="color:#6b6a66;font-size:14px;margin:0 0 4px;"><strong style="color:#111110;">${garageName}</strong> has been approved. Customers can now find you and book online.</p>
+      ${dataTable([
+        ["Your booking link", bookingLink],
+        ...(trialEndsAt ? [["Free trial until", formatDate(trialEndsAt)] as [string, string]] : []),
+      ])}
+      <p style="margin-top:24px;font-size:14px;color:#444441;">Share your booking link with customers — on your website, social media, or by text. New requests arrive by email and in your dashboard.</p>
+      ${emailButton("Open your dashboard", `${APP_URL}/garage-dashboard`)}
+    `),
+  })
+}
+
+/** To Fyca's admin when a new garage signs up, so approval isn't left waiting. */
+export async function sendNewGarageToAdmin({
+  to,
+  garageName,
+  city,
+  postcode,
+  ownerName,
+  garageEmail,
+  garagePhone,
+}: {
+  to: string
+  garageName: string
+  city: string
+  postcode: string
+  ownerName: string
+  garageEmail: string
+  garagePhone: string
+}) {
+  await sendWithRetry({
+    from: FROM,
+    to,
+    subject: `New garage sign-up — ${garageName}, ${city}`,
+    html: emailBase(html`
+      <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">New garage waiting for approval</h2>
+      ${dataTable([
+        ["Garage", garageName],
+        ["Location", `${city}, ${postcode}`],
+        ["Owner", ownerName],
+        ["Email", garageEmail],
+        ["Phone", garagePhone],
+      ])}
+      ${emailButton("Review in admin", `${APP_URL}/admin/pending`)}
+    `),
+  })
+}
