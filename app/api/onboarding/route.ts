@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/app/lib/prisma"
 import { trialEndsAtFromNow } from "@/app/lib/subscription"
+import { sendNewGarageToAdmin } from "@/app/lib/email"
 
 export async function POST(req: Request) {
   try {
@@ -99,6 +100,21 @@ export async function POST(req: Request) {
           profileComplete: true,
         }
       })
+
+      // Let Fyca's admin know a garage is waiting for approval
+      const adminId = process.env.ADMIN_USER_ID
+      const admin = adminId ? await prisma.user.findUnique({ where: { clerkId: adminId }, select: { email: true } }) : null
+      if (admin?.email) {
+        await sendNewGarageToAdmin({
+          to: admin.email,
+          garageName: garage.name,
+          city: garage.city,
+          postcode: garage.postcode,
+          ownerName: name.trim(),
+          garageEmail: garageEmail.trim(),
+          garagePhone: garagePhone.trim(),
+        }).catch((err) => console.error("Failed to send new garage email:", err))
+      }
 
       return NextResponse.json({ success: true, garageId: garage.id })
     }
