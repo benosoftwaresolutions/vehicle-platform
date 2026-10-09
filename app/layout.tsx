@@ -2,6 +2,7 @@ import AuthProvider from "./components/AuthProvider"
 import type { Metadata } from "next"
 import { Fraunces, DM_Sans } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import EnvironmentBanner from "./components/EnvironmentBanner"
 import { SITE_URL, SITE_NAME, SITE_TAGLINE } from "./lib/seo"
 import "./globals.css"
@@ -39,6 +40,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <EnvironmentBanner />
           {children}
           <Analytics />
+          {/* Real-visitor load times (Vercel → Speed Insights). Collects
+              nothing until it's enabled in the Vercel dashboard. */}
+          <SpeedInsights />
         </body>
       </html>
     </AuthProvider>
