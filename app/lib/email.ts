@@ -1,4 +1,6 @@
 import { Resend } from "resend"
+import { legalIdentityLine } from "@/app/lib/company"
+import { unsubscribePageUrl, unsubscribeOneClickUrl } from "@/app/lib/unsubscribe"
 
 const FROM = process.env.RESEND_FROM ?? "onboarding@resend.dev"
 
@@ -103,7 +105,9 @@ function formatDate(date: Date | string): string {
   })
 }
 
-function emailBase(content: SafeHtml): string {
+// footerExtra: extra footer line, e.g. the unsubscribe link on reminder emails.
+function emailBase(content: SafeHtml, footerExtra?: SafeHtml): string {
+  const identity = legalIdentityLine()
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -143,6 +147,8 @@ function emailBase(content: SafeHtml): string {
         <tr>
           <td style="padding-top:20px;text-align:center;font-size:12px;color:#6b6a66;">
             Fyca — Fix Your Car Anywhere · fyca.co.uk
+            ${identity ? html`<br>${identity}` : ""}
+            ${footerExtra ?? ""}
           </td>
         </tr>
 
@@ -151,6 +157,19 @@ function emailBase(content: SafeHtml): string {
   </table>
 </body>
 </html>`
+}
+
+/** Footer line + List-Unsubscribe headers for MOT/service reminders. */
+function reminderUnsubscribe(userId: string): { footer: SafeHtml; headers: Record<string, string> } {
+  const page = unsubscribePageUrl(userId)
+  const oneClick = unsubscribeOneClickUrl(userId)
+  const footer = page
+    ? html`<br><br>You're getting this because you added this vehicle to Fyca. <a href="${page}" style="color:#6b6a66;">Unsubscribe from MOT &amp; service reminders</a>`
+    : html`<br><br>To stop these reminders, reply to this email or contact hello@fyca.co.uk.`
+  const headers: Record<string, string> = oneClick
+    ? { "List-Unsubscribe": `<${oneClick}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" }
+    : {}
+  return { footer, headers }
 }
 
 function dataTable(rows: [string, string][]): SafeHtml {
@@ -635,6 +654,7 @@ export async function sendBookingCancelledToGarage({
 }
 
 export async function sendMotReminder({
+  userId,
   customerEmail,
   customerName,
   registration,
@@ -643,6 +663,7 @@ export async function sendMotReminder({
   motExpiry,
   daysUntilExpiry,
 }: {
+  userId: string
   customerEmail: string
   customerName: string
   registration: string
@@ -653,10 +674,12 @@ export async function sendMotReminder({
 }) {
   const urgency = daysUntilExpiry <= 7 ? "urgent" : daysUntilExpiry <= 14 ? "soon" : "upcoming"
   const urgencyLabel = urgency === "urgent" ? "⚠️ Urgent — " : ""
+  const unsub = reminderUnsubscribe(userId)
 
   await sendWithRetry({
     from: FROM,
     to: customerEmail,
+    headers: unsub.headers,
     subject: `${urgencyLabel}MOT due in ${daysUntilExpiry} day${daysUntilExpiry === 1 ? "" : "s"} — ${registration}`,
     html: emailBase(html`
       <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Your MOT is due soon</h2>
@@ -667,14 +690,15 @@ export async function sendMotReminder({
         ["MOT expires", formatDate(motExpiry)],
       ])}
       <p style="margin-top:24px;">
-        <a href="https://www.gov.uk/get-mot-reminder" style="display:inline-block;background:#111110;color:#ffffff;padding:12px 24px;border-radius:100px;font-size:14px;font-weight:600;text-decoration:none;">Find a garage on Fyca</a>
+        <a href="${APP_URL}/garages" style="display:inline-block;background:#111110;color:#ffffff;padding:12px 24px;border-radius:100px;font-size:14px;font-weight:600;text-decoration:none;">Find a garage on Fyca</a>
       </p>
-      <p style="margin-top:16px;font-size:13px;color:#6b6a66;">You can manage your vehicle reminders in <a href="https://fyca.co.uk/vehicles" style="color:#111110;">My Vehicles</a> on Fyca.</p>
-    `),
+      <p style="margin-top:16px;font-size:13px;color:#6b6a66;">You can manage your vehicle reminders in <a href="${APP_URL}/vehicles" style="color:#111110;">My Vehicles</a> on Fyca.</p>
+    `, unsub.footer),
   })
 }
 
 export async function sendServiceReminder({
+  userId,
   customerEmail,
   customerName,
   registration,
@@ -683,6 +707,7 @@ export async function sendServiceReminder({
   nextServiceDue,
   daysUntilService,
 }: {
+  userId: string
   customerEmail: string
   customerName: string
   registration: string
@@ -691,9 +716,11 @@ export async function sendServiceReminder({
   nextServiceDue: Date
   daysUntilService: number
 }) {
+  const unsub = reminderUnsubscribe(userId)
   await sendWithRetry({
     from: FROM,
     to: customerEmail,
+    headers: unsub.headers,
     subject: `Service due in ${daysUntilService} day${daysUntilService === 1 ? "" : "s"} — ${registration}`,
     html: emailBase(html`
       <h2 style="font-size:22px;font-weight:600;color:#111110;margin:0 0 6px;letter-spacing:-0.02em;">Your service is due soon</h2>
@@ -706,8 +733,8 @@ export async function sendServiceReminder({
       <p style="margin-top:24px;">
         <a href="https://fyca.co.uk/garages" style="display:inline-block;background:#111110;color:#ffffff;padding:12px 24px;border-radius:100px;font-size:14px;font-weight:600;text-decoration:none;">Book a service on Fyca</a>
       </p>
-      <p style="margin-top:16px;font-size:13px;color:#6b6a66;">You can manage your vehicle reminders in <a href="https://fyca.co.uk/vehicles" style="color:#111110;">My Vehicles</a> on Fyca.</p>
-    `),
+      <p style="margin-top:16px;font-size:13px;color:#6b6a66;">You can manage your vehicle reminders in <a href="${APP_URL}/vehicles" style="color:#111110;">My Vehicles</a> on Fyca.</p>
+    `, unsub.footer),
   })
 }
 

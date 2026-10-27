@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { PLATFORM_LINKS, COMPANY_LINKS } from "@/app/lib/navLinks"
+import { legalIdentityLine } from "@/app/lib/company"
 
 export default function FycaFooter() {
   return (
@@ -71,6 +72,10 @@ export default function FycaFooter() {
         <p style={{ fontSize: "0.78rem", color: "#aaa9a4", margin: 0 }}>
           © 2026 Fyca. All rights reserved.
         </p>
+        {/* Legal identity — required on the website by UK trading disclosure rules. Set in app/lib/company.ts */}
+        {legalIdentityLine() && (
+          <p style={{ fontSize: "0.72rem", color: "#aaa9a4", margin: "6px 0 0" }}>{legalIdentityLine()}</p>
+        )}
       </div>
     </footer>
   )

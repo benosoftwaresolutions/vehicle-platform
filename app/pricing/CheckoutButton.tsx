@@ -2,22 +2,31 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { subscriptionTermsSummary } from "@/app/lib/subscriptionTerms"
 
 // variant: "light" = white button (for dark cards, the default for garage_pro),
 // "dark" = black button (for light backgrounds, e.g. the dashboard trial-ended wall).
 export default function CheckoutButton({ plan, label, variant }: { plan: string; label: string; variant?: "light" | "dark" }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Consumer law requires the price, auto-renewal and cancellation terms to be
+  // clear before the customer commits, and the tick gives us a record that they
+  // agreed. The server refuses to start checkout without it.
+  const [agreed, setAgreed] = useState(false)
   const router = useRouter()
 
   const handleClick = async () => {
+    if (!agreed) {
+      setError("Please tick the box to agree to the terms first")
+      return
+    }
     setLoading(true)
     setError(null)
     try {
       const res = await fetch("/api/subscriptions/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({ plan, acceptedTerms: agreed }),
       })
       const data = await res.json()
       if (data.url) {
@@ -39,6 +48,23 @@ export default function CheckoutButton({ plan, label, variant }: { plan: string;
   return (
     <>
     {error && <p style={{ fontSize: "0.8rem", color: "#ef4444", marginBottom: 8 }}>{error}</p>}
+    <label style={{
+      display: "flex", gap: 8, alignItems: "flex-start", textAlign: "left",
+      fontSize: "0.75rem", lineHeight: 1.5, marginBottom: 10, cursor: "pointer",
+      color: isLight ? "rgba(255,255,255,0.8)" : "#444441",
+    }}>
+      <input
+        type="checkbox"
+        checked={agreed}
+        onChange={e => { setAgreed(e.target.checked); if (e.target.checked) setError(null) }}
+        style={{ marginTop: 3, flexShrink: 0 }}
+      />
+      <span>
+        I agree to the{" "}
+        <a href="/terms" target="_blank" rel="noopener noreferrer" style={{ color: "inherit", textDecoration: "underline" }}>Terms of Service</a>.{" "}
+        {subscriptionTermsSummary(plan)}
+      </span>
+    </label>
     <button
       onClick={handleClick}
       disabled={loading}

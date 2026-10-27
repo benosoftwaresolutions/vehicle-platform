@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { getStripe, PLANS } from "@/app/lib/stripe"
 import { prisma } from "@/app/lib/prisma"
+import { subscriptionTermsSummary, TERMS_VERSION } from "@/app/lib/subscriptionTerms"
 
 // Statuses that mean "already has a live subscription — don't create another"
 const LIVE_STATUSES = ["active", "trialing", "past_due"]
@@ -26,7 +27,15 @@ export async function POST(req: Request) {
   if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 })
 
   const origin = new URL(req.url).origin
-  const { plan } = await req.json()
+  const { plan, acceptedTerms } = await req.json()
+
+  // The pricing page makes the customer tick to accept the terms (price,
+  // auto-renewal, cancellation). Refuse to start checkout without it, and
+  // record which version they accepted on the Stripe session and subscription.
+  if (acceptedTerms !== true) {
+    return NextResponse.json({ error: "Please tick the box to agree to the terms first" }, { status: 400 })
+  }
+  const consent = { termsVersion: TERMS_VERSION, termsAcceptedAt: new Date().toISOString() }
 
   if (plan === "driver_pro") {
     const user = await prisma.user.findUnique({ where: { clerkId: userId } })
@@ -43,7 +52,9 @@ export async function POST(req: Request) {
       line_items: [{ price: PLANS.DRIVER_PRO.priceId, quantity: 1 }],
       success_url: `${origin}/vehicles?upgraded=1`,
       cancel_url: `${origin}/pricing`,
-      metadata: { entity: "user", entityId: user.id, plan: "driver_pro" },
+      metadata: { entity: "user", entityId: user.id, plan: "driver_pro", ...consent },
+      subscription_data: { metadata: consent },
+      custom_text: { submit: { message: subscriptionTermsSummary("driver_pro") } },
     })
 
     return NextResponse.json({ url: session.url })
@@ -65,8 +76,8 @@ export async function POST(req: Request) {
       ? Math.ceil((garage.trialEndsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
       : 30
     const subscriptionData = trialDaysLeft > 0
-      ? { trial_period_days: trialDaysLeft }
-      : {}
+      ? { trial_period_days: trialDaysLeft, metadata: consent }
+      : { metadata: consent }
 
     const session = await getStripe().checkout.sessions.create({
       mode: "subscription",
@@ -77,7 +88,8 @@ export async function POST(req: Request) {
       subscription_data: subscriptionData,
       success_url: `${origin}/garage-dashboard?subscribed=1`,
       cancel_url: `${origin}/garage-dashboard`,
-      metadata: { entity: "garage", entityId: garage.id, plan: "garage_pro" },
+      metadata: { entity: "garage", entityId: garage.id, plan: "garage_pro", ...consent },
+      custom_text: { submit: { message: subscriptionTermsSummary("garage_pro") } },
     })
 
     return NextResponse.json({ url: session.url })

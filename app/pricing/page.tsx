@@ -3,6 +3,7 @@ import { prisma } from "@/app/lib/prisma"
 import Navbar from "@/app/components/Navbar"
 import FycaFooter from "@/app/components/FycaFooter"
 import CheckoutButton from "./CheckoutButton"
+import { COMPANY } from "@/app/lib/company"
 import ManageButton from "./ManageButton"
 import { garageTrialDaysLeft } from "@/app/lib/subscription"
 import type { Metadata } from "next"
@@ -204,7 +205,7 @@ export default async function PricingPage() {
         )}
 
         <p style={{ textAlign: "center", color: "#aaa9a4", fontSize: "0.8rem", marginTop: 40 }}>
-          All plans are billed monthly. Cancel any time. Prices include VAT.
+          All plans are billed monthly in advance and renew automatically until you cancel. Cancel any time. {COMPANY.vatRegistered ? "Prices include VAT." : "No VAT is charged."} Drivers can cancel Pro within 14 days of subscribing for a refund, minus the days used. See our <a href="/terms" style={{ color: "inherit", textDecoration: "underline" }}>Terms of Service</a>.
         </p>
       </main>
 
