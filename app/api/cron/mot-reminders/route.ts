@@ -31,9 +31,11 @@ export async function GET(req: Request) {
         { motExpiry: { gte: today, lte: maxDate } },
         { nextServiceDue: { gte: today, lte: maxDate } },
       ],
+      // Respect the unsubscribe link in previous reminders
+      user: { reminderEmails: true },
     },
     include: {
-      user: { select: { email: true, name: true } },
+      user: { select: { id: true, email: true, name: true } },
     },
   })
 
@@ -51,6 +53,7 @@ export async function GET(req: Request) {
       if (REMINDER_DAYS.includes(days)) {
         try {
           await sendMotReminder({
+            userId: user.id,
             customerEmail: user.email,
             customerName,
             registration,
@@ -72,6 +75,7 @@ export async function GET(req: Request) {
       if (REMINDER_DAYS.includes(days)) {
         try {
           await sendServiceReminder({
+            userId: user.id,
             customerEmail: user.email,
             customerName,
             registration,

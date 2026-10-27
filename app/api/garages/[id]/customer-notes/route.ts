@@ -38,7 +38,13 @@ export async function PUT(req: Request, { params }: Params) {
   }
 
   const { registration, note } = await req.json()
-  if (!registration) return NextResponse.json({ error: "registration required" }, { status: 400 })
+  if (typeof registration !== "string" || !registration.trim() || registration.length > 12) {
+    return NextResponse.json({ error: "registration required" }, { status: 400 })
+  }
+  // Notes are personal data about a customer: keep them to plain text of a sensible size.
+  if (note != null && (typeof note !== "string" || note.length > 2000)) {
+    return NextResponse.json({ error: "Note must be text, up to 2,000 characters" }, { status: 400 })
+  }
 
   if (!note || !note.trim()) {
     await prisma.customerNote.deleteMany({ where: { garageId, registration } })
